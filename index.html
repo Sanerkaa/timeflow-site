@@ -680,13 +680,23 @@ document.querySelectorAll('.feat-card').forEach(card=>{
 });
 
 // Hero spotlight
-const hero=document.querySelector('.hero');
-if(hero){
-  hero.addEventListener('mousemove',e=>{
-    const r=hero.getBoundingClientRect();
-    hero.style.background=`radial-gradient(600px circle at ${e.clientX-r.left}px ${e.clientY-r.top}px,rgba(107,70,193,0.08),transparent 60%)`;
-  });
-  hero.addEventListener('mouseleave',()=>hero.style.background='');
+
+const spotlight = document.createElement('div');
+
+spotlight.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9990;transition:opacity 0.3s ease;';
+document.body.appendChild(spotlight);
+
+document.addEventListener('mousemove', e => {
+  spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(107,70,193,0.08), transparent 60%)`;
+});
+
+
+document.addEventListener('mouseleave', () => {
+  spotlight.style.opacity = '0';
+});
+document.addEventListener('mouseenter', () => {
+  spotlight.style.opacity = '1';
+});
 }
 </script>
 </body>
