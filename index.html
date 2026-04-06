@@ -4,337 +4,199 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TimeFlow — Учись умнее</title>
-<meta name="description" content="TimeFlow — бесплатное приложение для студентов НГУЭУ и НГТУ. Расписание, задачи и ИИ-ассистент в одном месте."/>
-
-<!-- Favicon -->
+<meta name="description" content="TimeFlow — бесплатное приложение для студентов. Расписание, задачи и ИИ-ассистент в одном месте."/>
 <link rel="icon" type="image/webp" href="icon.webp"/>
 <link rel="apple-touch-icon" href="icon.webp"/>
-
-<!-- Open Graph (Telegram, VK, WhatsApp) -->
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="TimeFlow — Учись умнее"/>
-<meta property="og:description" content="Бесплатное приложение для студентов: расписание, задачи и ИИ-ассистент. НГУЭУ и НГТУ."/>
+<meta property="og:description" content="Бесплатное приложение для студентов: расписание, задачи и ИИ-ассистент."/>
 <meta property="og:image" content="icon.webp"/>
 <meta property="og:locale" content="ru_RU"/>
-
-<!-- Twitter / X -->
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="TimeFlow — Учись умнее"/>
 <meta name="twitter:description" content="Бесплатное приложение для студентов: расписание, задачи и ИИ-ассистент."/>
 <meta name="twitter:image" content="icon.webp"/>
-
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#12121f;--bg2:#1a1a2e;--bg3:#1f1f35;
+  --card:#1e1e32;--card2:#232338;
+  --purple:#7B5EA7;--purple2:#9B7EC8;--purple3:#C4AADF;
+  --purple-dim:rgba(123,94,167,0.15);--purple-dim2:rgba(123,94,167,0.28);
+  --purple-g:linear-gradient(135deg,#6B46C1 0%,#9B7EC8 100%);
+  --chip-bg:#2a2040;--chip-border:rgba(155,126,200,0.3);
+  --border:rgba(255,255,255,0.07);--border2:rgba(155,126,200,0.22);
+  --text:#e8e8f0;--muted:#7b7b9a;--muted2:#4a4a65;
+  --radius:16px;--font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.7;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.022;pointer-events:none;z-index:0}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0}
+.orb1{width:700px;height:700px;background:rgba(107,70,193,0.1);top:-250px;left:-150px}
+.orb2{width:500px;height:500px;background:rgba(123,94,167,0.07);bottom:5%;right:-180px}
+.orb3{width:300px;height:300px;background:rgba(107,70,193,0.05);top:50%;left:30%}
 
-  :root {
-    --bg:        #12121f;
-    --bg2:       #1a1a2e;
-    --bg3:       #1f1f35;
-    --card:      #1e1e32;
-    --card2:     #232338;
-    --purple:    #7B5EA7;
-    --purple2:   #9B7EC8;
-    --purple3:   #C4AADF;
-    --purple-dim:  rgba(123,94,167,0.15);
-    --purple-dim2: rgba(123,94,167,0.28);
-    --purple-g:  linear-gradient(135deg, #6B46C1 0%, #9B7EC8 100%);
-    --chip-bg:   #2a2040;
-    --chip-border: rgba(155,126,200,0.3);
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(155,126,200,0.22);
-    --text:      #e8e8f0;
-    --muted:     #7b7b9a;
-    --muted2:    #4a4a65;
-    --radius:    16px;
-    --font-head: 'Syne', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
-  }
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:64px;background:rgba(18,18,31,0.78);backdrop-filter:blur(28px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-head);font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:9px}
+.nav-logo em{font-style:normal;background:var(--purple-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-icon{width:32px;height:32px;border-radius:9px;overflow:hidden;flex-shrink:0}
+.logo-icon img{width:32px;height:32px;display:block;object-fit:cover}
+.nav-links{display:flex;align-items:center;gap:4px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;padding:6px 14px;border-radius:8px;transition:color .2s,background .2s}
+.nav-links a:hover{color:var(--text);background:rgba(123,94,167,0.12)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:10px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .2s;border:none}
+.btn-primary{background:var(--purple-g);color:#fff;box-shadow:0 0 28px rgba(107,70,193,0.35)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 44px rgba(107,70,193,0.52)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--purple-dim)}
 
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: var(--font-body); font-size: 16px; line-height: 1.7;
-    overflow-x: hidden;
-  }
-  body::before {
-    content: ''; position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-    opacity: 0.022; pointer-events: none; z-index: 0;
-  }
+/* HERO */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 5vw 60px}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:var(--purple-dim);border:1px solid var(--chip-border);color:var(--purple3);font-size:13px;font-weight:500;padding:5px 16px;border-radius:100px;margin-bottom:28px;animation:fadeUp .6s ease both}
+.hero-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--purple2);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+h1{font-family:var(--font-head);font-size:clamp(40px,7vw,80px);font-weight:800;line-height:1.05;letter-spacing:-2px;color:var(--text);max-width:860px;animation:fadeUp .6s .1s ease both}
+h1 em{font-style:normal;background:var(--purple-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:clamp(16px,2vw,18px);color:var(--muted);max-width:540px;margin:20px auto 40px;font-weight:300;animation:fadeUp .6s .2s ease both}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;animation:fadeUp .6s .3s ease both}
+.btn-dl{padding:14px 28px;font-size:15px;border-radius:12px}
+.hero-stats{display:flex;gap:48px;margin-top:64px;animation:fadeUp .6s .4s ease both}
+.stat-num{font-family:var(--font-head);font-size:30px;font-weight:700;background:var(--purple-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:13px;color:var(--muted);margin-top:2px}
 
-  .orb { position: fixed; border-radius: 50%; filter: blur(130px); pointer-events: none; z-index: 0; }
-  .orb1 { width: 700px; height: 700px; background: rgba(107,70,193,0.1); top: -250px; left: -150px; }
-  .orb2 { width: 500px; height: 500px; background: rgba(123,94,167,0.07); bottom: 5%; right: -180px; }
-  .orb3 { width: 300px; height: 300px; background: rgba(107,70,193,0.05); top: 50%; left: 30%; }
+/* PHONE MOCKUP */
+.mockup-wrap{position:relative;z-index:1;padding:0 5vw 90px;display:flex;justify-content:center;animation:fadeUp .8s .5s ease both}
+.mockup-phone{width:285px;background:var(--bg2);border-radius:38px;border:1px solid rgba(123,94,167,0.28);box-shadow:0 40px 120px rgba(0,0,0,0.65),0 0 70px rgba(107,70,193,0.14);position:relative;overflow:hidden}
+.mockup-phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:88px;height:26px;background:var(--bg);border-radius:0 0 16px 16px;z-index:2}
 
-  /* NAV */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 5vw; height: 64px;
-    background: rgba(18,18,31,0.78); backdrop-filter: blur(28px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-logo {
-    font-family: var(--font-head); font-size: 20px; font-weight: 800;
-    letter-spacing: -0.5px; color: var(--text);
-    text-decoration: none; display: flex; align-items: center; gap: 9px;
-  }
-  .nav-logo em {
-    font-style: normal; background: var(--purple-g);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .logo-icon {
-    width: 32px; height: 32px;
-    border-radius: 9px; overflow: hidden; flex-shrink: 0;
-  }
-  .logo-icon img { width: 32px; height: 32px; display: block; object-fit: cover; }
-  .nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
-  .nav-links a {
-    color: var(--muted); text-decoration: none; font-size: 14px;
-    padding: 6px 14px; border-radius: 8px; transition: color .2s, background .2s;
-  }
-  .nav-links a:hover { color: var(--text); background: rgba(123,94,167,0.12); }
+/* Phone inner screens */
+.phone-inner{padding:32px 14px 0;display:flex;flex-direction:column;min-height:540px}
+.p-screen{display:none;flex-direction:column;flex:1}
+.p-screen.active{display:flex}
+.phone-nav{display:flex;border-top:1px solid var(--border);margin-top:auto;padding:8px 0 6px}
+.pnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--font-body);padding:0;transition:color .15s}
+.pnav-item.active,.pnav-item:hover{color:var(--purple2)}
+.pnav-dot{font-size:14px;line-height:1}
+.pnav-svg{width:16px;height:16px;display:block}
 
-  .btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 22px; border-radius: 10px;
-    font-family: var(--font-body); font-size: 14px; font-weight: 500;
-    cursor: pointer; text-decoration: none; transition: all .2s; border: none;
-  }
-  .btn-primary { background: var(--purple-g); color: #fff; box-shadow: 0 0 28px rgba(107,70,193,0.35); }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 44px rgba(107,70,193,0.52); }
-  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border2); }
-  .btn-ghost:hover { background: var(--purple-dim); }
+/* Phone components */
+.ptitle{font-family:var(--font-head);font-size:17px;font-weight:700;color:var(--text)}
+.psub{font-size:11px;color:var(--muted);margin-top:1px}
+.pheader{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.pchips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.pchip{font-size:10px;padding:3px 10px;border-radius:20px;border:1px solid var(--chip-border);color:var(--purple3);background:var(--chip-bg)}
+.pchip.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+.ptask{background:var(--card);border-radius:10px;padding:9px 11px;border:1px solid var(--border);margin-bottom:6px}
+.ptask-text{font-size:12px;font-weight:500;color:var(--text)}
+.ptask-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.psearch{background:var(--bg3);border-radius:8px;padding:7px 11px;font-size:11px;color:var(--muted2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 
-  /* HERO */
-  .hero {
-    position: relative; z-index: 1; min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 120px 5vw 60px;
-  }
-  .hero-tag {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--purple-dim); border: 1px solid var(--chip-border);
-    color: var(--purple3); font-size: 13px; font-weight: 500;
-    padding: 5px 16px; border-radius: 100px; margin-bottom: 28px;
-    animation: fadeUp .6s ease both;
-  }
-  .hero-tag::before {
-    content: ''; width: 6px; height: 6px; border-radius: 50%;
-    background: var(--purple2); animation: pulse 2s ease infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+/* Stat bars */
+.stat-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.bar-label{font-size:9px;color:var(--muted);width:18px;text-align:center}
+.bar-wrap{flex:1;height:30px;display:flex;align-items:flex-end}
+.bar{border-radius:4px 4px 0 0;width:100%;background:var(--purple-dim2);transition:height .3s}
+.bar.hi{background:var(--purple)}
 
-  h1 {
-    font-family: var(--font-head);
-    font-size: clamp(40px, 7vw, 80px); font-weight: 800;
-    line-height: 1.05; letter-spacing: -2px; color: var(--text); max-width: 860px;
-    animation: fadeUp .6s .1s ease both;
-  }
-  h1 em { font-style: normal; background: var(--purple-g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .hero-sub {
-    font-size: clamp(16px, 2vw, 18px); color: var(--muted);
-    max-width: 540px; margin: 20px auto 40px; font-weight: 300;
-    animation: fadeUp .6s .2s ease both;
-  }
-  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; animation: fadeUp .6s .3s ease both; }
-  .btn-dl { padding: 14px 28px; font-size: 15px; border-radius: 12px; }
+/* Grid 2 */
+.pgrid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.pstat-card{background:var(--card);border-radius:10px;padding:10px;border:1px solid var(--border)}
+.pstat-icon{font-size:16px;margin-bottom:4px}
+.pstat-label{font-size:9px;color:var(--muted)}
+.pstat-num{font-size:18px;font-weight:700;color:var(--text)}
+.pstat-num.accent{background:var(--purple-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-  .hero-stats { display: flex; gap: 48px; margin-top: 64px; animation: fadeUp .6s .4s ease both; }
-  .stat-num {
-    font-family: var(--font-head); font-size: 30px; font-weight: 700;
-    background: var(--purple-g); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+/* Collab */
+.pcollab-btn{border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--border)}
+.pcollab-btn.primary{background:var(--purple);border-color:transparent}
+.pcollab-btn .pcollab-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.pcollab-btn .pcollab-sub{font-size:10px;color:var(--muted)}
+.pcollab-btn.primary .pcollab-sub{color:rgba(255,255,255,0.6)}
+.pcollab-btn.primary .pcollab-title{color:#fff}
+.pcollab-action{background:rgba(255,255,255,0.15);border-radius:8px;padding:6px 14px;font-size:11px;color:#fff;text-align:center;margin-top:8px}
+.pinput{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--muted2);margin-bottom:6px}
+.pgray-btn{background:var(--bg3);border-radius:8px;padding:6px 14px;font-size:11px;color:var(--muted);text-align:center}
 
-  /* PHONE */
-  .mockup-wrap {
-    position: relative; z-index: 1; padding: 0 5vw 90px;
-    display: flex; justify-content: center; animation: fadeUp .8s .5s ease both;
-  }
-  .mockup-phone {
-    width: 272px; background: var(--bg2); border-radius: 38px;
-    border: 1px solid rgba(123,94,167,0.28); padding: 22px 16px 16px;
-    box-shadow: 0 40px 120px rgba(0,0,0,0.65), 0 0 70px rgba(107,70,193,0.14);
-    position: relative; overflow: hidden;
-  }
-  .mockup-phone::before {
-    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 88px; height: 26px; background: var(--bg); border-radius: 0 0 16px 16px; z-index: 2;
-  }
-  .phone-screen { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
-  .phone-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
-  .phone-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; color: var(--text); }
-  .phone-sub2 { font-size: 11px; color: var(--muted); margin-top: 1px; }
-  .phone-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 2px; }
-  .pchip {
-    font-size: 10px; padding: 3px 10px; border-radius: 20px;
-    border: 1px solid var(--chip-border); color: var(--purple3); background: var(--chip-bg);
-  }
-  .pchip.active { background: var(--purple); color: #fff; border-color: var(--purple); }
-  .phone-task {
-    background: var(--card); border-radius: 12px; padding: 10px 12px;
-    border: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-start;
-  }
-  .phone-task.ptask-purple { background: var(--purple); border-color: transparent; }
-  .task-check { width: 17px; height: 17px; border-radius: 5px; flex-shrink: 0; margin-top: 1px; }
-  .check-done { background: var(--purple2); display: flex; align-items: center; justify-content: center; }
-  .check-done svg { width: 9px; height: 9px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
-  .check-todo { border: 1.5px solid var(--muted2); background: transparent; }
-  .task-text { font-size: 12px; font-weight: 500; color: var(--text); }
-  .task-text.done { color: var(--muted); text-decoration: line-through; }
-  .task-meta2 { font-size: 10px; color: var(--muted); margin-top: 1px; }
-  .ptask-purple .task-text,
-  .ptask-purple .task-meta2 { color: rgba(255,255,255,0.85); }
-  .phone-ai {
-    background: linear-gradient(135deg, rgba(107,70,193,0.22), rgba(123,94,167,0.1));
-    border: 1px solid rgba(123,94,167,0.32);
-    border-radius: 10px; padding: 10px 12px; font-size: 11px; color: var(--purple3); line-height: 1.5;
-  }
-  .ai-label { font-size: 9px; color: var(--muted); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 3px; }
-  .phone-nav {
-    display: flex; justify-content: space-around; align-items: center;
-    margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border);
-  }
-  .pnav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; color: var(--muted); }
-  .pnav-item.active { color: var(--purple2); }
-  .pnav-dot { font-size: 13px; }
+/* New task */
+.pform-field{border-bottom:1px solid var(--border);padding:8px 0;font-size:12px;color:var(--muted2);margin-bottom:4px}
+.pform-section{background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px;border:1px solid var(--border)}
+.pform-sec-title{font-size:11px;font-weight:600;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pform-btns{display:flex;gap:6px}
+.pform-btn{flex:1;background:var(--bg3);border-radius:8px;padding:6px;font-size:10px;color:var(--muted);text-align:center;border:1px solid var(--border)}
+.pform-btn.red{background:rgba(180,50,50,0.15);color:#f08080;border-color:rgba(180,50,50,0.2)}
+.ptags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.ptag{font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--chip-border);color:var(--purple3);background:var(--chip-bg)}
+.ptag.on{background:var(--purple);color:#fff;border-color:var(--purple)}
+.psave-btn{background:var(--purple-g);border-radius:20px;padding:9px;font-size:12px;font-weight:600;color:#fff;text-align:center;margin-top:8px}
 
-  /* SECTIONS */
-  section { position: relative; z-index: 1; padding: 100px 5vw; }
-  .section-tag { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--purple2); margin-bottom: 14px; }
-  h2 { font-family: var(--font-head); font-size: clamp(26px, 4vw, 46px); font-weight: 700; letter-spacing: -1px; line-height: 1.1; color: var(--text); margin-bottom: 14px; }
-  .section-sub { font-size: 17px; color: var(--muted); max-width: 500px; font-weight: 300; margin-bottom: 56px; }
+/* Header icons */
+.pheader-icons{display:flex;gap:6px;align-items:center}
+.picon-btn{width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;border:none}
 
-  /* FEATURES */
-  .features { background: var(--bg2); }
-  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-  .feat-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 28px; transition: border-color .25s, transform .25s;
-  }
-  .feat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
-  .feat-icon {
-    width: 44px; height: 44px; background: var(--purple-dim); border: 1px solid var(--border2);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    margin-bottom: 18px; font-size: 20px;
-  }
-  .feat-title { font-family: var(--font-head); font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-  .feat-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
-
-  /* UNIS */
-  .unis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 660px; }
-  .uni-chip {
-    background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
-    padding: 18px 20px; font-size: 15px; font-weight: 700;
-    color: var(--text); text-align: center; font-family: var(--font-head);
-    transition: border-color .2s, background .2s;
-  }
-  .uni-chip:hover { border-color: var(--border2); background: var(--purple-dim); }
-  .uni-chip small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 3px; font-family: var(--font-body); }
-
-  /* FAQ */
-  .faq-section { background: var(--bg2); }
-  .faq-list { max-width: 680px; display: flex; flex-direction: column; gap: 8px; }
-  .faq-item {
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    overflow: hidden; transition: border-color .2s;
-  }
-  .faq-item:hover { border-color: var(--border2); }
-  .faq-q {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 18px 22px; cursor: pointer; font-size: 15px; font-weight: 500;
-    color: var(--text); user-select: none; gap: 16px; transition: color .2s;
-  }
-  .faq-q:hover { color: var(--purple3); }
-  .faq-icon {
-    width: 26px; height: 26px; flex-shrink: 0; border-radius: 7px;
-    background: var(--purple-dim); border: 1px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    transition: transform .25s, background .2s; font-size: 15px; color: var(--purple2);
-  }
-  .faq-item.open .faq-icon { transform: rotate(45deg); background: var(--purple); color: #fff; border-color: var(--purple); }
-  .faq-a {
-    max-height: 0; overflow: hidden;
-    transition: max-height .35s ease, padding .25s ease;
-    font-size: 14px; color: var(--muted); line-height: 1.7; padding: 0 22px;
-  }
-  .faq-item.open .faq-a { max-height: 300px; padding: 0 22px 18px; }
-
-  /* DOWNLOAD */
-  .dl-section { text-align: center; }
-  .dl-card {
-    display: inline-block; background: var(--card); border: 1px solid rgba(123,94,167,0.25);
-    border-radius: 24px; padding: 52px 64px; max-width: 560px;
-    box-shadow: 0 0 100px rgba(107,70,193,0.09); position: relative; overflow: hidden;
-  }
-  .dl-card::before {
-    content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
-    width: 300px; height: 160px;
-    background: radial-gradient(ellipse, rgba(107,70,193,0.2) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .dl-card h2, .dl-card p, .dl-btns { position: relative; }
-  .dl-card p { color: var(--muted); font-size: 16px; margin-bottom: 32px; font-weight: 300; }
-  .dl-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .btn-store {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--purple-dim); border: 1px solid var(--border2);
-    border-radius: 12px; padding: 12px 22px;
-    text-decoration: none; color: var(--text); font-family: var(--font-body);
-    transition: all .2s;
-  }
-  .btn-store:hover { background: var(--purple-dim2); border-color: rgba(123,94,167,0.4); transform: translateY(-1px); }
-  .btn-store-icon { font-size: 26px; line-height: 1; }
-  .btn-store-sub { font-size: 10px; color: var(--muted); display: block; text-transform: uppercase; letter-spacing: 0.5px; }
-  .btn-store-name { font-size: 15px; font-weight: 600; display: block; }
-
-  /* CONTACT */
-  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; max-width: 680px; }
-  .contact-card {
-    background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 24px; text-decoration: none; color: var(--text);
-    transition: border-color .2s, transform .2s; display: flex; flex-direction: column; gap: 10px;
-  }
-  .contact-card:hover { border-color: var(--border2); transform: translateY(-2px); }
-  .contact-icon { font-size: 22px; }
-  .contact-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
-  .contact-val { font-size: 14px; font-weight: 500; color: var(--purple3); }
-
-  footer {
-    border-top: 1px solid var(--border); padding: 28px 5vw;
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 12px; position: relative; z-index: 1;
-  }
-  footer p { font-size: 13px; color: var(--muted2); }
-  .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
-
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
-  .reveal { opacity: 1; transform: translateY(0); transition: opacity .6s ease, transform .6s ease; }
-
-  @media (max-width: 640px) {
-    .nav-links { display: none; }
-    .hero-stats { gap: 28px; }
-    .unis-grid { grid-template-columns: 1fr 1fr; }
-    .dl-card { padding: 32px 24px; }
-  }
+/* SECTIONS */
+section{position:relative;z-index:1;padding:100px 5vw}
+.section-tag{font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple2);margin-bottom:14px}
+h2{font-family:var(--font-head);font-size:clamp(26px,4vw,46px);font-weight:700;letter-spacing:-1px;line-height:1.1;color:var(--text);margin-bottom:14px}
+.section-sub{font-size:17px;color:var(--muted);max-width:500px;font-weight:300;margin-bottom:56px}
+.features{background:var(--bg2)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.feat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:border-color .25s,transform .25s}
+.feat-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.feat-icon{width:44px;height:44px;background:var(--purple-dim);border:1px solid var(--border2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:20px}
+.feat-title{font-family:var(--font-head);font-size:17px;font-weight:600;margin-bottom:8px}
+.feat-desc{font-size:14px;color:var(--muted);line-height:1.65}
+.unis-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:440px}
+.uni-chip{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;font-size:15px;font-weight:700;color:var(--text);text-align:center;font-family:var(--font-head);transition:border-color .2s,background .2s}
+.uni-chip:hover{border-color:var(--border2);background:var(--purple-dim)}
+.uni-chip small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:3px;font-family:var(--font-body)}
+.faq-section{background:var(--bg2)}
+.faq-list{max-width:680px;display:flex;flex-direction:column;gap:8px}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.faq-item:hover{border-color:var(--border2)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;cursor:pointer;font-size:15px;font-weight:500;color:var(--text);user-select:none;gap:16px;transition:color .2s}
+.faq-q:hover{color:var(--purple3)}
+.faq-icon{width:26px;height:26px;flex-shrink:0;border-radius:7px;background:var(--purple-dim);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;transition:transform .25s,background .2s;font-size:15px;color:var(--purple2)}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:var(--purple);color:#fff;border-color:var(--purple)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .25s ease;font-size:14px;color:var(--muted);line-height:1.7;padding:0 22px}
+.faq-item.open .faq-a{max-height:300px;padding:0 22px 18px}
+.dl-section{text-align:center}
+.dl-card{display:inline-block;background:var(--card);border:1px solid rgba(123,94,167,0.25);border-radius:24px;padding:52px 64px;max-width:560px;box-shadow:0 0 100px rgba(107,70,193,0.09);position:relative;overflow:hidden}
+.dl-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:160px;background:radial-gradient(ellipse,rgba(107,70,193,0.2) 0%,transparent 70%);pointer-events:none}
+.dl-card h2,.dl-card p,.dl-btns{position:relative}
+.dl-card p{color:var(--muted);font-size:16px;margin-bottom:32px;font-weight:300}
+.dl-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-store{display:flex;align-items:center;gap:10px;background:var(--purple-dim);border:1px solid var(--border2);border-radius:12px;padding:12px 22px;text-decoration:none;color:var(--text);font-family:var(--font-body);transition:all .2s}
+.btn-store:hover{background:var(--purple-dim2);border-color:rgba(123,94,167,0.4);transform:translateY(-1px)}
+.btn-store-icon{font-size:26px;line-height:1}
+.btn-store-sub{font-size:10px;color:var(--muted);display:block;text-transform:uppercase;letter-spacing:.5px}
+.btn-store-name{font-size:15px;font-weight:600;display:block}
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;max-width:500px}
+.contact-card{background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;text-decoration:none;color:var(--text);transition:border-color .2s,transform .2s;display:flex;flex-direction:column;gap:10px}
+.contact-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.contact-icon{font-size:22px}
+.contact-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:500}
+.contact-val{font-size:14px;font-weight:500;color:var(--purple3)}
+footer{border-top:1px solid var(--border);padding:28px 5vw;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:relative;z-index:1}
+footer p{font-size:13px;color:var(--muted2)}
+.divider{border:none;border-top:1px solid var(--border);margin:0}
+.reveal{opacity:1;transform:translateY(0);transition:opacity .6s ease,transform .6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:640px){.nav-links{display:none}.hero-stats{gap:28px}.dl-card{padding:32px 24px}}
 </style>
 </head>
 <body>
-
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
 <nav>
   <a href="#" class="nav-logo">
-    <div class="logo-icon">
-      <img src="icon.webp" alt="TimeFlow icon"/>
-    </div>
+    <div class="logo-icon"><img src="icon.webp" alt="TimeFlow"/></div>
     Time<em>Flow</em>
   </a>
   <ul class="nav-links">
@@ -348,7 +210,7 @@
 <section class="hero">
   <div class="hero-tag">Для студентов Новосибирска</div>
   <h1>Учись умнее.<br/>Успевай <em>больше.</em></h1>
-  <p class="hero-sub">TimeFlow — расписание, задачи и ИИ-ассистент в одном приложении. Поддерживает НГУЭУ и НГТУ.</p>
+  <p class="hero-sub">TimeFlow — расписание, задачи и ИИ-ассистент в одном приложении для студентов.</p>
   <div class="hero-cta">
     <a href="#download" class="btn btn-primary btn-dl">↓ Скачать бесплатно</a>
     <a href="#features" class="btn btn-ghost btn-dl">Узнать больше →</a>
@@ -360,54 +222,279 @@
   </div>
 </section>
 
+<!-- PHONE MOCKUP -->
 <div class="mockup-wrap">
   <div class="mockup-phone">
-    <div class="phone-screen">
-      <div class="phone-header">
-        <div>
-          <div class="phone-title">Мои задачи</div>
-          <div class="phone-sub2">На сегодня</div>
+    <div class="phone-inner">
+
+      <!-- ЗАДАЧИ (главная) -->
+      <div class="p-screen active" id="ps-tasks">
+        <div class="pheader">
+          <div><div class="ptitle">Мои задачи</div><div class="psub">На сегодня</div></div>
+          <div class="pheader-icons">
+            <button class="picon-btn" onclick="showScreen('stats')" title="Статистика">📊</button>
+            <button class="picon-btn" onclick="showScreen('collab')" title="Совместный режим">👥</button>
+            <button class="picon-btn" title="Настройки">⚙️</button>
+          </div>
+        </div>
+        <div class="psearch">🔍 <span>Найти задачу...</span></div>
+        <div class="pchips">
+          <div class="pchip on">Все</div>
+          <div class="pchip">✓ Выполненные</div>
+          <div class="pchip">Запланированные</div>
+        </div>
+        <div class="pchip" style="width:fit-content;margin-bottom:8px;">учёба</div>
+        <div style="background:var(--purple-dim);border:1px solid var(--border2);border-radius:10px;padding:9px 11px;font-size:11px;color:var(--purple3);margin-bottom:8px;">✦ Получить AI-совет по задачам</div>
+        <div class="ptask" style="border-left:3px solid var(--purple);display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="ptask-text">Сдать курсовую по СУБД</div>
+            <div class="ptask-meta">учёба · без срока</div>
+          </div>
+          <div style="display:flex;gap:5px;font-size:12px;color:var(--muted2);">▶ 🖼 ✏️</div>
+        </div>
+        <div class="phone-nav">
+          <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+          <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+          <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+          <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+          <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
         </div>
       </div>
-      <div class="phone-chips">
-        <div class="pchip active">Все</div>
-        <div class="pchip">✓ Выполненные</div>
-        <div class="pchip">Запланированные</div>
-      </div>
-      <div class="phone-task ptask-purple">
-        <div style="flex:1">
-          <div class="task-text">→ Свайпните вправо</div>
-          <div class="task-meta2">чтобы завершить задачу</div>
+
+      <!-- РАСПИСАНИЕ -->
+      <div class="p-screen" id="ps-schedule">
+        <div class="pheader">
+          <div class="ptitle">Расписание</div>
+          <div style="font-size:10px;background:var(--purple-dim);border:1px solid var(--border2);color:var(--purple3);padding:3px 8px;border-radius:6px;">🎓 НГУЭУ</div>
         </div>
-        <div style="color:rgba(255,255,255,0.5);font-size:13px;">✕</div>
-      </div>
-      <div class="phone-task">
-        <div class="task-check check-done"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
-        <div style="flex:1">
-          <div class="task-text done">Лабораторная по физике</div>
-          <div class="task-meta2">учёба · без срока</div>
+        <div class="psearch">🔍 <span>9-ИС402/2</span></div>
+        <div style="font-size:9px;color:var(--muted);text-align:right;margin-bottom:4px;">Обновлено: 06.04 14:38 ↻</div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:6px;">2 неделя (текущая)</div>
+        <div style="background:var(--purple-dim);border:1px solid var(--border2);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--purple3);width:fit-content;margin-bottom:8px;">Сегодня</div>
+        <div style="display:flex;gap:4px;margin-bottom:10px;">
+          <div style="background:var(--purple);border-radius:8px;padding:5px 0;text-align:center;font-size:9px;color:#fff;flex:1;"><div style="font-weight:700;font-size:12px;">06</div><div>ПН</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:5px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:12px;">07</div><div>ВТ</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:5px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:12px;">08</div><div>СР</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:5px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:12px;">09</div><div>ЧТ</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:5px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:12px;">10</div><div>ПТ</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:5px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:12px;">11</div><div>СБ</div></div>
+        </div>
+        <div class="ptask" style="border-left:3px solid var(--purple);flex-direction:column;gap:2px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);"><span>3 · 11:25 – 12:55</span><span>Лекция 🔔</span></div>
+          <div class="ptask-text">МДК.03.01 Моделир. и анализ ПО</div>
+          <div class="ptask-meta">Морозова И.А. · ауд. 2-118</div>
+        </div>
+        <div class="ptask" style="border-left:3px solid var(--purple2);flex-direction:column;gap:2px;">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);"><span>4 · 13:20 – 14:50</span><span>Семинар 🔔</span></div>
+          <div class="ptask-text">Теория вероятностей и мат.статист</div>
+          <div class="ptask-meta">Фролова И.В. · ауд. 2-121</div>
+        </div>
+        <div class="phone-nav">
+          <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+          <button class="pnav-item active" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+          <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+          <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+          <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
         </div>
       </div>
-      <div class="phone-task">
-        <div class="task-check check-todo"></div>
-        <div style="flex:1">
-          <div class="task-text">Сдать курсовую по СУБД</div>
-          <div class="task-meta2">учёба · до 23:59</div>
+
+      <!-- ПЛАН -->
+      <div class="p-screen" id="ps-plan">
+        <div class="ptitle" style="margin-bottom:10px;">План на неделю</div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex:1;">
+          <div class="ptask" style="flex-direction:column;gap:2px;">
+            <div style="font-size:11px;font-weight:600;color:var(--purple2);">пн, 06.04.2026 (Сегодня)</div>
+            <div style="font-size:11px;color:var(--muted2);">Нет задач</div>
+          </div>
+          <div class="ptask" style="flex-direction:column;gap:2px;">
+            <div style="font-size:11px;font-weight:500;">вт, 07.04.2026</div>
+            <div style="font-size:11px;color:var(--muted2);">Нет задач</div>
+          </div>
+          <div class="ptask" style="flex-direction:column;gap:2px;">
+            <div style="font-size:11px;font-weight:500;">ср, 08.04.2026</div>
+            <div style="font-size:11px;color:var(--muted2);">Нет задач</div>
+          </div>
+          <div class="ptask" style="flex-direction:column;gap:2px;">
+            <div style="font-size:11px;font-weight:500;">чт, 09.04.2026</div>
+            <div style="font-size:11px;color:var(--muted2);">Нет задач</div>
+          </div>
+          <div class="ptask" style="flex-direction:column;gap:2px;">
+            <div style="font-size:11px;font-weight:500;">пт, 10.04.2026</div>
+            <div style="font-size:11px;color:var(--muted2);">Нет задач</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+          <div style="background:var(--bg3);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--muted);">← Пред.</div>
+          <div style="font-size:10px;color:var(--muted);">06.04 – 12.04</div>
+          <div style="background:var(--purple);border-radius:8px;padding:5px 10px;font-size:11px;color:#fff;">След. →</div>
+        </div>
+        <div class="phone-nav">
+          <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+          <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+          <button class="pnav-item active" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+          <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+          <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
         </div>
       </div>
-      <div class="phone-ai">
-        <div class="ai-label">✦ ИИ-подсказка</div>
-        Сегодня 2 задачи. Курсовую лучше сдать до вечера!
+
+      <!-- ЗАПИСИ / КОНСПЕКТ -->
+      <div class="p-screen" id="ps-notes">
+        <div class="ptitle" style="margin-bottom:12px;">Умный Конспект</div>
+        <div style="background:var(--purple);border-radius:14px;padding:20px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:26px;margin-bottom:8px;">☁️</div>
+          <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">Загрузи аудио лекции</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:12px;">ИИ послушает и выпишет главное<br/>Макс. размер: 50.0 МБ</div>
+          <div style="background:rgba(255,255,255,0.2);border-radius:20px;padding:7px 20px;font-size:11px;color:#fff;display:inline-block;">Выбрать файл</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);text-align:center;">Здесь появится твой конспект</div>
+        <div class="phone-nav" style="margin-top:auto;">
+          <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+          <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+          <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+          <button class="pnav-item active" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+          <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+        </div>
       </div>
-      <div class="phone-nav">
-        <div class="pnav-item active"><div class="pnav-dot">🏠</div><span>Главная</span></div>
-        <div class="pnav-item"><div class="pnav-dot">📅</div><span>Пары</span></div>
-        <div class="pnav-item"><div class="pnav-dot">📋</div><span>План</span></div>
-        <div class="pnav-item"><div class="pnav-dot">📝</div><span>Записи</span></div>
+
+      <!-- AI -->
+      <div class="p-screen" id="ps-ai">
+        <div class="pheader" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:30px;height:30px;background:var(--purple-g);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;">✦</div>
+            <div>
+              <div class="ptitle" style="font-size:14px;">TimeFlow AI</div>
+              <div style="font-size:10px;color:#5de07b;">● онлайн</div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-height:200px;">
+          <div style="display:flex;align-items:flex-start;gap:8px;">
+            <div style="width:24px;height:24px;background:var(--purple-g);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;">✦</div>
+            <div style="background:var(--bg3);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--text);line-height:1.5;max-width:85%;">
+              Привет! Я помогу тебе разложить дела по задачам в TimeFlow. Расскажи, что нужно сделать?
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border-radius:20px;padding:8px 12px;margin-top:8px;">
+          <span style="font-size:14px;color:var(--muted);">🎤</span>
+          <span style="font-size:11px;color:var(--muted2);flex:1;">Сообщение...</span>
+          <div style="width:22px;height:22px;background:var(--purple);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;">↑</div>
+        </div>
+        <div class="phone-nav">
+          <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+          <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+          <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+          <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+          <button class="pnav-item active" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
+
+      <!-- СТАТИСТИКА -->
+      <div class="p-screen" id="ps-stats">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <button onclick="showScreen('tasks')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0;">←</button>
+          <div style="flex:1;text-align:center;">
+            <div style="width:36px;height:36px;background:var(--purple-g);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 2px;">✓</div>
+            <div class="ptitle" style="font-size:14px;">Статистика</div>
+            <div class="psub">За последние 7 дней</div>
+          </div>
+          <div style="width:24px;"></div>
+        </div>
+        <div class="pgrid2">
+          <div class="pstat-card">
+            <div class="pstat-icon">✅</div>
+            <div class="pstat-label">Выполнено за неделю</div>
+            <div class="pstat-num">9</div>
+          </div>
+          <div class="pstat-card">
+            <div class="pstat-icon" style="font-size:14px;background:var(--purple-dim);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;">○</div>
+            <div class="pstat-label">Активных задач</div>
+            <div class="pstat-num">1</div>
+          </div>
+          <div class="pstat-card">
+            <div class="pstat-icon">🏆</div>
+            <div class="pstat-label">Лучший день</div>
+            <div class="pstat-num" style="font-size:14px;">пн (5)</div>
+          </div>
+          <div class="pstat-card">
+            <div class="pstat-label" style="margin-bottom:4px;">Выполнено всего</div>
+            <div class="pstat-num accent" style="font-size:20px;">90%</div>
+            <div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:6px;"><div style="height:4px;width:90%;background:var(--purple-g);border-radius:2px;"></div></div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Выполнено по дням</div>
+        <div style="display:flex;align-items:flex-end;gap:4px;height:60px;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;">
+            <div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:10%;"></div>
+            <div style="font-size:8px;color:var(--muted);">вт</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;">
+            <div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:15%;"></div>
+            <div style="font-size:8px;color:var(--muted);">ср</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;">
+            <div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:12%;"></div>
+            <div style="font-size:8px;color:var(--muted);">чт</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;">
+            <div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:55%;"></div>
+            <div style="font-size:8px;color:var(--muted);">пт</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;">
+            <div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:8%;"></div>
+            <div style="font-size:8px;color:var(--muted);">сб</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;">
+            <div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:5%;"></div>
+            <div style="font-size:8px;color:var(--muted);">вс</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;">
+            <div style="width:100%;background:var(--purple);border-radius:3px 3px 0 0;height:100%;"></div>
+            <div style="font-size:8px;color:var(--purple2);">пн</div>
+          </div>
+        </div>
+        <div class="phone-nav" style="margin-top:8px;">
+          <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+          <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+          <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+          <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+          <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+        </div>
+      </div>
+
+      <!-- СОВМЕСТНЫЙ РЕЖИМ -->
+      <div class="p-screen" id="ps-collab">
+        <div style="display:flex;align-items:center;margin-bottom:4px;">
+          <button onclick="showScreen('tasks')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0;">←</button>
+        </div>
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="width:44px;height:44px;background:var(--purple-g);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 8px;">👥</div>
+          <div class="ptitle">Совместный режим</div>
+          <div class="psub">Создай или присоединись к комнате</div>
+        </div>
+        <div class="pcollab-btn" style="background:var(--card);border-color:var(--border);margin-bottom:8px;">
+          <div class="pcollab-title">+ Создать комнату</div>
+          <div class="pcollab-sub">Создай новую комнату и поделись кодом с другом</div>
+          <div style="background:var(--purple);border-radius:8px;padding:7px;font-size:12px;color:#fff;text-align:center;margin-top:8px;">Создать</div>
+        </div>
+        <div class="pcollab-btn" style="background:var(--card);border-color:var(--border);">
+          <div class="pcollab-title">→ Присоединиться</div>
+          <div class="pcollab-sub">Введи код комнаты от друга</div>
+          <div class="pinput" style="margin-top:8px;">XXXXXX</div>
+          <div class="pgray-btn">Войти</div>
+        </div>
+        <div class="phone-nav" style="margin-top:auto;">
+          <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+          <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+          <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+          <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+          <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+        </div>
+      </div>
+
+    </div><!-- /phone-inner -->
+  </div><!-- /mockup-phone -->
+</div><!-- /mockup-wrap -->
 
 <section id="features" class="features">
   <div class="section-tag">Возможности</div>
@@ -427,7 +514,7 @@
   <div class="section-tag">Поддерживаемые вузы</div>
   <h2>Работает с твоим университетом</h2>
   <p class="section-sub">TimeFlow знает расписания двух университетов Новосибирска и обновляет их автоматически.</p>
-  <div class="unis-grid reveal" style="grid-template-columns: repeat(2, 1fr); max-width: 440px;">
+  <div class="unis-grid reveal">
     <div class="uni-chip">НГУЭУ<small>Нархоз</small></div>
     <div class="uni-chip">НГТУ<small>Политех</small></div>
   </div>
@@ -454,7 +541,7 @@
     </div>
     <div class="faq-item">
       <div class="faq-q">ИИ-ассистент работает офлайн?<div class="faq-icon">+</div></div>
-      <div class="faq-a">Нет, ИИ-ассистент требует интернет-соединения — он обращается к Gemini API через облако. Задачи и расписание работают офлайн благодаря локальной базе данных (Room).</div>
+      <div class="faq-a">Нет, ИИ-ассистент требует интернет-соединения — он обращается к Gemini API через облако. Задачи и расписание работают офлайн.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">Мой университет не поддерживается. Когда добавите?<div class="faq-icon">+</div></div>
@@ -472,18 +559,20 @@
     <h2>Скачай TimeFlow</h2>
     <p>Бесплатно. Только Android. Без рекламы.</p>
     <div class="dl-btns">
-      <a href="#" class="btn-store">
-        <span class="btn-store-icon">▶</span>
-        <span class="btn-store-text">
-          <span class="btn-store-sub">Доступно в</span>
-          <span class="btn-store-name">Google Play</span>
-        </span>
-      </a>
-      <a href="#" class="btn-store">
+      <a href="app-release.apk" download="TimeFlow.apk" class="btn-store">
         <span class="btn-store-icon">📦</span>
         <span class="btn-store-text">
           <span class="btn-store-sub">Прямая загрузка</span>
           <span class="btn-store-name">APK файл</span>
+        </span>
+      </a>
+      <a href="https://t.me/TimeFlowUpdater_bot" target="_blank" class="btn-store">
+        <span class="btn-store-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.93 6.677l-1.684 7.927c-.126.574-.46.713-.932.444l-2.58-1.9-1.244 1.197c-.138.138-.254.254-.52.254l.185-2.63 4.793-4.33c.208-.185-.046-.287-.323-.102L7.66 14.39l-2.53-.79c-.55-.172-.56-.55.115-.815l9.9-3.815c.457-.167.857.1.785.707z" fill="#9B7EC8"/></svg>
+        </span>
+        <span class="btn-store-text">
+          <span class="btn-store-sub">Обновления в</span>
+          <span class="btn-store-name">Telegram боте</span>
         </span>
       </a>
     </div>
@@ -495,20 +584,15 @@
   <h2>Связаться с нами</h2>
   <p class="section-sub">Нашёл баг? Хочешь новую функцию? Пиши — отвечаем быстро.</p>
   <div class="contact-grid reveal">
-    <a href="https://t.me/timeflowapp" class="contact-card">
-      <span class="contact-icon">✈️</span>
-      <span class="contact-label">Telegram</span>
-      <span class="contact-val">@timeflowapp</span>
+    <a href="https://t.me/TimeFlowUpdater_bot" target="_blank" class="contact-card">
+      <span class="contact-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.93 6.677l-1.684 7.927c-.126.574-.46.713-.932.444l-2.58-1.9-1.244 1.197c-.138.138-.254.254-.52.254l.185-2.63 4.793-4.33c.208-.185-.046-.287-.323-.102L7.66 14.39l-2.53-.79c-.55-.172-.56-.55.115-.815l9.9-3.815c.457-.167.857.1.785.707z" fill="#9B7EC8"/></svg></span>
+      <span class="contact-label">Telegram бот</span>
+      <span class="contact-val">@TimeFlowUpdater_bot</span>
     </a>
-    <a href="/cdn-cgi/l/email-protection#ea828f868685aa9e83878f8c86859dc4989f" class="contact-card">
+    <a href="mailto:timeflow.no.reply@gmail.com" class="contact-card">
       <span class="contact-icon">✉️</span>
       <span class="contact-label">Email</span>
-      <span class="contact-val"><span class="__cf_email__" data-cfemail="59313c353536192d30343c3f35362e772b2c">[email&#160;protected]</span></span>
-    </a>
-    <a href="https://github.com/timeflow" class="contact-card">
-      <span class="contact-icon">⌥</span>
-      <span class="contact-label">GitHub</span>
-      <span class="contact-val">github.com/timeflow</span>
+      <span class="contact-val">timeflow.no.reply@gmail.com</span>
     </a>
   </div>
 </section>
@@ -519,155 +603,91 @@
 </footer>
 
 <script>
-  // FAQ
-  document.querySelectorAll('.faq-q').forEach(q => {
-    q.addEventListener('click', () => {
-      const item = q.parentElement;
-      const isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-      if (!isOpen) item.classList.add('open');
-    });
+// Screen switcher
+function showScreen(name) {
+  document.querySelectorAll('.p-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('ps-' + name).classList.add('active');
+}
+
+// FAQ
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
   });
+});
 
-  // ── CUSTOM CURSOR ──
-  const cursor = document.createElement('div');
-  cursor.id = 'cursor';
-  cursor.innerHTML = '<div id="cursor-dot"></div><div id="cursor-ring"></div>';
-  document.body.appendChild(cursor);
+// Custom cursor
+const cursor = document.createElement('div');
+cursor.innerHTML = '<div id="cd"></div><div id="cr"></div>';
+cursor.style.cssText = 'position:fixed;top:0;left:0;pointer-events:none;z-index:9999';
+document.body.appendChild(cursor);
+const cstyle = document.createElement('style');
+cstyle.textContent = `
+  *{cursor:none!important}
+  #cd{position:absolute;width:6px;height:6px;border-radius:50%;background:#9B7EC8;transform:translate(-50%,-50%);transition:transform .1s,background .2s}
+  #cr{position:absolute;width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(155,126,200,0.5);transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s}
+  body.hov #cr{width:52px;height:52px;border-color:rgba(155,126,200,0.8)}
+  body.clk #cd{transform:translate(-50%,-50%) scale(2.5);background:#C4AADF}
+  body.clk #cr{width:18px;height:18px}
+`;
+document.head.appendChild(cstyle);
+let mx=0,my=0,rx=0,ry=0;
+const cd=document.getElementById('cd'),cr=document.getElementById('cr');
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cd.style.left=mx+'px';cd.style.top=my+'px'});
+(function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(a)})();
+document.querySelectorAll('a,button,.faq-q,.feat-card,.pnav-item,.picon-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+});
+document.addEventListener('mousedown',()=>document.body.classList.add('clk'));
+document.addEventListener('mouseup',()=>document.body.classList.remove('clk'));
 
-  const style = document.createElement('style');
-  style.textContent = `
-    * { cursor: none !important; }
-    #cursor { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; }
-    #cursor-dot {
-      position: absolute; width: 6px; height: 6px; border-radius: 50%;
-      background: #9B7EC8; transform: translate(-50%, -50%);
-      transition: transform .1s, background .2s;
-    }
-    #cursor-ring {
-      position: absolute; width: 36px; height: 36px; border-radius: 50%;
-      border: 1.5px solid rgba(155,126,200,0.5);
-      transform: translate(-50%, -50%);
-      transition: width .3s, height .3s, border-color .3s, transform .12s;
-    }
-    body.hovering #cursor-ring {
-      width: 56px; height: 56px;
-      border-color: rgba(155,126,200,0.8);
-    }
-    body.clicking #cursor-dot { transform: translate(-50%, -50%) scale(2.5); background: #C4AADF; }
-    body.clicking #cursor-ring { width: 20px; height: 20px; }
-  `;
-  document.head.appendChild(style);
+// Particle trail
+let lt=0;
+document.addEventListener('mousemove',e=>{
+  const now=Date.now();
+  if(now-lt<45)return;lt=now;
+  const p=document.createElement('div');
+  const sz=3+Math.random()*5;
+  const cols=['#7B5EA7','#9B7EC8','#C4AADF','#6B46C1'];
+  Object.assign(p.style,{position:'fixed',left:e.clientX+'px',top:e.clientY+'px',width:sz+'px',height:sz+'px',borderRadius:'50%',background:cols[Math.floor(Math.random()*cols.length)],pointerEvents:'none',zIndex:'9998',opacity:'0.7',transform:'translate(-50%,-50%)',transition:'opacity .6s ease,transform .6s ease'});
+  document.body.appendChild(p);
+  requestAnimationFrame(()=>{p.style.opacity='0';p.style.transform=`translate(calc(-50% + ${(Math.random()-.5)*60}px),calc(-50% + ${-20-Math.random()*40}px)) scale(0.2)`});
+  setTimeout(()=>p.remove(),700);
+});
 
-  let mx = 0, my = 0, rx = 0, ry = 0;
-  const dot = document.getElementById('cursor-dot');
-  const ring = document.getElementById('cursor-ring');
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+// Magnetic buttons
+document.querySelectorAll('.btn-primary,.btn-ghost').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect();
+    btn.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.25}px,${(e.clientY-(r.top+r.height/2))*.25}px)`;
   });
+  btn.addEventListener('mouseleave',()=>{btn.style.transform='';btn.style.transition='transform .4s cubic-bezier(.23,1,.32,1)';setTimeout(()=>btn.style.transition='',400)});
+});
 
-  // Ring follows with lag
-  (function animRing() {
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
-    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
-    requestAnimationFrame(animRing);
-  })();
-
-  document.querySelectorAll('a, button, .faq-q, .feat-card, .uni-chip').forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+// Card tilt
+document.querySelectorAll('.feat-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform=`perspective(600px) rotateY(${x*10}deg) rotateX(${-y*10}deg) translateY(-4px)`;
+    card.style.boxShadow=`${-x*12}px ${-y*12}px 30px rgba(107,70,193,0.15)`;
   });
-  document.addEventListener('mousedown', () => document.body.classList.add('clicking'));
-  document.addEventListener('mouseup', () => document.body.classList.remove('clicking'));
+  card.addEventListener('mouseleave',()=>{card.style.transform='';card.style.boxShadow=''});
+});
 
-  // ── PARTICLE TRAIL ──
-  const particles = [];
-  let lastParticle = 0;
-
-  document.addEventListener('mousemove', e => {
-    const now = Date.now();
-    if (now - lastParticle < 40) return;
-    lastParticle = now;
-
-    const p = document.createElement('div');
-    const size = 4 + Math.random() * 6;
-    const colors = ['#7B5EA7','#9B7EC8','#C4AADF','#6B46C1'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    Object.assign(p.style, {
-      position: 'fixed',
-      left: e.clientX + 'px', top: e.clientY + 'px',
-      width: size + 'px', height: size + 'px',
-      borderRadius: '50%',
-      background: color,
-      pointerEvents: 'none',
-      zIndex: 9998,
-      opacity: '0.7',
-      transform: 'translate(-50%, -50%)',
-      transition: 'opacity .6s ease, transform .6s ease',
-    });
-    document.body.appendChild(p);
-    particles.push(p);
-
-    requestAnimationFrame(() => {
-      const dx = (Math.random() - 0.5) * 60;
-      const dy = -20 - Math.random() * 40;
-      p.style.opacity = '0';
-      p.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.2)`;
-    });
-
-    setTimeout(() => { p.remove(); }, 700);
+// Hero spotlight
+const hero=document.querySelector('.hero');
+if(hero){
+  hero.addEventListener('mousemove',e=>{
+    const r=hero.getBoundingClientRect();
+    hero.style.background=`radial-gradient(600px circle at ${e.clientX-r.left}px ${e.clientY-r.top}px,rgba(107,70,193,0.08),transparent 60%)`;
   });
-
-  // ── MAGNETIC BUTTONS ──
-  document.querySelectorAll('.btn-primary, .btn-ghost').forEach(btn => {
-    btn.addEventListener('mousemove', e => {
-      const r = btn.getBoundingClientRect();
-      const dx = e.clientX - (r.left + r.width / 2);
-      const dy = e.clientY - (r.top + r.height / 2);
-      btn.style.transform = `translate(${dx * 0.25}px, ${dy * 0.25}px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = '';
-      btn.style.transition = 'transform .4s cubic-bezier(.23,1,.32,1)';
-      setTimeout(() => btn.style.transition = '', 400);
-    });
-  });
-
-  // ── CARD TILT ──
-  document.querySelectorAll('.feat-card').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform = `perspective(600px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-4px)`;
-      card.style.boxShadow = `${-x * 12}px ${-y * 12}px 30px rgba(107,70,193,0.15)`;
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
-      card.style.boxShadow = '';
-    });
-  });
-
-  // ── SCROLL REVEAL ──
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-
-  // ── GLOWING CURSOR SPOTLIGHT on hero ──
-  const hero = document.querySelector('.hero');
-  if (hero) {
-    hero.addEventListener('mousemove', e => {
-      const r = hero.getBoundingClientRect();
-      const x = e.clientX - r.left;
-      const y = e.clientY - r.top;
-      hero.style.background = `radial-gradient(600px circle at ${x}px ${y}px, rgba(107,70,193,0.08), transparent 60%)`;
-    });
-    hero.addEventListener('mouseleave', () => { hero.style.background = ''; });
-  }
+  hero.addEventListener('mouseleave',()=>hero.style.background='');
+}
 </script>
 </body>
 </html>
