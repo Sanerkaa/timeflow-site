@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TimeFlow — Учись умнее</title>
+<meta name="description" content="TimeFlow — бесплатное приложение для студентов НГУЭУ и НГТУ. Расписание, задачи и ИИ-ассистент в одном месте."/>
+
+<!-- Favicon -->
+<link rel="icon" type="image/webp" href="icon.webp"/>
+<link rel="apple-touch-icon" href="icon.webp"/>
+
+<!-- Open Graph (Telegram, VK, WhatsApp) -->
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="TimeFlow — Учись умнее"/>
+<meta property="og:description" content="Бесплатное приложение для студентов: расписание, задачи и ИИ-ассистент. НГУЭУ и НГТУ."/>
+<meta property="og:image" content="icon.webp"/>
+<meta property="og:locale" content="ru_RU"/>
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TimeFlow — Учись умнее"/>
+<meta name="twitter:description" content="Бесплатное приложение для студентов: расписание, задачи и ИИ-ассистент."/>
+<meta name="twitter:image" content="icon.webp"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #12121f;
+    --bg2:       #1a1a2e;
+    --bg3:       #1f1f35;
+    --card:      #1e1e32;
+    --card2:     #232338;
+    --purple:    #7B5EA7;
+    --purple2:   #9B7EC8;
+    --purple3:   #C4AADF;
+    --purple-dim:  rgba(123,94,167,0.15);
+    --purple-dim2: rgba(123,94,167,0.28);
+    --purple-g:  linear-gradient(135deg, #6B46C1 0%, #9B7EC8 100%);
+    --chip-bg:   #2a2040;
+    --chip-border: rgba(155,126,200,0.3);
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(155,126,200,0.22);
+    --text:      #e8e8f0;
+    --muted:     #7b7b9a;
+    --muted2:    #4a4a65;
+    --radius:    16px;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.022; pointer-events: none; z-index: 0;
+  }
+
+  .orb { position: fixed; border-radius: 50%; filter: blur(130px); pointer-events: none; z-index: 0; }
+  .orb1 { width: 700px; height: 700px; background: rgba(107,70,193,0.1); top: -250px; left: -150px; }
+  .orb2 { width: 500px; height: 500px; background: rgba(123,94,167,0.07); bottom: 5%; right: -180px; }
+  .orb3 { width: 300px; height: 300px; background: rgba(107,70,193,0.05); top: 50%; left: 30%; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5vw; height: 64px;
+    background: rgba(18,18,31,0.78); backdrop-filter: blur(28px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-head); font-size: 20px; font-weight: 800;
+    letter-spacing: -0.5px; color: var(--text);
+    text-decoration: none; display: flex; align-items: center; gap: 9px;
+  }
+  .nav-logo em {
+    font-style: normal; background: var(--purple-g);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    border-radius: 9px; overflow: hidden; flex-shrink: 0;
+  }
+  .logo-icon img { width: 32px; height: 32px; display: block; object-fit: cover; }
+  .nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 14px;
+    padding: 6px 14px; border-radius: 8px; transition: color .2s, background .2s;
+  }
+  .nav-links a:hover { color: var(--text); background: rgba(123,94,167,0.12); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 22px; border-radius: 10px;
+    font-family: var(--font-body); font-size: 14px; font-weight: 500;
+    cursor: pointer; text-decoration: none; transition: all .2s; border: none;
+  }
+  .btn-primary { background: var(--purple-g); color: #fff; box-shadow: 0 0 28px rgba(107,70,193,0.35); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 44px rgba(107,70,193,0.52); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--purple-dim); }
+
+  /* HERO */
+  .hero {
+    position: relative; z-index: 1; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 5vw 60px;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--purple-dim); border: 1px solid var(--chip-border);
+    color: var(--purple3); font-size: 13px; font-weight: 500;
+    padding: 5px 16px; border-radius: 100px; margin-bottom: 28px;
+    animation: fadeUp .6s ease both;
+  }
+  .hero-tag::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--purple2); animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  h1 {
+    font-family: var(--font-head);
+    font-size: clamp(40px, 7vw, 80px); font-weight: 800;
+    line-height: 1.05; letter-spacing: -2px; color: var(--text); max-width: 860px;
+    animation: fadeUp .6s .1s ease both;
+  }
+  h1 em { font-style: normal; background: var(--purple-g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 18px); color: var(--muted);
+    max-width: 540px; margin: 20px auto 40px; font-weight: 300;
+    animation: fadeUp .6s .2s ease both;
+  }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; animation: fadeUp .6s .3s ease both; }
+  .btn-dl { padding: 14px 28px; font-size: 15px; border-radius: 12px; }
+
+  .hero-stats { display: flex; gap: 48px; margin-top: 64px; animation: fadeUp .6s .4s ease both; }
+  .stat-num {
+    font-family: var(--font-head); font-size: 30px; font-weight: 700;
+    background: var(--purple-g); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* PHONE */
+  .mockup-wrap {
+    position: relative; z-index: 1; padding: 0 5vw 90px;
+    display: flex; justify-content: center; animation: fadeUp .8s .5s ease both;
+  }
+  .mockup-phone {
+    width: 272px; background: var(--bg2); border-radius: 38px;
+    border: 1px solid rgba(123,94,167,0.28); padding: 22px 16px 16px;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.65), 0 0 70px rgba(107,70,193,0.14);
+    position: relative; overflow: hidden;
+  }
+  .mockup-phone::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 88px; height: 26px; background: var(--bg); border-radius: 0 0 16px 16px; z-index: 2;
+  }
+  .phone-screen { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+  .phone-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+  .phone-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; color: var(--text); }
+  .phone-sub2 { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .phone-chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 2px; }
+  .pchip {
+    font-size: 10px; padding: 3px 10px; border-radius: 20px;
+    border: 1px solid var(--chip-border); color: var(--purple3); background: var(--chip-bg);
+  }
+  .pchip.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .phone-task {
+    background: var(--card); border-radius: 12px; padding: 10px 12px;
+    border: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-start;
+  }
+  .phone-task.ptask-purple { background: var(--purple); border-color: transparent; }
+  .task-check { width: 17px; height: 17px; border-radius: 5px; flex-shrink: 0; margin-top: 1px; }
+  .check-done { background: var(--purple2); display: flex; align-items: center; justify-content: center; }
+  .check-done svg { width: 9px; height: 9px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
+  .check-todo { border: 1.5px solid var(--muted2); background: transparent; }
+  .task-text { font-size: 12px; font-weight: 500; color: var(--text); }
+  .task-text.done { color: var(--muted); text-decoration: line-through; }
+  .task-meta2 { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .ptask-purple .task-text,
+  .ptask-purple .task-meta2 { color: rgba(255,255,255,0.85); }
+  .phone-ai {
+    background: linear-gradient(135deg, rgba(107,70,193,0.22), rgba(123,94,167,0.1));
+    border: 1px solid rgba(123,94,167,0.32);
+    border-radius: 10px; padding: 10px 12px; font-size: 11px; color: var(--purple3); line-height: 1.5;
+  }
+  .ai-label { font-size: 9px; color: var(--muted); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 3px; }
+  .phone-nav {
+    display: flex; justify-content: space-around; align-items: center;
+    margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .pnav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; color: var(--muted); }
+  .pnav-item.active { color: var(--purple2); }
+  .pnav-dot { font-size: 13px; }
+
+  /* SECTIONS */
+  section { position: relative; z-index: 1; padding: 100px 5vw; }
+  .section-tag { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--purple2); margin-bottom: 14px; }
+  h2 { font-family: var(--font-head); font-size: clamp(26px, 4vw, 46px); font-weight: 700; letter-spacing: -1px; line-height: 1.1; color: var(--text); margin-bottom: 14px; }
+  .section-sub { font-size: 17px; color: var(--muted); max-width: 500px; font-weight: 300; margin-bottom: 56px; }
+
+  /* FEATURES */
+  .features { background: var(--bg2); }
+  .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .feat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; transition: border-color .25s, transform .25s;
+  }
+  .feat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .feat-icon {
+    width: 44px; height: 44px; background: var(--purple-dim); border: 1px solid var(--border2);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px; font-size: 20px;
+  }
+  .feat-title { font-family: var(--font-head); font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+  .feat-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+  /* UNIS */
+  .unis-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 660px; }
+  .uni-chip {
+    background: var(--card2); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 20px; font-size: 15px; font-weight: 700;
+    color: var(--text); text-align: center; font-family: var(--font-head);
+    transition: border-color .2s, background .2s;
+  }
+  .uni-chip:hover { border-color: var(--border2); background: var(--purple-dim); }
+  .uni-chip small { display: block; font-size: 11px; color: var(--muted); font-weight: 400; margin-top: 3px; font-family: var(--font-body); }
+
+  /* FAQ */
+  .faq-section { background: var(--bg2); }
+  .faq-list { max-width: 680px; display: flex; flex-direction: column; gap: 8px; }
+  .faq-item {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; transition: border-color .2s;
+  }
+  .faq-item:hover { border-color: var(--border2); }
+  .faq-q {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 22px; cursor: pointer; font-size: 15px; font-weight: 500;
+    color: var(--text); user-select: none; gap: 16px; transition: color .2s;
+  }
+  .faq-q:hover { color: var(--purple3); }
+  .faq-icon {
+    width: 26px; height: 26px; flex-shrink: 0; border-radius: 7px;
+    background: var(--purple-dim); border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .25s, background .2s; font-size: 15px; color: var(--purple2);
+  }
+  .faq-item.open .faq-icon { transform: rotate(45deg); background: var(--purple); color: #fff; border-color: var(--purple); }
+  .faq-a {
+    max-height: 0; overflow: hidden;
+    transition: max-height .35s ease, padding .25s ease;
+    font-size: 14px; color: var(--muted); line-height: 1.7; padding: 0 22px;
+  }
+  .faq-item.open .faq-a { max-height: 300px; padding: 0 22px 18px; }
+
+  /* DOWNLOAD */
+  .dl-section { text-align: center; }
+  .dl-card {
+    display: inline-block; background: var(--card); border: 1px solid rgba(123,94,167,0.25);
+    border-radius: 24px; padding: 52px 64px; max-width: 560px;
+    box-shadow: 0 0 100px rgba(107,70,193,0.09); position: relative; overflow: hidden;
+  }
+  .dl-card::before {
+    content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 160px;
+    background: radial-gradient(ellipse, rgba(107,70,193,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .dl-card h2, .dl-card p, .dl-btns { position: relative; }
+  .dl-card p { color: var(--muted); font-size: 16px; margin-bottom: 32px; font-weight: 300; }
+  .dl-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-store {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--purple-dim); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 12px 22px;
+    text-decoration: none; color: var(--text); font-family: var(--font-body);
+    transition: all .2s;
+  }
+  .btn-store:hover { background: var(--purple-dim2); border-color: rgba(123,94,167,0.4); transform: translateY(-1px); }
+  .btn-store-icon { font-size: 26px; line-height: 1; }
+  .btn-store-sub { font-size: 10px; color: var(--muted); display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+  .btn-store-name { font-size: 15px; font-weight: 600; display: block; }
+
+  /* CONTACT */
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; max-width: 680px; }
+  .contact-card {
+    background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; text-decoration: none; color: var(--text);
+    transition: border-color .2s, transform .2s; display: flex; flex-direction: column; gap: 10px;
+  }
+  .contact-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .contact-icon { font-size: 22px; }
+  .contact-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
+  .contact-val { font-size: 14px; font-weight: 500; color: var(--purple3); }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 28px 5vw;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px; position: relative; z-index: 1;
+  }
+  footer p { font-size: 13px; color: var(--muted2); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal { opacity: 1; transform: translateY(0); transition: opacity .6s ease, transform .6s ease; }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .hero-stats { gap: 28px; }
+    .unis-grid { grid-template-columns: 1fr 1fr; }
+    .dl-card { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">
+      <img src="icon.webp" alt="TimeFlow icon"/>
+    </div>
+    Time<em>Flow</em>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Функции</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Контакты</a></li>
+  </ul>
+  <a href="#download" class="btn btn-primary" style="font-size:14px;padding:8px 18px;">Скачать</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">Для студентов Новосибирска</div>
+  <h1>Учись умнее.<br/>Успевай <em>больше.</em></h1>
+  <p class="hero-sub">TimeFlow — расписание, задачи и ИИ-ассистент в одном приложении. Поддерживает НГУЭУ и НГТУ.</p>
+  <div class="hero-cta">
+    <a href="#download" class="btn btn-primary btn-dl">↓ Скачать бесплатно</a>
+    <a href="#features" class="btn btn-ghost btn-dl">Узнать больше →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">университета</div></div>
+    <div class="stat-item"><div class="stat-num">ИИ</div><div class="stat-label">ассистент</div></div>
+    <div class="stat-item"><div class="stat-num">0 ₽</div><div class="stat-label">бесплатно</div></div>
+  </div>
+</section>
+
+<div class="mockup-wrap">
+  <div class="mockup-phone">
+    <div class="phone-screen">
+      <div class="phone-header">
+        <div>
+          <div class="phone-title">Мои задачи</div>
+          <div class="phone-sub2">На сегодня</div>
+        </div>
+      </div>
+      <div class="phone-chips">
+        <div class="pchip active">Все</div>
+        <div class="pchip">✓ Выполненные</div>
+        <div class="pchip">Запланированные</div>
+      </div>
+      <div class="phone-task ptask-purple">
+        <div style="flex:1">
+          <div class="task-text">→ Свайпните вправо</div>
+          <div class="task-meta2">чтобы завершить задачу</div>
+        </div>
+        <div style="color:rgba(255,255,255,0.5);font-size:13px;">✕</div>
+      </div>
+      <div class="phone-task">
+        <div class="task-check check-done"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+        <div style="flex:1">
+          <div class="task-text done">Лабораторная по физике</div>
+          <div class="task-meta2">учёба · без срока</div>
+        </div>
+      </div>
+      <div class="phone-task">
+        <div class="task-check check-todo"></div>
+        <div style="flex:1">
+          <div class="task-text">Сдать курсовую по СУБД</div>
+          <div class="task-meta2">учёба · до 23:59</div>
+        </div>
+      </div>
+      <div class="phone-ai">
+        <div class="ai-label">✦ ИИ-подсказка</div>
+        Сегодня 2 задачи. Курсовую лучше сдать до вечера!
+      </div>
+      <div class="phone-nav">
+        <div class="pnav-item active"><div class="pnav-dot">🏠</div><span>Главная</span></div>
+        <div class="pnav-item"><div class="pnav-dot">📅</div><span>Пары</span></div>
+        <div class="pnav-item"><div class="pnav-dot">📋</div><span>План</span></div>
+        <div class="pnav-item"><div class="pnav-dot">📝</div><span>Записи</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="features" class="features">
+  <div class="section-tag">Возможности</div>
+  <h2>Всё что нужно студенту</h2>
+  <p class="section-sub">Только то, что реально помогает учиться и не опаздывать.</p>
+  <div class="features-grid reveal">
+    <div class="feat-card"><div class="feat-icon">📅</div><div class="feat-title">Умное расписание</div><div class="feat-desc">Автоматически подтягивает расписание твоего университета. Всегда актуально, без ручного ввода.</div></div>
+    <div class="feat-card"><div class="feat-icon">✓</div><div class="feat-title">Задачи и дедлайны</div><div class="feat-desc">Создавай задачи, ставь дедлайны, группируй по предметам. Свайп вправо — задача выполнена.</div></div>
+    <div class="feat-card"><div class="feat-icon">🤖</div><div class="feat-title">ИИ-ассистент</div><div class="feat-desc">Скажи голосом что нужно сделать — ассистент создаст задачи сам. Работает на базе Gemini.</div></div>
+    <div class="feat-card"><div class="feat-icon">👥</div><div class="feat-title">Совместный режим</div><div class="feat-desc">Работай над заданиями с одногруппниками в реальном времени. Видно кто что делает прямо сейчас.</div></div>
+    <div class="feat-card"><div class="feat-icon">🔔</div><div class="feat-title">Push-уведомления</div><div class="feat-desc">Напоминания о парах, дедлайнах и совместных задачах. Не пропустишь ничего важного.</div></div>
+    <div class="feat-card"><div class="feat-icon">☁️</div><div class="feat-title">Облачная синхронизация</div><div class="feat-desc">Все данные в облаке. Смени телефон — всё на месте. Firebase + Supabase под капотом.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-tag">Поддерживаемые вузы</div>
+  <h2>Работает с твоим университетом</h2>
+  <p class="section-sub">TimeFlow знает расписания двух университетов Новосибирска и обновляет их автоматически.</p>
+  <div class="unis-grid reveal" style="grid-template-columns: repeat(2, 1fr); max-width: 440px;">
+    <div class="uni-chip">НГУЭУ<small>Нархоз</small></div>
+    <div class="uni-chip">НГТУ<small>Политех</small></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<section id="faq" class="faq-section">
+  <div class="section-tag">FAQ</div>
+  <h2>Частые вопросы</h2>
+  <p class="section-sub">Если что-то непонятно — пиши нам в Telegram, отвечаем быстро.</p>
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <div class="faq-q">Приложение бесплатное?<div class="faq-icon">+</div></div>
+      <div class="faq-a">Да, TimeFlow полностью бесплатен. Никаких платных подписок, скрытых платежей и рекламы нет и не планируется.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Как приложение получает расписание?<div class="faq-icon">+</div></div>
+      <div class="faq-a">TimeFlow автоматически парсит официальные сайты университетов и обновляет расписание в реальном времени. Ты просто выбираешь свой вуз и группу — остальное приложение делает само.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Что такое совместный режим?<div class="faq-icon">+</div></div>
+      <div class="faq-a">Совместный режим позволяет создавать общие списки задач с одногруппниками. Видно кто над чем работает прямо сейчас, есть push-уведомления об изменениях.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">ИИ-ассистент работает офлайн?<div class="faq-icon">+</div></div>
+      <div class="faq-a">Нет, ИИ-ассистент требует интернет-соединения — он обращается к Gemini API через облако. Задачи и расписание работают офлайн благодаря локальной базе данных (Room).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Мой университет не поддерживается. Когда добавите?<div class="faq-icon">+</div></div>
+      <div class="faq-a">Напиши нам в Telegram — мы рассматриваем каждый запрос. Сейчас поддерживаются НГУЭУ и НГТУ. Список планируется расширять.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Приложение только для Android?<div class="faq-icon">+</div></div>
+      <div class="faq-a">Сейчас да — TimeFlow написан на Kotlin + Jetpack Compose и доступен только для Android. Версия для iOS пока не планируется.</div>
+    </div>
+  </div>
+</section>
+
+<section id="download" class="dl-section">
+  <div class="dl-card reveal">
+    <h2>Скачай TimeFlow</h2>
+    <p>Бесплатно. Только Android. Без рекламы.</p>
+    <div class="dl-btns">
+      <a href="#" class="btn-store">
+        <span class="btn-store-icon">▶</span>
+        <span class="btn-store-text">
+          <span class="btn-store-sub">Доступно в</span>
+          <span class="btn-store-name">Google Play</span>
+        </span>
+      </a>
+      <a href="#" class="btn-store">
+        <span class="btn-store-icon">📦</span>
+        <span class="btn-store-text">
+          <span class="btn-store-sub">Прямая загрузка</span>
+          <span class="btn-store-name">APK файл</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="section-tag">Контакты</div>
+  <h2>Связаться с нами</h2>
+  <p class="section-sub">Нашёл баг? Хочешь новую функцию? Пиши — отвечаем быстро.</p>
+  <div class="contact-grid reveal">
+    <a href="https://t.me/timeflowapp" class="contact-card">
+      <span class="contact-icon">✈️</span>
+      <span class="contact-label">Telegram</span>
+      <span class="contact-val">@timeflowapp</span>
+    </a>
+    <a href="/cdn-cgi/l/email-protection#ea828f868685aa9e83878f8c86859dc4989f" class="contact-card">
+      <span class="contact-icon">✉️</span>
+      <span class="contact-label">Email</span>
+      <span class="contact-val"><span class="__cf_email__" data-cfemail="59313c353536192d30343c3f35362e772b2c">[email&#160;protected]</span></span>
+    </a>
+    <a href="https://github.com/timeflow" class="contact-card">
+      <span class="contact-icon">⌥</span>
+      <span class="contact-label">GitHub</span>
+      <span class="contact-val">github.com/timeflow</span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 TimeFlow. Сделано для студентов Новосибирска.</p>
+  <p>Kotlin · Jetpack Compose · Firebase · Supabase</p>
+</footer>
+
+<script>
+  // FAQ
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  // ── CUSTOM CURSOR ──
+  const cursor = document.createElement('div');
+  cursor.id = 'cursor';
+  cursor.innerHTML = '<div id="cursor-dot"></div><div id="cursor-ring"></div>';
+  document.body.appendChild(cursor);
+
+  const style = document.createElement('style');
+  style.textContent = `
+    * { cursor: none !important; }
+    #cursor { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; }
+    #cursor-dot {
+      position: absolute; width: 6px; height: 6px; border-radius: 50%;
+      background: #9B7EC8; transform: translate(-50%, -50%);
+      transition: transform .1s, background .2s;
+    }
+    #cursor-ring {
+      position: absolute; width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid rgba(155,126,200,0.5);
+      transform: translate(-50%, -50%);
+      transition: width .3s, height .3s, border-color .3s, transform .12s;
+    }
+    body.hovering #cursor-ring {
+      width: 56px; height: 56px;
+      border-color: rgba(155,126,200,0.8);
+    }
+    body.clicking #cursor-dot { transform: translate(-50%, -50%) scale(2.5); background: #C4AADF; }
+    body.clicking #cursor-ring { width: 20px; height: 20px; }
+  `;
+  document.head.appendChild(style);
+
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+  });
+
+  // Ring follows with lag
+  (function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  document.querySelectorAll('a, button, .faq-q, .feat-card, .uni-chip').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+  });
+  document.addEventListener('mousedown', () => document.body.classList.add('clicking'));
+  document.addEventListener('mouseup', () => document.body.classList.remove('clicking'));
+
+  // ── PARTICLE TRAIL ──
+  const particles = [];
+  let lastParticle = 0;
+
+  document.addEventListener('mousemove', e => {
+    const now = Date.now();
+    if (now - lastParticle < 40) return;
+    lastParticle = now;
+
+    const p = document.createElement('div');
+    const size = 4 + Math.random() * 6;
+    const colors = ['#7B5EA7','#9B7EC8','#C4AADF','#6B46C1'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    Object.assign(p.style, {
+      position: 'fixed',
+      left: e.clientX + 'px', top: e.clientY + 'px',
+      width: size + 'px', height: size + 'px',
+      borderRadius: '50%',
+      background: color,
+      pointerEvents: 'none',
+      zIndex: 9998,
+      opacity: '0.7',
+      transform: 'translate(-50%, -50%)',
+      transition: 'opacity .6s ease, transform .6s ease',
+    });
+    document.body.appendChild(p);
+    particles.push(p);
+
+    requestAnimationFrame(() => {
+      const dx = (Math.random() - 0.5) * 60;
+      const dy = -20 - Math.random() * 40;
+      p.style.opacity = '0';
+      p.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.2)`;
+    });
+
+    setTimeout(() => { p.remove(); }, 700);
+  });
+
+  // ── MAGNETIC BUTTONS ──
+  document.querySelectorAll('.btn-primary, .btn-ghost').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2);
+      const dy = e.clientY - (r.top + r.height / 2);
+      btn.style.transform = `translate(${dx * 0.25}px, ${dy * 0.25}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+      btn.style.transition = 'transform .4s cubic-bezier(.23,1,.32,1)';
+      setTimeout(() => btn.style.transition = '', 400);
+    });
+  });
+
+  // ── CARD TILT ──
+  document.querySelectorAll('.feat-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(600px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateY(-4px)`;
+      card.style.boxShadow = `${-x * 12}px ${-y * 12}px 30px rgba(107,70,193,0.15)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.boxShadow = '';
+    });
+  });
+
+  // ── SCROLL REVEAL ──
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // ── GLOWING CURSOR SPOTLIGHT on hero ──
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    hero.addEventListener('mousemove', e => {
+      const r = hero.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      hero.style.background = `radial-gradient(600px circle at ${x}px ${y}px, rgba(107,70,193,0.08), transparent 60%)`;
+    });
+    hero.addEventListener('mouseleave', () => { hero.style.background = ''; });
+  }
+</script>
+</body>
+</html>
