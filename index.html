@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TimeFlow — Учись умнее</title>
+<meta name="description" content="TimeFlow — бесплатное приложение для студентов. Расписание, задачи и ИИ-ассистент в одном месте."/>
+<link rel="icon" type="image/webp" href="icon.webp"/>
+<link rel="apple-touch-icon" href="icon.webp"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="TimeFlow — Учись умнее"/>
+<meta property="og:description" content="Бесплатное приложение для студентов: расписание, задачи и ИИ-ассистент."/>
+<meta property="og:image" content="icon.webp"/>
+<meta property="og:locale" content="ru_RU"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TimeFlow — Учись умнее"/>
+<meta name="twitter:description" content="Бесплатное приложение для студентов: расписание, задачи и ИИ-ассистент."/>
+<meta name="twitter:image" content="icon.webp"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;--bg2:#0d0d1a;--bg3:#121220;
+  --card:#141428;--card2:#191932;
+  --p1:#5b21b6;--p2:#7c3aed;--p3:#8b5cf6;--p4:#a78bfa;--p5:#c4b5fd;
+  --g-main:linear-gradient(135deg,#5b21b6 0%,#7c3aed 60%,#6d28d9 100%);
+  --g-soft:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);
+  --g-text:linear-gradient(90deg,#a78bfa,#c4b5fd,#7c3aed);
+  --glow:0 0 60px rgba(124,58,237,.25);
+  --glow-sm:0 0 24px rgba(124,58,237,.18);
+  --border:rgba(255,255,255,0.055);
+  --border-a:rgba(139,92,246,.22);
+  --border-h:rgba(139,92,246,.48);
+  --text:#eeeef8;--text2:#b0b0cc;
+  --muted:#5e5e7e;--muted2:#3a3a55;
+  --radius:20px;
+  --font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+  --purple:#7c3aed;--purple2:#a78bfa;--purple3:#c4b5fd;
+  --purple-dim:rgba(124,58,237,.12);--purple-dim2:rgba(124,58,237,.24);
+  --purple-g:linear-gradient(135deg,#5b21b6,#7c3aed);
+  --chip-bg:#1a1035;--chip-border:rgba(167,139,250,.28);
+  --border2:rgba(139,92,246,.22);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:16px;line-height:1.7;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:.028;pointer-events:none;z-index:0}
+.grid-lines{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(139,92,246,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.022) 1px,transparent 1px);background-size:90px 90px}
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;animation:orbF 20s ease-in-out infinite}
+.orb1{width:750px;height:750px;background:radial-gradient(circle,rgba(91,33,182,.16) 0%,transparent 70%);top:-280px;left:-180px;animation-delay:0s}
+.orb2{width:550px;height:550px;background:radial-gradient(circle,rgba(124,58,237,.1) 0%,transparent 70%);bottom:0;right:-180px;animation-delay:-8s}
+.orb3{width:380px;height:380px;background:radial-gradient(circle,rgba(109,40,217,.07) 0%,transparent 70%);top:42%;left:22%;animation-delay:-15s}
+@keyframes orbF{0%,100%{transform:translate(0,0)}40%{transform:translate(28px,-18px)}70%{transform:translate(-18px,26px)}}
+.scroll-bar{position:fixed;top:0;left:0;height:2px;background:var(--g-soft);z-index:200;width:0;transition:width .1s linear}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:66px;background:rgba(9,9,15,.8);backdrop-filter:blur(30px) saturate(1.5);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-h);font-size:21px;font-weight:800;letter-spacing:-.6px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:10px}
+.nav-logo em{font-style:normal;background:var(--g-soft);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-icon{width:34px;height:34px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-a)}
+.logo-icon img{width:34px;height:34px;display:block;object-fit:cover}
+.nav-links{display:flex;align-items:center;gap:2px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;padding:7px 15px;border-radius:10px;transition:color .2s,background .2s;font-weight:500}
+.nav-links a:hover{color:var(--text);background:rgba(139,92,246,.1)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:11px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .25s;border:none}
+.btn-primary{background:var(--g-main);color:#fff;box-shadow:0 0 30px rgba(91,33,182,.38),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(91,33,182,.55),inset 0 1px 0 rgba(255,255,255,.2)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--border-a);backdrop-filter:blur(8px)}
+.btn-ghost:hover{background:rgba(139,92,246,.1);border-color:var(--border-h)}
+
+/* HERO */
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 5vw 70px}
+.hero-tag{display:inline-flex;align-items:center;gap:9px;background:rgba(139,92,246,.09);border:1px solid var(--border-a);color:var(--p5);font-size:12px;font-weight:600;padding:6px 18px 6px 14px;border-radius:100px;margin-bottom:32px;animation:fadeUp .65s ease both;letter-spacing:.3px;backdrop-filter:blur(8px)}
+.tag-dot{width:7px;height:7px;border-radius:50%;background:var(--p4);flex-shrink:0;animation:pulse 2.2s ease infinite;box-shadow:0 0 8px rgba(167,139,250,.6)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}
+h1{font-family:var(--font-h);font-size:clamp(44px,7.5vw,86px);font-weight:800;line-height:1.02;letter-spacing:-2.5px;color:var(--text);max-width:900px;animation:fadeUp .65s .1s ease both}
+h1 em{font-style:normal;background:var(--g-text);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.hero-sub{font-size:clamp(16px,2.2vw,19px);color:var(--text2);max-width:520px;margin:22px auto 44px;font-weight:300;line-height:1.75;animation:fadeUp .65s .2s ease both}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;animation:fadeUp .65s .3s ease both}
+.btn-dl{padding:15px 30px;font-size:15px;border-radius:13px}
+.hero-stats{display:flex;gap:12px;margin-top:72px;flex-wrap:wrap;justify-content:center;animation:fadeUp .65s .45s ease both}
+.stat-item{background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:16px;padding:18px 28px;backdrop-filter:blur(12px);text-align:center;min-width:100px;transition:border-color .25s,background .25s}
+.stat-item:hover{border-color:var(--border-a);background:rgba(139,92,246,.06)}
+.stat-num{font-family:var(--font-h);font-size:28px;font-weight:800;background:var(--g-soft);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.stat-label{font-size:12px;color:var(--muted);margin-top:5px;font-weight:500}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* MOCKUP */
+.mockup-wrap{position:relative;z-index:1;padding:0 5vw 40px;display:flex;justify-content:center;animation:fadeUp .9s .55s ease both}
+.mockup-center{position:relative}
+.mockup-glow-ring{position:absolute;inset:-50px;background:radial-gradient(ellipse 55% 40% at 50% 50%,rgba(124,58,237,.2),transparent 70%);pointer-events:none}
+.mockup-phone{width:300px;height:620px;background:linear-gradient(160deg,#161630 0%,#0e0e20 100%);border-radius:44px;border:1px solid rgba(139,92,246,.2);box-shadow:0 70px 150px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04),var(--glow);position:relative;overflow:hidden}
+.mockup-phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:90px;height:28px;background:#0e0e20;border-radius:0 0 18px 18px;z-index:10}
+.mockup-phone::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,.35),transparent)}
+.phone-inner{padding:36px 0 0;display:flex;flex-direction:column;height:100%}
+.p-screen{display:none;flex-direction:column;flex:1;overflow:hidden}
+.p-screen.active{display:flex}
+.phone-nav-wrap{padding:0 10px 14px;margin-top:auto;flex-shrink:0}
+.phone-nav{display:flex;background:#1a1a2e;border-radius:26px;padding:5px;gap:2px}
+.pnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:8.5px;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--font-b);padding:6px 4px;border-radius:21px;transition:background .18s,color .18s}
+.pnav-item.active{background:rgba(255,255,255,.1);color:#fff}
+.pnav-item:not(.active):hover{color:var(--p4)}
+.pnav-dot{font-size:15px;line-height:1}
+
+/* Phone components */
+.px{padding:0 14px}
+.ptitle{font-family:var(--font-h);font-size:20px;font-weight:800;color:var(--text)}
+.ptitle-sm{font-family:var(--font-h);font-size:16px;font-weight:700;color:var(--text)}
+.psub{font-size:11px;color:var(--muted);margin-top:1px}
+.pheader{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding:0 14px}
+.pchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pchip{font-size:10px;padding:4px 12px;border-radius:20px;border:1px solid rgba(167,139,250,.25);color:var(--p5);background:rgba(124,58,237,.08);white-space:nowrap}
+.pchip.on{background:rgba(124,58,237,.2);border-color:rgba(139,92,246,.5);color:#fff}
+.ptask{background:rgba(255,255,255,.04);border-radius:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.06);margin-bottom:7px}
+.ptask-text{font-size:12px;font-weight:600;color:var(--text)}
+.ptask-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.psearch{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 12px;font-size:11px;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.picon-btn{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer}
+.pheader-icons{display:flex;gap:6px;align-items:center}
+.plesson{background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(255,255,255,.06);padding:10px 12px;margin-bottom:8px}
+.plesson-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.plesson-num{width:22px;height:22px;background:rgba(139,92,246,.2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--p4)}
+.plesson-time{font-size:10px;color:var(--muted);flex:1;margin-left:7px}
+.plesson-type{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.plesson-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.plesson-meta{font-size:10px;color:var(--muted)}
+.pday{background:rgba(255,255,255,.04);border-radius:10px;padding:9px 12px;margin-bottom:6px;border:1px solid rgba(255,255,255,.06)}
+.pday-title{font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px}
+.pday-title.today{color:var(--p4)}
+.pday-empty{font-size:11px;color:var(--muted2)}
+.pbubble{background:rgba(255,255,255,.06);border-radius:12px 12px 12px 3px;padding:11px 13px;font-size:11px;color:var(--text);line-height:1.55;max-width:88%;border:1px solid rgba(255,255,255,.06)}
+.pfab-wrap{position:absolute;bottom:90px;right:14px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.pfab{width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+.pfab-mic{background:rgba(255,255,255,.1);color:var(--text2)}
+.pfab-plus{background:var(--p2);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4)}
+.pgrid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;padding:0 14px}
+.pstat-card{background:rgba(255,255,255,.04);border-radius:11px;padding:10px;border:1px solid rgba(255,255,255,.06)}
+.pstat-icon{font-size:15px;margin-bottom:4px}
+.pstat-label{font-size:9px;color:var(--muted)}
+.pstat-num{font-size:17px;font-weight:700;color:var(--text)}
+.pstat-num.accent{background:var(--g-soft);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pcollab-btn{border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.04)}
+.pcollab-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.pcollab-sub{font-size:10px;color:var(--muted)}
+.pinput{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--muted2);margin-bottom:6px;margin-top:8px}
+.pgray-btn{background:rgba(255,255,255,.07);border-radius:8px;padding:6px 14px;font-size:11px;color:var(--muted);text-align:center}
+
+/* floating labels */
+.float-label{position:absolute;background:rgba(14,14,26,.92);border:1px solid var(--border-a);border-radius:12px;padding:8px 14px;font-size:11.5px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);backdrop-filter:blur(14px);animation:floatA 4s ease-in-out infinite;white-space:nowrap}
+.float-label .fdot{width:7px;height:7px;border-radius:50%;background:var(--p4);flex-shrink:0}
+.fl1{top:10%;right:-62px;animation-delay:0s}
+.fl2{top:40%;left:-82px;animation-delay:-1.8s}
+.fl3{bottom:20%;right:-58px;animation-delay:-3.2s}
+@keyframes floatA{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes bounceX{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes dotPop{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.4);opacity:1}}
+
+/* SECTIONS */
+section{position:relative;z-index:1;padding:110px 5vw}
+.section-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--p4);margin-bottom:16px}
+.section-tag::before{content:'';width:20px;height:1px;background:var(--g-soft);border-radius:1px}
+h2{font-family:var(--font-h);font-size:clamp(28px,4vw,50px);font-weight:800;letter-spacing:-1.2px;line-height:1.08;color:var(--text);margin-bottom:14px}
+.section-sub{font-size:17px;color:var(--text2);max-width:500px;font-weight:300;margin-bottom:60px;line-height:1.7}
+.features{background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1px;background:var(--border);border-radius:24px;overflow:hidden;border:1px solid var(--border)}
+.feat-card{background:var(--card);padding:32px;transition:background .3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(124,58,237,.07),transparent 55%);opacity:0;transition:opacity .3s}
+.feat-card:hover::before{opacity:1}
+.feat-card:hover{background:var(--card2)}
+.feat-num{font-family:var(--font-h);font-size:11px;font-weight:700;color:var(--muted2);letter-spacing:2px;margin-bottom:20px;display:block}
+.feat-icon{width:48px;height:48px;background:linear-gradient(135deg,rgba(91,33,182,.2),rgba(124,58,237,.08));border:1px solid var(--border-a);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:22px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.feat-title{font-family:var(--font-h);font-size:17px;font-weight:700;margin-bottom:10px;color:var(--text)}
+.feat-desc{font-size:14px;color:var(--muted);line-height:1.7}
+.unis-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:480px}
+.uni-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;font-size:18px;font-weight:800;color:var(--text);font-family:var(--font-h);transition:all .25s;position:relative;overflow:hidden;cursor:default}
+.uni-chip::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g-soft);opacity:0;transition:opacity .25s}
+.uni-chip:hover{border-color:var(--border-a);background:var(--card2);transform:translateY(-3px);box-shadow:var(--glow-sm)}
+.uni-chip:hover::before{opacity:1}
+.uni-chip small{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:5px;font-family:var(--font-b)}
+.faq-section{background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%)}
+.faq-list{max-width:700px;display:flex;flex-direction:column;gap:8px}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .2s}
+.faq-item:hover{border-color:var(--border-a)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;cursor:pointer;font-size:15px;font-weight:500;color:var(--text);user-select:none;gap:16px;transition:color .2s}
+.faq-q:hover{color:var(--p5)}
+.faq-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;background:rgba(139,92,246,.1);border:1px solid var(--border-a);display:flex;align-items:center;justify-content:center;transition:transform .28s cubic-bezier(.34,1.56,.64,1),background .2s;font-size:16px;color:var(--p4)}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:var(--p2);color:#fff;border-color:var(--p2)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .38s ease,padding .28s ease;font-size:14px;color:var(--text2);line-height:1.75;padding:0 24px}
+.faq-item.open .faq-a{max-height:300px;padding:0 24px 20px}
+.dl-section{text-align:center;position:relative;z-index:1;padding:110px 5vw}
+.dl-card{display:inline-block;background:linear-gradient(135deg,rgba(20,20,40,.9),rgba(14,14,28,.95));border:1px solid rgba(139,92,246,.18);border-radius:28px;padding:60px 70px;max-width:580px;box-shadow:0 0 120px rgba(91,33,182,.09),0 40px 80px rgba(0,0,0,.5);position:relative;overflow:hidden;backdrop-filter:blur(20px)}
+.dl-card::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:200px;background:radial-gradient(ellipse,rgba(91,33,182,.22) 0%,transparent 70%);pointer-events:none}
+.dl-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,.45),transparent)}
+.dl-card h2,.dl-card p,.dl-btns{position:relative}
+.dl-card p{color:var(--text2);font-size:17px;margin-bottom:36px;font-weight:300;margin-top:10px}
+.dl-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-store{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid var(--border-a);border-radius:14px;padding:14px 24px;text-decoration:none;color:var(--text);font-family:var(--font-b);transition:all .25s;backdrop-filter:blur(8px)}
+.btn-store:hover{background:rgba(139,92,246,.1);border-color:var(--border-h);transform:translateY(-2px);box-shadow:var(--glow-sm)}
+.btn-store-icon{font-size:28px;line-height:1}
+.btn-store-sub{font-size:10px;color:var(--muted);display:block;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
+.btn-store-name{font-size:15px;font-weight:700;display:block}
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;max-width:520px}
+.contact-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;text-decoration:none;color:var(--text);transition:border-color .25s,transform .25s,box-shadow .25s;display:flex;flex-direction:column;gap:10px}
+.contact-card:hover{border-color:var(--border-a);transform:translateY(-3px);box-shadow:var(--glow-sm)}
+.contact-icon{font-size:24px}
+.contact-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.contact-val{font-size:14px;font-weight:600;color:var(--p5)}
+footer{border-top:1px solid var(--border);padding:32px 5vw;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:relative;z-index:1}
+footer p{font-size:13px;color:var(--muted2)}
+footer p span{color:var(--muted)}
+.divider{border:none;border-top:1px solid var(--border);margin:0;position:relative;z-index:1}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+/* ── STATS STRIP ── */
+.stats-strip{position:relative;z-index:1;display:flex;justify-content:center;padding:0 5vw 90px;flex-wrap:wrap;border-top:1px solid var(--border);margin-top:0}
+.ss-item{flex:1;min-width:130px;text-align:center;padding:40px 20px;border-right:1px solid var(--border);transition:background .25s}
+.ss-item:last-child{border-right:none}
+.ss-item:hover{background:rgba(139,92,246,.04)}
+.ss-num{font-family:var(--font-h);font-size:clamp(28px,3.8vw,54px);font-weight:800;background:var(--g-soft);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;line-height:1;white-space:nowrap}
+.ss-label{font-size:13px;color:var(--muted);margin-top:8px;display:block;font-weight:500}
+/* ── SPOTLIGHT ── */
+.spotlight-section{position:relative;z-index:1;padding:110px 5vw;background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%)}
+.spotlight-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;margin-top:56px}
+.spotlight-list{display:flex;flex-direction:column;gap:4px}
+.sfeature{display:flex;gap:18px;padding:24px;border-radius:18px;border:1px solid transparent;opacity:.4;transition:opacity .35s,background .35s,border-color .35s;cursor:default}
+.sfeature.active{background:rgba(139,92,246,.07);border-color:var(--border-a);opacity:1}
+.sfeature-icon{width:46px;height:46px;background:rgba(139,92,246,.1);border:1px solid var(--border-a);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .35s}
+.sfeature.active .sfeature-icon{background:rgba(139,92,246,.22)}
+.sfeature-num{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:2px;margin-bottom:5px}
+.sfeature-title{font-family:var(--font-h);font-size:17px;font-weight:700;color:var(--text);margin-bottom:7px}
+.sfeature-desc{font-size:14px;color:var(--muted);line-height:1.7}
+.spotlight-sticky{position:sticky;top:120px}
+.sp-phone{width:260px;height:540px;background:linear-gradient(160deg,#161630,#0e0e20);border-radius:40px;border:1px solid rgba(139,92,246,.25);box-shadow:0 40px 100px rgba(0,0,0,.65),var(--glow);position:relative;overflow:hidden;margin:0 auto;transition:box-shadow .4s}
+.sp-phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:80px;height:24px;background:#0e0e20;border-radius:0 0 14px 14px;z-index:10}
+.sp-inner{padding:30px 12px 12px;height:100%;display:flex;flex-direction:column}
+.sp-screen{display:none;flex-direction:column;flex:1;animation:spIn .38s ease}
+.sp-screen.active{display:flex}
+@keyframes spIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.sp-title{font-family:var(--font-h);font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;padding:0 2px}
+.sp-row{background:rgba(255,255,255,.05);border-radius:10px;padding:9px 11px;margin-bottom:6px;border:1px solid rgba(255,255,255,.06)}
+.sp-row-title{font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px}
+.sp-row-sub{font-size:9.5px;color:var(--muted)}
+.sp-chip{display:inline-flex;font-size:9.5px;padding:3px 10px;border-radius:20px;background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.25);color:var(--p5);margin-right:4px;margin-bottom:5px}
+.sp-search{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:7px 11px;font-size:10px;color:var(--muted2);margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.sp-bubble{background:rgba(255,255,255,.06);border-radius:10px 10px 10px 2px;padding:10px 12px;font-size:10px;color:var(--text);line-height:1.5;border:1px solid rgba(255,255,255,.06);max-width:90%;margin-left:32px;margin-bottom:8px}
+.sp-nav{display:flex;background:#1a1a2e;border-radius:22px;padding:4px;gap:2px;margin-top:auto}
+.sp-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:7.5px;padding:5px 3px;border-radius:18px}
+.sp-nav-item.on{background:rgba(255,255,255,.1);color:#fff}
+.sp-nav-item:not(.on){color:var(--muted)}
+/* ── PHONE 3D ── */
+.mockup-phone{transform-style:preserve-3d;transition:box-shadow .4s ease}
+@media(max-width:900px){.spotlight-wrap{grid-template-columns:1fr}.spotlight-sticky{display:none}.ss-item{border-right:none;border-bottom:1px solid var(--border)}.ss-item:last-child{border-bottom:none}}
+@media(max-width:768px){.nav-links{display:none}.hero-stats{gap:8px}.dl-card{padding:36px 28px}.fl1,.fl2,.fl3{display:none}.feat-card{padding:24px}}
+</style>
+</head>
+<body>
+<div class="scroll-bar" id="scrollBar"></div>
+<div class="grid-lines"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-icon"><img src="icon.webp" alt="TimeFlow"/></div>
+    Time<em>Flow</em>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Функции</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Контакты</a></li>
+  </ul>
+  <a href="#download" class="btn btn-primary" style="font-size:14px;padding:9px 20px;">Скачать</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag"><span class="tag-dot"></span>Для студентов Новосибирска</div>
+  <h1>Учись умнее.<br/>Успевай <em>больше.</em></h1>
+  <p class="hero-sub">TimeFlow — расписание, задачи и ИИ-ассистент в одном приложении. Бесплатно, без рекламы.</p>
+  <div class="hero-cta">
+    <a href="#download" class="btn btn-primary btn-dl">↓ Скачать бесплатно</a>
+    <a href="#features" class="btn btn-ghost btn-dl">Узнать больше →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">университета</div></div>
+    <div class="stat-item"><div class="stat-num">ИИ</div><div class="stat-label">ассистент</div></div>
+    <div class="stat-item"><div class="stat-num">0 ₽</div><div class="stat-label">бесплатно</div></div>
+  </div>
+</section>
+
+<!-- PHONE MOCKUP -->
+<div class="mockup-wrap">
+  <div class="mockup-center">
+    <div class="mockup-glow-ring"></div>
+    <div class="mockup-phone">
+      <div class="phone-inner">
+
+        <!-- ЗАДАЧИ -->
+        <div class="p-screen active" id="ps-tasks" style="position:relative">
+          <div class="pheader">
+            <div><div class="ptitle">Мои задачи</div><div class="psub">На сегодня</div></div>
+            <div class="pheader-icons">
+              <button class="picon-btn" onclick="showScreen('stats')">📊</button>
+              <button class="picon-btn" onclick="showScreen('collab')">👥</button>
+              <button class="picon-btn" onclick="showScreen('settings')">⚙️</button>
+            </div>
+          </div>
+          <div class="px">
+            <div class="psearch">🔍 <span>Найти задачу...</span></div>
+            <div class="pchips">
+              <div class="pchip on">Все</div>
+              <div class="pchip" onclick="showScreen('completed')" style="cursor:pointer">✓ Выполненные</div>
+              <div class="pchip">Запланированные</div>
+            </div>
+            <div class="pchip" style="width:fit-content;margin-bottom:8px;">учёба</div>
+            <div style="background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:9px 12px;font-size:11px;color:var(--p5);margin-bottom:9px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:13px;">✦</span> Получить AI-совет по задачам
+            </div>
+            <div class="ptask" style="border-left:3px solid var(--p3);display:flex;align-items:center;justify-content:space-between;">
+              <div><div class="ptask-text">привет</div><div class="ptask-meta">учёба · без срока</div></div>
+              <div style="display:flex;gap:6px;font-size:12px;color:var(--muted2);">▶ 🖼 ✏ ▾</div>
+            </div>
+          </div>
+          <div class="pfab-wrap">
+            <button class="pfab pfab-mic">🎤</button>
+            <button class="pfab pfab-plus" style="font-size:20px;font-weight:300;">+</button>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- РАСПИСАНИЕ -->
+        <div class="p-screen" id="ps-schedule">
+          <div class="pheader">
+            <div class="ptitle-sm">Расписание</div>
+            <div style="font-size:10px;background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.28);color:var(--p5);padding:4px 10px;border-radius:8px;display:flex;align-items:center;gap:5px;">🎓 НГУЭУ</div>
+          </div>
+          <div class="px" style="flex:1;overflow-y:auto;overflow-x:hidden">
+            <div class="psearch">🔍 <span style="color:var(--text2)">9-ИС402/2</span></div>
+            <div style="font-size:9px;color:var(--muted);text-align:right;margin-bottom:5px;">Обновлено: 06.04 18:27 ↻</div>
+            <div style="font-size:11px;font-weight:600;margin-bottom:7px;">2 неделя (текущая)</div>
+            <div style="background:rgba(124,58,237,.15);border:1px solid rgba(139,92,246,.3);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--p5);width:fit-content;margin-bottom:9px;font-weight:500;">Сегодня</div>
+            <div style="display:flex;gap:4px;margin-bottom:12px;">
+              <div style="background:var(--p2);border-radius:10px;padding:6px 0;text-align:center;font-size:9px;color:#fff;flex:1;"><div style="font-weight:800;font-size:13px;">06</div><div>ПН</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:6px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:13px;">07</div><div>ВТ</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:6px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:13px;">08</div><div>СР</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:6px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:13px;">09</div><div>ЧТ</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:6px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:13px;">10</div><div>ПТ</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:6px 0;text-align:center;font-size:9px;color:var(--muted);flex:1;"><div style="font-size:13px;">11</div><div>СБ</div></div>
+            </div>
+            <div class="plesson">
+              <div class="plesson-top"><div class="plesson-num">3</div><div class="plesson-time">11:25 – 12:55</div><div class="plesson-type">Лекция 🔔 ✏</div></div>
+              <div class="plesson-name">МДК.03.01 Моделир. и анализ ПО</div>
+              <div class="plesson-meta">Морозова И.А. · ауд. 2-118</div>
+            </div>
+            <div class="plesson">
+              <div class="plesson-top"><div class="plesson-num">4</div><div class="plesson-time">13:20 – 14:50</div><div class="plesson-type">Семинар 🔔 ✏</div></div>
+              <div class="plesson-name">Теория вероятностей и мат.статист</div>
+              <div class="plesson-meta">Фролова И.В. · ауд. 2-121</div>
+            </div>
+            <div class="plesson">
+              <div class="plesson-top"><div class="plesson-num">5</div><div class="plesson-time">15:05 – 16:35</div><div class="plesson-type">Семинар 🔔 ✏</div></div>
+              <div class="plesson-name">МДК.03.01 Моделир. и анализ ПО</div>
+              <div class="plesson-meta">Морозова И.А. · ауд. 2-200</div>
+            </div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item active" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ПЛАН -->
+        <div class="p-screen" id="ps-plan">
+          <div class="pheader"><div class="ptitle-sm">План на неделю</div><button class="picon-btn">📅</button></div>
+          <div class="px" style="flex:1;overflow-y:auto">
+            <div class="pday"><div class="pday-title today">пн, 06.04.2026 (Сегодня)</div><div class="pday-empty">Нет задач</div></div>
+            <div class="pday"><div class="pday-title">вт, 07.04.2026</div><div class="pday-empty">Нет задач</div></div>
+            <div class="pday"><div class="pday-title">ср, 08.04.2026</div><div class="pday-empty">Нет задач</div></div>
+            <div class="pday"><div class="pday-title">чт, 09.04.2026</div><div class="pday-empty">Нет задач</div></div>
+            <div class="pday"><div class="pday-title">пт, 10.04.2026</div><div class="pday-empty">Нет задач</div></div>
+            <div class="pday"><div class="pday-title">сб, 11.04.2026</div><div class="pday-empty">Нет задач</div></div>
+            <div class="pday"><div class="pday-title">вс, 12.04.2026</div><div class="pday-empty">Нет задач</div></div>
+          </div>
+          <div class="px" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;padding-top:8px;">
+            <div style="background:rgba(255,255,255,.07);border-radius:10px;padding:7px 14px;font-size:11px;color:var(--text2);">← Пред.</div>
+            <div style="font-size:10px;color:var(--muted);">06.04 – 12.04</div>
+            <div style="background:var(--p2);border-radius:10px;padding:7px 14px;font-size:11px;color:#fff;">След. →</div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item active" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ЗАПИСИ -->
+        <div class="p-screen" id="ps-notes">
+          <div style="text-align:center;padding:10px 14px 14px;flex-shrink:0;"><div class="ptitle-sm">Умный Конспект</div></div>
+          <div class="px" style="flex:1">
+            <div style="background:var(--p2);border-radius:18px;padding:24px 20px;text-align:center;margin-bottom:16px;">
+              <div style="font-size:30px;margin-bottom:10px;">☁</div>
+              <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Загрузи аудио лекции</div>
+              <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:14px;line-height:1.5;">ИИ послушает и выпишет главное<br/>Макс. размер: 50.0 МБ</div>
+              <div style="background:rgba(255,255,255,.22);border-radius:22px;padding:8px 22px;font-size:11px;font-weight:600;color:#fff;display:inline-block;">Выбрать файл</div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);text-align:center;margin-top:20px;">Здесь появится твой конспект</div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item active" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI -->
+        <div class="p-screen" id="ps-ai">
+          <div class="pheader">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div style="width:32px;height:32px;background:var(--g-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">✦</div>
+              <div><div class="ptitle-sm">TimeFlow AI</div><div style="font-size:10px;color:#4ade80;font-weight:500;">● онлайн</div></div>
+            </div>
+            <button class="picon-btn">🗑</button>
+          </div>
+          <div class="px" style="flex:1;display:flex;flex-direction:column;gap:10px;padding-bottom:10px;">
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <div style="width:26px;height:26px;background:var(--g-soft);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;">✦</div>
+              <div class="pbubble">Привет! Я помогу тебе разложить дела по задачам в TimeFlow. Расскажи, что нужно сделать?</div>
+            </div>
+          </div>
+          <div class="px" style="padding-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:9px 14px;">
+              <span style="font-size:16px;color:var(--muted);">🎤</span>
+              <span style="font-size:11px;color:var(--muted2);flex:1;">Сообщение...</span>
+              <div style="width:25px;height:25px;background:var(--p2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;">↑</div>
+            </div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item active" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- СТАТИСТИКА -->
+        <div class="p-screen" id="ps-stats">
+          <div style="display:flex;align-items:center;padding:0 14px;margin-bottom:6px;">
+            <button onclick="showScreen('tasks')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;flex-shrink:0;">←</button>
+            <div style="flex:1;text-align:center;">
+              <div style="width:38px;height:38px;background:var(--g-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 3px;">✓</div>
+              <div class="ptitle-sm">Статистика</div><div class="psub">За последние 7 дней</div>
+            </div>
+            <div style="width:26px;"></div>
+          </div>
+          <div class="pgrid2">
+            <div class="pstat-card"><div class="pstat-icon">✅</div><div class="pstat-label">Выполнено за неделю</div><div class="pstat-num">9</div></div>
+            <div class="pstat-card"><div class="pstat-icon">○</div><div class="pstat-label">Активных задач</div><div class="pstat-num">1</div></div>
+            <div class="pstat-card"><div class="pstat-icon">🏆</div><div class="pstat-label">Лучший день</div><div class="pstat-num" style="font-size:14px;">пн (5)</div></div>
+            <div class="pstat-card"><div class="pstat-label" style="margin-bottom:4px;">Выполнено всего</div><div class="pstat-num accent" style="font-size:20px;">90%</div><div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:6px;"><div style="height:4px;width:90%;background:var(--g-soft);border-radius:2px;"></div></div></div>
+          </div>
+          <div style="padding:0 14px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Выполнено по дням</div>
+            <div style="display:flex;align-items:flex-end;gap:4px;height:60px;">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;"><div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:10%;"></div><div style="font-size:8px;color:var(--muted);">вт</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;"><div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:15%;"></div><div style="font-size:8px;color:var(--muted);">ср</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;"><div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:12%;"></div><div style="font-size:8px;color:var(--muted);">чт</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;"><div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:55%;"></div><div style="font-size:8px;color:var(--muted);">пт</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;"><div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:8%;"></div><div style="font-size:8px;color:var(--muted);">сб</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;"><div style="width:100%;background:var(--purple-dim2);border-radius:3px 3px 0 0;height:5%;"></div><div style="font-size:8px;color:var(--muted);">вс</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end;"><div style="width:100%;background:var(--p2);border-radius:3px 3px 0 0;height:100%;"></div><div style="font-size:8px;color:var(--p4);">пн</div></div>
+            </div>
+          </div>
+          <div class="phone-nav-wrap" style="margin-top:8px;">
+            <div class="phone-nav">
+              <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- СОВМЕСТНЫЙ -->
+        <div class="p-screen" id="ps-collab">
+          <div style="padding:0 14px;margin-bottom:4px;"><button onclick="showScreen('tasks')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;">←</button></div>
+          <div style="text-align:center;margin-bottom:14px;padding:0 14px;">
+            <div style="width:46px;height:46px;background:var(--g-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;">👥</div>
+            <div class="ptitle-sm">Совместный режим</div>
+            <div class="psub">Создай или присоединись к комнате</div>
+          </div>
+          <div class="px">
+            <div class="pcollab-btn">
+              <div class="pcollab-title">+ Создать комнату</div>
+              <div class="pcollab-sub">Создай новую комнату и поделись кодом с другом</div>
+              <div style="background:var(--p2);border-radius:9px;padding:8px;font-size:12px;color:#fff;text-align:center;margin-top:9px;font-weight:600;">Создать</div>
+            </div>
+            <div class="pcollab-btn">
+              <div class="pcollab-title">→ Присоединиться</div>
+              <div class="pcollab-sub">Введи код комнаты от друга</div>
+              <div class="pinput">XXXXXX</div>
+              <div class="pgray-btn">Войти</div>
+            </div>
+          </div>
+          <div class="phone-nav-wrap" style="margin-top:auto;">
+            <div class="phone-nav">
+              <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- НАСТРОЙКИ -->
+        <div class="p-screen" id="ps-settings">
+          <div class="pheader">
+            <div class="ptitle-sm">Настройки</div>
+            <button onclick="showScreen('tasks')" style="background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.2);color:var(--p4);font-size:11px;font-weight:600;cursor:pointer;padding:5px 12px;border-radius:8px;">Закрыть</button>
+          </div>
+          <div class="px" style="flex:1;overflow-y:auto;padding-bottom:8px;">
+            <div style="background:rgba(124,58,237,.13);border:1px solid rgba(139,92,246,.22);border-radius:14px;padding:13px;display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+              <div style="width:42px;height:42px;border-radius:50%;background:var(--g-soft);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;">👤</div>
+              <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--text);">Sanerkaa ✏</div></div>
+              <div style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted2);">↪</div>
+            </div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--p4);margin-bottom:7px;">ПРИЛОЖЕНИЕ</div>
+            <div style="background:rgba(255,255,255,.04);border-radius:13px;border:1px solid rgba(255,255,255,.06);overflow:hidden;margin-bottom:10px;">
+              <div style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06);">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><span style="font-size:13px;">🌙</span><span style="font-size:12px;font-weight:600;color:var(--text);">Тема приложения</span></div>
+                <div style="display:flex;gap:3px;background:rgba(255,255,255,.05);border-radius:9px;padding:3px;">
+                  <div style="flex:1;text-align:center;padding:4px 2px;border-radius:7px;font-size:10px;color:var(--muted);">Светлая</div>
+                  <div style="flex:1;text-align:center;padding:4px 2px;border-radius:7px;font-size:10px;color:#fff;background:var(--p2);font-weight:600;">Тёмная</div>
+                  <div style="flex:1;text-align:center;padding:4px 2px;border-radius:7px;font-size:10px;color:var(--muted);">Как в системе</div>
+                </div>
+              </div>
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06);">
+                <span style="font-size:13px;">👤</span>
+                <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Профиль</div><div style="font-size:10px;color:var(--muted);">Имя, фото аккаунта</div></div>
+                <span style="color:var(--muted);font-size:16px;">›</span>
+              </div>
+              <div style="padding:11px 13px;">
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><span style="font-size:13px;">🌐</span><span style="font-size:12px;font-weight:600;color:var(--text);">Язык</span></div>
+                <div style="display:flex;gap:3px;background:rgba(255,255,255,.05);border-radius:9px;padding:3px;">
+                  <div style="flex:1;text-align:center;padding:4px 2px;border-radius:7px;font-size:10px;color:#fff;background:var(--p2);font-weight:600;">Русский</div>
+                  <div style="flex:1;text-align:center;padding:4px 2px;border-radius:7px;font-size:10px;color:var(--muted);">Английский</div>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--p4);margin-bottom:7px;">ИНСТРУМЕНТЫ</div>
+            <div style="background:rgba(255,255,255,.04);border-radius:13px;border:1px solid rgba(255,255,255,.06);overflow:hidden;margin-bottom:10px;">
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.06);">
+                <div style="width:28px;height:28px;background:rgba(251,146,60,.14);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">📊</div>
+                <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Виджет расписания</div><div style="font-size:10px;color:var(--muted);">Настроить цвета и отображение</div></div>
+                <span style="color:var(--muted);font-size:16px;">›</span>
+              </div>
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;">
+                <div style="width:28px;height:28px;background:rgba(34,197,94,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">🎯</div>
+                <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Режим фокусировки</div><div style="font-size:10px;color:var(--muted);">Заблокировать отвлекающие</div></div>
+                <span style="color:var(--muted);font-size:16px;">›</span>
+              </div>
+            </div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--p4);margin-bottom:7px;">О ПРИЛОЖЕНИИ</div>
+            <div style="background:rgba(255,255,255,.04);border-radius:13px;border:1px solid rgba(255,255,255,.06);overflow:hidden;">
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.06);">
+                <div style="width:28px;height:28px;background:rgba(59,130,246,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">📱</div>
+                <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Проверить обновления</div><div style="font-size:10px;color:var(--muted);">Версия beta-1.0 (7)</div></div>
+                <span style="color:var(--muted);font-size:16px;">›</span>
+              </div>
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;">
+                <div style="width:28px;height:28px;background:rgba(239,68,68,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">🐛</div>
+                <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Сообщить об ошибке</div><div style="font-size:10px;color:var(--muted);">@TimeFlowUpdater_bot в Telegram</div></div>
+                <span style="color:var(--muted);font-size:16px;">›</span>
+              </div>
+            </div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВЫПОЛНЕНО -->
+        <div class="p-screen" id="ps-completed">
+          <div class="pheader">
+            <button onclick="showScreen('tasks')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;flex-shrink:0;">←</button>
+            <div class="ptitle-sm" style="flex:1;text-align:center;">Выполнено</div>
+            <button class="picon-btn">🗑</button>
+          </div>
+          <div class="px" style="flex:1;overflow-y:auto;padding-bottom:4px;">
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;">лаладал</div><div style="font-size:10px;color:var(--muted2);">учёба · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;">↺</span><span style="font-size:14px;color:var(--muted2);">🗑</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;">Английский</div><div style="font-size:10px;color:var(--muted2);">учёба · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;">↺</span><span style="font-size:14px;color:var(--muted2);">🗑</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;">Математика</div><div style="font-size:10px;color:var(--muted2);">учёба · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;">↺</span><span style="font-size:14px;color:var(--muted2);">🗑</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;">Русский язык</div><div style="font-size:10px;color:var(--muted2);">учёба · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;">↺</span><span style="font-size:14px;color:var(--muted2);">🗑</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Добавь задачу по матема...</div><div style="font-size:10px;color:var(--muted2);">личное · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;flex-shrink:0;">↺</span><span style="font-size:14px;color:var(--muted2);flex-shrink:0;">🗑</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Добавь задачу по матема...</div><div style="font-size:10px;color:var(--muted2);">личное · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;flex-shrink:0;">↺</span><span style="font-size:14px;color:var(--muted2);flex-shrink:0;">🗑</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Добавить задачу по мате...</div><div style="font-size:10px;color:var(--muted2);">личное · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;flex-shrink:0;">↺</span><span style="font-size:14px;color:var(--muted2);flex-shrink:0;">🗑</span></div>
+            <div style="display:flex;align-items:center;gap:8px;padding:9px 0;"><span style="color:#4ade80;font-size:16px;flex-shrink:0;">✓</span><div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:500;color:var(--muted);text-decoration:line-through;">клклдк</div><div style="font-size:10px;color:var(--muted2);">личное · приоритет 1</div></div><span style="font-size:15px;color:var(--p4);margin-right:6px;flex-shrink:0;">↺</span><span style="font-size:14px;color:var(--muted2);flex-shrink:0;">🗑</span></div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HINT -->
+<div style="position:relative;z-index:1;display:flex;justify-content:center;margin-top:32px;padding-bottom:80px;">
+  <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(139,92,246,.2);border-radius:100px;padding:9px 20px;backdrop-filter:blur(12px);animation:fadeUp .6s 1.2s ease both;">
+    <span style="font-size:16px;animation:bounceX 1.5s ease-in-out infinite;">👆</span>
+    <span style="font-size:13px;color:var(--text2);font-weight:500;">Нажимай на вкладки и кнопки — макет интерактивный</span>
+    <span style="display:flex;gap:4px;margin-left:4px;">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--p3);animation:dotPop 1.4s 0s ease-in-out infinite;display:block;"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--p3);animation:dotPop 1.4s .2s ease-in-out infinite;display:block;"></span>
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--p3);animation:dotPop 1.4s .4s ease-in-out infinite;display:block;"></span>
+    </span>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="ss-item"><span class="ss-num" data-count="2" data-suffix="">2</span><span class="ss-label">Университета</span></div>
+  <div class="ss-item"><span class="ss-num" data-count="6" data-suffix="">6</span><span class="ss-label">Функций в приложении</span></div>
+  <div class="ss-item"><span class="ss-num" data-count="100" data-suffix="%">100%</span><span class="ss-label">Бесплатно</span></div>
+  <div class="ss-item"><span class="ss-num" data-count="0" data-suffix=" ₽">0 ₽</span><span class="ss-label">Без подписки</span></div>
+</div>
+
+<!-- FEATURES -->
+<section id="features" class="features">
+  <div class="section-tag">Возможности</div>
+  <h2>Всё что нужно студенту</h2>
+  <p class="section-sub">Только то, что реально помогает учиться и не опаздывать.</p>
+  <div class="features-grid reveal">
+    <div class="feat-card"><span class="feat-num">01</span><div class="feat-icon">📅</div><div class="feat-title">Умное расписание</div><div class="feat-desc">Автоматически подтягивает расписание твоего университета. Всегда актуально, без ручного ввода.</div></div>
+    <div class="feat-card"><span class="feat-num">02</span><div class="feat-icon">✓</div><div class="feat-title">Задачи и дедлайны</div><div class="feat-desc">Создавай задачи, ставь дедлайны, группируй по предметам. Свайп вправо — задача выполнена.</div></div>
+    <div class="feat-card"><span class="feat-num">03</span><div class="feat-icon">🤖</div><div class="feat-title">ИИ-ассистент</div><div class="feat-desc">Скажи голосом что нужно сделать — ассистент создаст задачи сам. Работает на базе Gemini.</div></div>
+    <div class="feat-card"><span class="feat-num">04</span><div class="feat-icon">👥</div><div class="feat-title">Совместный режим</div><div class="feat-desc">Работай над заданиями с одногруппниками в реальном времени. Видно кто что делает прямо сейчас.</div></div>
+    <div class="feat-card"><span class="feat-num">05</span><div class="feat-icon">🔔</div><div class="feat-title">Push-уведомления</div><div class="feat-desc">Напоминания о парах, дедлайнах и совместных задачах. Не пропустишь ничего важного.</div></div>
+    <div class="feat-card"><span class="feat-num">06</span><div class="feat-icon">☁️</div><div class="feat-title">Облачная синхронизация</div><div class="feat-desc">Все данные в облаке. Смени телефон — всё на месте. Firebase + Supabase под капотом.</div></div>
+  </div>
+</section>
+
+<!-- SPOTLIGHT -->
+<section class="spotlight-section" id="spotlight">
+  <div class="section-tag">Как это работает</div>
+  <h2>Всё в одном месте</h2>
+  <p class="section-sub">Скролл вниз — и телефон показывает каждую функцию вживую.</p>
+  <div class="spotlight-wrap">
+    <div class="spotlight-list">
+      <div class="sfeature active" data-screen="sp-schedule">
+        <div class="sfeature-icon">📅</div>
+        <div>
+          <div class="sfeature-num">01</div>
+          <div class="sfeature-title">Умное расписание</div>
+          <div class="sfeature-desc">Автоматически подтягивает пары из НГУЭУ и НГТУ. Всегда актуально — без ручного ввода.</div>
+        </div>
+      </div>
+      <div class="sfeature" data-screen="sp-tasks">
+        <div class="sfeature-icon">✓</div>
+        <div>
+          <div class="sfeature-num">02</div>
+          <div class="sfeature-title">Задачи и дедлайны</div>
+          <div class="sfeature-desc">Создавай задачи голосом или текстом. Группируй по предметам, ставь приоритеты.</div>
+        </div>
+      </div>
+      <div class="sfeature" data-screen="sp-ai">
+        <div class="sfeature-icon">🤖</div>
+        <div>
+          <div class="sfeature-num">03</div>
+          <div class="sfeature-title">ИИ-ассистент</div>
+          <div class="sfeature-desc">Скажи что нужно сделать — ИИ разберёт и создаст задачи. Работает на базе Gemini.</div>
+        </div>
+      </div>
+      <div class="sfeature" data-screen="sp-collab">
+        <div class="sfeature-icon">👥</div>
+        <div>
+          <div class="sfeature-num">04</div>
+          <div class="sfeature-title">Совместный режим</div>
+          <div class="sfeature-desc">Работай с одногруппниками над общими задачами в реальном времени.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spotlight-sticky">
+      <div class="sp-phone" id="spPhone">
+        <div class="sp-inner">
+
+          <!-- Schedule -->
+          <div class="sp-screen active" id="sp-schedule">
+            <div class="sp-title">Расписание</div>
+            <div class="sp-search">🔍 <span>9-ИС402/2</span></div>
+            <div style="display:flex;gap:3px;margin-bottom:10px;">
+              <div style="background:var(--p2);border-radius:8px;padding:5px 0;text-align:center;font-size:8px;color:#fff;flex:1;"><div style="font-weight:800;font-size:11px;">06</div><div>ПН</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:5px 0;text-align:center;font-size:8px;color:var(--muted);flex:1;"><div style="font-size:11px;">07</div><div>ВТ</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:5px 0;text-align:center;font-size:8px;color:var(--muted);flex:1;"><div style="font-size:11px;">08</div><div>СР</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:5px 0;text-align:center;font-size:8px;color:var(--muted);flex:1;"><div style="font-size:11px;">09</div><div>ЧТ</div></div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:5px 0;text-align:center;font-size:8px;color:var(--muted);flex:1;"><div style="font-size:11px;">10</div><div>ПТ</div></div>
+            </div>
+            <div class="sp-row"><div style="display:flex;justify-content:space-between;font-size:8.5px;color:var(--muted);margin-bottom:3px;"><span>3 · 11:25–12:55</span><span>Лекция</span></div><div class="sp-row-title">МДК.03.01 Моделир. и анализ ПО</div><div class="sp-row-sub">Морозова И.А. · ауд. 2-118</div></div>
+            <div class="sp-row"><div style="display:flex;justify-content:space-between;font-size:8.5px;color:var(--muted);margin-bottom:3px;"><span>4 · 13:20–14:50</span><span>Семинар</span></div><div class="sp-row-title">Теория вероятностей</div><div class="sp-row-sub">Фролова И.В. · ауд. 2-121</div></div>
+            <div class="sp-row"><div style="display:flex;justify-content:space-between;font-size:8.5px;color:var(--muted);margin-bottom:3px;"><span>5 · 15:05–16:35</span><span>Семинар</span></div><div class="sp-row-title">МДК.03.01 Моделир. и анализ ПО</div><div class="sp-row-sub">Морозова И.А. · ауд. 2-200</div></div>
+            <div class="sp-nav">
+              <div class="sp-nav-item"><span>🏠</span><span>Главная</span></div>
+              <div class="sp-nav-item on"><span>📅</span><span>Пары</span></div>
+              <div class="sp-nav-item"><span>📋</span><span>План</span></div>
+              <div class="sp-nav-item"><span>📄</span><span>Записи</span></div>
+              <div class="sp-nav-item"><span>🤖</span><span>AI</span></div>
+            </div>
+          </div>
+
+          <!-- Tasks -->
+          <div class="sp-screen" id="sp-tasks">
+            <div class="sp-title">Мои задачи</div>
+            <div class="sp-search">🔍 <span>Найти задачу...</span></div>
+            <div style="margin-bottom:8px;">
+              <span class="sp-chip on" style="background:rgba(124,58,237,.2);border-color:rgba(139,92,246,.5);color:#fff;">Все</span>
+              <span class="sp-chip">✓ Выполненные</span>
+              <span class="sp-chip">Запланированные</span>
+            </div>
+            <div style="background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.25);border-radius:9px;padding:8px 10px;font-size:10px;color:var(--p5);margin-bottom:8px;">✦ Получить AI-совет</div>
+            <div class="sp-row" style="border-left:3px solid var(--p3);display:flex;align-items:center;justify-content:space-between;"><div><div class="sp-row-title">Сдать курсовую по СУБД</div><div class="sp-row-sub">учёба · без срока</div></div><span style="font-size:10px;color:var(--muted2);">▶ ✏</span></div>
+            <div class="sp-row" style="border-left:3px solid var(--p4);display:flex;align-items:center;justify-content:space-between;opacity:.6;"><div><div class="sp-row-title">Лабораторная №3</div><div class="sp-row-sub">учёба · 10.04</div></div><span style="font-size:10px;color:var(--muted2);">▶ ✏</span></div>
+            <div class="sp-nav">
+              <div class="sp-nav-item on"><span>🏠</span><span>Главная</span></div>
+              <div class="sp-nav-item"><span>📅</span><span>Пары</span></div>
+              <div class="sp-nav-item"><span>📋</span><span>План</span></div>
+              <div class="sp-nav-item"><span>📄</span><span>Записи</span></div>
+              <div class="sp-nav-item"><span>🤖</span><span>AI</span></div>
+            </div>
+          </div>
+
+          <!-- AI -->
+          <div class="sp-screen" id="sp-ai">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div style="width:28px;height:28px;background:var(--g-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">✦</div>
+              <div><div style="font-size:13px;font-weight:700;color:var(--text);">TimeFlow AI</div><div style="font-size:9px;color:#4ade80;">● онлайн</div></div>
+            </div>
+            <div class="sp-bubble">Привет! Расскажи, что нужно сделать — я создам задачи сам.</div>
+            <div style="display:flex;align-items:flex-end;gap:6px;justify-content:flex-end;margin-bottom:8px;">
+              <div style="background:var(--p2);border-radius:10px 10px 2px 10px;padding:9px 11px;font-size:10px;color:#fff;max-width:80%;">Сдать лабу по базам данных до пятницы</div>
+            </div>
+            <div class="sp-bubble" style="margin-left:32px;">Создала задачу «Лабораторная по БД» с дедлайном 11.04.2026 ✓</div>
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:7px 12px;margin-top:auto;">
+              <span style="font-size:13px;color:var(--muted);">🎤</span>
+              <span style="font-size:10px;color:var(--muted2);flex:1;">Сообщение...</span>
+              <div style="width:22px;height:22px;background:var(--p2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">↑</div>
+            </div>
+            <div class="sp-nav">
+              <div class="sp-nav-item"><span>🏠</span><span>Главная</span></div>
+              <div class="sp-nav-item"><span>📅</span><span>Пары</span></div>
+              <div class="sp-nav-item"><span>📋</span><span>План</span></div>
+              <div class="sp-nav-item"><span>📄</span><span>Записи</span></div>
+              <div class="sp-nav-item on"><span>🤖</span><span>AI</span></div>
+            </div>
+          </div>
+
+          <!-- Collab -->
+          <div class="sp-screen" id="sp-collab">
+            <div style="text-align:center;margin-bottom:14px;">
+              <div style="width:40px;height:40px;background:var(--g-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 6px;">👥</div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);">Совместный режим</div>
+              <div style="font-size:10px;color:var(--muted);">Создай или присоединись</div>
+            </div>
+            <div class="sp-row" style="margin-bottom:8px;">
+              <div class="sp-row-title">+ Создать комнату</div>
+              <div class="sp-row-sub">Поделись кодом с другом</div>
+              <div style="background:var(--p2);border-radius:7px;padding:6px;font-size:10px;color:#fff;text-align:center;margin-top:7px;font-weight:600;">Создать</div>
+            </div>
+            <div class="sp-row">
+              <div class="sp-row-title">→ Присоединиться</div>
+              <div class="sp-row-sub">Введи код комнаты</div>
+              <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:6px 10px;font-size:10px;color:var(--muted2);margin-top:7px;margin-bottom:5px;">XXXXXX</div>
+              <div style="background:rgba(255,255,255,.07);border-radius:7px;padding:6px;font-size:10px;color:var(--muted);text-align:center;">Войти</div>
+            </div>
+            <div class="sp-nav">
+              <div class="sp-nav-item on"><span>🏠</span><span>Главная</span></div>
+              <div class="sp-nav-item"><span>📅</span><span>Пары</span></div>
+              <div class="sp-nav-item"><span>📋</span><span>План</span></div>
+              <div class="sp-nav-item"><span>📄</span><span>Записи</span></div>
+              <div class="sp-nav-item"><span>🤖</span><span>AI</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-tag">Поддерживаемые вузы</div>
+  <h2>Работает с твоим университетом</h2>
+  <p class="section-sub">TimeFlow знает расписания двух университетов Новосибирска и обновляет их автоматически.</p>
+  <div class="unis-grid reveal">
+    <div class="uni-chip">НГУЭУ<small>Нархоз</small></div>
+    <div class="uni-chip">НГТУ<small>Политех</small></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<section id="faq" class="faq-section">
+  <div class="section-tag">FAQ</div>
+  <h2>Частые вопросы</h2>
+  <p class="section-sub">Если что-то непонятно — пиши нам в Telegram, отвечаем быстро.</p>
+  <div class="faq-list reveal">
+    <div class="faq-item"><div class="faq-q">Приложение бесплатное?<div class="faq-icon">+</div></div><div class="faq-a">Да, TimeFlow полностью бесплатен. Никаких платных подписок, скрытых платежей и рекламы нет и не планируется.</div></div>
+    <div class="faq-item"><div class="faq-q">Как приложение получает расписание?<div class="faq-icon">+</div></div><div class="faq-a">TimeFlow автоматически парсит официальные сайты университетов и обновляет расписание в реальном времени. Ты просто выбираешь свой вуз и группу — остальное приложение делает само.</div></div>
+    <div class="faq-item"><div class="faq-q">Что такое совместный режим?<div class="faq-icon">+</div></div><div class="faq-a">Совместный режим позволяет создавать общие списки задач с одногруппниками. Видно кто над чем работает прямо сейчас, есть push-уведомления об изменениях.</div></div>
+    <div class="faq-item"><div class="faq-q">ИИ-ассистент работает офлайн?<div class="faq-icon">+</div></div><div class="faq-a">Нет, ИИ-ассистент требует интернет-соединения — он обращается к Gemini API через облако. Задачи и расписание работают офлайн.</div></div>
+    <div class="faq-item"><div class="faq-q">Мой университет не поддерживается. Когда добавите?<div class="faq-icon">+</div></div><div class="faq-a">Напиши нам в Telegram — мы рассматриваем каждый запрос. Сейчас поддерживаются НГУЭУ и НГТУ. Список планируется расширять.</div></div>
+    <div class="faq-item"><div class="faq-q">Приложение только для Android?<div class="faq-icon">+</div></div><div class="faq-a">Сейчас да — TimeFlow написан на Kotlin + Jetpack Compose и доступен только для Android. Версия для iOS пока не планируется.</div></div>
+  </div>
+</section>
+
+<section id="download" class="dl-section">
+  <div class="dl-card reveal">
+    <h2>Скачай TimeFlow</h2>
+    <p>Бесплатно. Только Android. Без рекламы.</p>
+    <div class="dl-btns">
+      <a href="https://github.com/Sanerkaa/timeflow-site/releases/download/v1.0/TimeFlow.apk" download="TimeFlow.apk" class="btn-store">
+        <span class="btn-store-icon">📦</span>
+        <span class="btn-store-text"><span class="btn-store-sub">Прямая загрузка</span><span class="btn-store-name">APK файл</span></span>
+      </a>
+      <a href="https://t.me/TimeFlowUpdater_bot" target="_blank" class="btn-store">
+        <span class="btn-store-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.93 6.677l-1.684 7.927c-.126.574-.46.713-.932.444l-2.58-1.9-1.244 1.197c-.138.138-.254.254-.52.254l.185-2.63 4.793-4.33c.208-.185-.046-.287-.323-.102L7.66 14.39l-2.53-.79c-.55-.172-.56-.55.115-.815l9.9-3.815c.457-.167.857.1.785.707z" fill="#a78bfa"/></svg></span>
+        <span class="btn-store-text"><span class="btn-store-sub">Обновления в</span><span class="btn-store-name">Telegram боте</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="section-tag">Контакты</div>
+  <h2>Связаться с нами</h2>
+  <p class="section-sub">Нашёл баг? Хочешь новую функцию? Пиши — отвечаем быстро.</p>
+  <div class="contact-grid reveal">
+    <a href="https://t.me/TimeFlowUpdater_bot" target="_blank" class="contact-card">
+      <span class="contact-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.93 6.677l-1.684 7.927c-.126.574-.46.713-.932.444l-2.58-1.9-1.244 1.197c-.138.138-.254.254-.52.254l.185-2.63 4.793-4.33c.208-.185-.046-.287-.323-.102L7.66 14.39l-2.53-.79c-.55-.172-.56-.55.115-.815l9.9-3.815c.457-.167.857.1.785.707z" fill="#a78bfa"/></svg></span>
+      <span class="contact-label">Telegram бот</span>
+      <span class="contact-val">@TimeFlowUpdater_bot</span>
+    </a>
+    <a href="mailto:timeflow.no.reply@gmail.com" class="contact-card">
+      <span class="contact-icon">✉️</span>
+      <span class="contact-label">Email</span>
+      <span class="contact-val">timeflow.no.reply@gmail.com</span>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 TimeFlow. <span>Сделано для студентов Новосибирска.</span></p>
+  <p><span>Kotlin · Jetpack Compose · Firebase · Supabase</span></p>
+  <p style="width:100%;text-align:center;margin-top:8px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted2);">
+    Разработано с ♥ <a href="https://github.com/Sanerkaa" target="_blank" style="color:var(--p4);text-decoration:none;font-weight:600;transition:color .2s;" onmouseover="this.style.color='var(--p5)'" onmouseout="this.style.color='var(--p4)'">Sanerka</a>
+  </p>
+</footer>
+
+<script>
+function showScreen(name){document.querySelectorAll('.p-screen').forEach(s=>s.classList.remove('active'));document.getElementById('ps-'+name).classList.add('active')}
+
+// ── Анимированные цифры ──
+function animateCount(el){
+  const target=parseInt(el.dataset.count);
+  const suffix=el.dataset.suffix||'';
+  const dur=1600;const start=performance.now();
+  const easeOut=t=>1-Math.pow(1-t,3);
+  function tick(now){
+    const t=Math.min((now-start)/dur,1);
+    const val=Math.round(easeOut(t)*target);
+    el.textContent=val+suffix;
+    if(t<1)requestAnimationFrame(tick);
+    else el.textContent=target+suffix;
+  }
+  requestAnimationFrame(tick);
+}
+const statsObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){animateCount(e.target);statsObs.unobserve(e.target)}});
+},{threshold:.5});
+document.querySelectorAll('.ss-num[data-count]').forEach(el=>statsObs.observe(el));
+
+// ── Spotlight scroll ──
+const sfeatures=document.querySelectorAll('.sfeature');
+if(sfeatures.length){
+  const spSection=document.getElementById('spotlight');
+  const spPhone=document.getElementById('spPhone');
+  function setSpotlight(idx){
+    sfeatures.forEach((f,i)=>{
+      f.classList.toggle('active',i===idx);
+    });
+    const screenId=sfeatures[idx].dataset.screen;
+    document.querySelectorAll('.sp-screen').forEach(s=>s.classList.remove('active'));
+    const sc=document.getElementById(screenId);
+    if(sc)sc.classList.add('active');
+  }
+  window.addEventListener('scroll',()=>{
+    if(!spSection)return;
+    const r=spSection.getBoundingClientRect();
+    const progress=Math.max(0,Math.min(1,(-r.top)/(r.height-window.innerHeight*0.8)));
+    const idx=Math.min(sfeatures.length-1,Math.floor(progress*sfeatures.length));
+    setSpotlight(idx);
+  },{passive:true});
+}
+
+// ── 3D tilt на телефоне ──
+const phoneEl=document.querySelector('.mockup-phone');
+if(phoneEl){
+  const wrap=phoneEl.closest('.mockup-center')||phoneEl.parentElement;
+  wrap.addEventListener('mousemove',e=>{
+    const r=phoneEl.getBoundingClientRect();
+    const cx=r.left+r.width/2, cy=r.top+r.height/2;
+    const dx=(e.clientX-cx)/r.width, dy=(e.clientY-cy)/r.height;
+    phoneEl.style.transform=`perspective(1000px) rotateY(${dx*14}deg) rotateX(${-dy*10}deg) scale(1.02)`;
+    phoneEl.style.boxShadow=`${-dx*30}px ${-dy*20}px 80px rgba(0,0,0,.8), ${dx*10}px ${dy*8}px 60px rgba(124,58,237,.25)`;
+  });
+  wrap.addEventListener('mouseleave',()=>{
+    phoneEl.style.transition='transform .6s cubic-bezier(.23,1,.32,1), box-shadow .6s ease';
+    phoneEl.style.transform='perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1)';
+    phoneEl.style.boxShadow='';
+    setTimeout(()=>phoneEl.style.transition='',600);
+  });
+  wrap.addEventListener('mouseenter',()=>{phoneEl.style.transition='none'});
+}
+document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{const item=q.parentElement,isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!isOpen)item.classList.add('open')})});
+const scrollBar=document.getElementById('scrollBar');
+window.addEventListener('scroll',()=>{scrollBar.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%'},{passive:true});
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+document.querySelectorAll('.feat-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(700px) rotateY(${x*8}deg) rotateX(${-y*8}deg)`;card.style.boxShadow=`${-x*10}px ${-y*10}px 28px rgba(91,33,182,.12)`});
+  card.addEventListener('mouseleave',()=>{card.style.transform='';card.style.boxShadow=''})
+});
+document.querySelectorAll('.btn-primary,.btn-ghost').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{const r=btn.getBoundingClientRect();btn.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.22}px,${(e.clientY-(r.top+r.height/2))*.22}px)`});
+  btn.addEventListener('mouseleave',()=>{btn.style.transition='transform .45s cubic-bezier(.23,1,.32,1)';btn.style.transform='';setTimeout(()=>btn.style.transition='',450)})
+});
+let lt=0;const COLS=['#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#5b21b6'];
+document.addEventListener('mousemove',e=>{const now=Date.now();if(now-lt<42)return;lt=now;const p=document.createElement('div'),sz=2.5+Math.random()*5;Object.assign(p.style,{position:'fixed',left:e.clientX+'px',top:e.clientY+'px',width:sz+'px',height:sz+'px',borderRadius:'50%',background:COLS[Math.floor(Math.random()*COLS.length)],pointerEvents:'none',zIndex:'9998',opacity:'.65',transform:'translate(-50%,-50%)',transition:'opacity .55s ease,transform .55s ease'});document.body.appendChild(p);requestAnimationFrame(()=>{p.style.opacity='0';p.style.transform=`translate(calc(-50% + ${(Math.random()-.5)*55}px),calc(-50% + ${-18-Math.random()*38}px)) scale(0.15)`});setTimeout(()=>p.remove(),650)});
+const spotlight=document.createElement('div');spotlight.style.cssText='position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9990;transition:opacity .3s ease;';document.body.appendChild(spotlight);
+document.addEventListener('mousemove',e=>{spotlight.style.background=`radial-gradient(650px circle at ${e.clientX}px ${e.clientY}px, rgba(91,33,182,.07), transparent 60%)`});
+document.addEventListener('mouseleave',()=>spotlight.style.opacity='0');
+document.addEventListener('mouseenter',()=>spotlight.style.opacity='1');
+if(window.matchMedia("(pointer: fine)").matches){
+  const cursor=document.createElement('div');cursor.innerHTML='<div id="cd"></div><div id="cr"></div>';cursor.style.cssText='position:fixed;top:0;left:0;pointer-events:none;z-index:9999';document.body.appendChild(cursor);
+  const cstyle=document.createElement('style');cstyle.textContent=`*{cursor:none!important}#cd{position:absolute;width:6px;height:6px;border-radius:50%;background:#9B7EC8;transform:translate(-50%,-50%);transition:transform .1s,background .2s}#cr{position:absolute;width:36px;height:36px;border-radius:50%;border:1.5px solid rgba(155,126,200,0.5);transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s}body.hov #cr{width:52px;height:52px;border-color:rgba(155,126,200,0.8)}body.clk #cd{transform:translate(-50%,-50%) scale(2.5);background:#C4AADF}body.clk #cr{width:18px;height:18px}`;document.head.appendChild(cstyle);
+  let mx=0,my=0,rx=0,ry=0;const cd=document.getElementById('cd'),cr=document.getElementById('cr');
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cd.style.left=mx+'px';cd.style.top=my+'px'});
+  (function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;cr.style.left=rx+'px';cr.style.top=ry+'px';requestAnimationFrame(a)})();
+  document.querySelectorAll('a,button,.faq-q,.feat-card,.pnav-item,.picon-btn,.uni-chip,.stat-item,.pfab').forEach(el=>{el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'))});
+  document.addEventListener('mousedown',()=>document.body.classList.add('clk'));
+  document.addEventListener('mouseup',()=>document.body.classList.remove('clk'));
+}
+</script>
+</body>
+</html>
