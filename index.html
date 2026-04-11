@@ -58,7 +58,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:66px;background:rgba(9,9,15,.8);backdrop-filter:blur(30px) saturate(1.5);border-bottom:1px solid var(--border)}
 .nav-logo{font-family:var(--font-h);font-size:21px;font-weight:800;letter-spacing:-.6px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:10px}
 .nav-logo em{font-style:normal;background:var(--g-soft);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.logo-icon{width:34px;height:34px;border-radius:10px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-a)}
+.logo-icon{width:34px;height:34px;border-radius:10px;overflow:hidden;flex-shrink:0;}
 .logo-icon img{width:34px;height:34px;display:block;object-fit:cover}
 .nav-links{display:flex;align-items:center;gap:2px;list-style:none}
 .nav-links a{color:var(--muted);text-decoration:none;font-size:14px;padding:7px 15px;border-radius:10px;transition:color .2s,background .2s;font-weight:500}
@@ -265,10 +265,10 @@ footer p span{color:var(--muted)}
 <nav>
   <a href="#" class="nav-logo">
     <div class="logo-icon"><img src="icon.webp" alt="TimeFlow"/></div>
-Time<em>Flow</em>
+    Time<em>Flow</em>
   </a>
   <ul class="nav-links">
-    <li><a href="#spotlight">Функции</a></li>
+    <li><a href="#spotlight ">Функции</a></li>
     <li><a href="#faq">FAQ</a></li>
     <li><a href="#contact">Контакты</a></li>
   </ul>
@@ -276,12 +276,16 @@ Time<em>Flow</em>
 </nav>
 
 <section class="hero">
-  <div class="hero-tag"><span class="tag-dot"></span>Для студентов Новосибирска</div>
   <h1>Учись умнее.<br/>Успевай <em>больше.</em></h1>
   <p class="hero-sub">TimeFlow — расписание, задачи и ИИ-ассистент в одном приложении. Бесплатно, без рекламы.</p>
-  <div class="hero-cta">
-    <a href="#download" class="btn btn-primary btn-dl">↓ Скачать бесплатно</a>
-    <a href="#features" class="btn btn-ghost btn-dl">Узнать больше →</a>
+ <div class="hero-cta">
+  <a href="#download" class="btn btn-primary btn-dl">↓ Скачать бесплатно</a>
+  <a href="#spotlight " class="btn btn-ghost btn-dl">Узнать больше →</a>
+</div>
+  <div class="hero-stats">
+    <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">университета</div></div>
+    <div class="stat-item"><div class="stat-num">ИИ</div><div class="stat-label">ассистент</div></div>
+    <div class="stat-item"><div class="stat-num">0 ₽</div><div class="stat-label">бесплатно</div></div>
   </div>
 </section>
 
@@ -314,7 +318,7 @@ Time<em>Flow</em>
               <span style="font-size:13px;">✦</span> Получить AI-совет по задачам
             </div>
             <div class="ptask" style="border-left:3px solid var(--p3);display:flex;align-items:center;justify-content:space-between;">
-              <div><div class="ptask-text">привет</div><div class="ptask-meta">учёба · без срока</div></div>
+              <div><div class="ptask-text">Сделать проект по математике</div><div class="ptask-meta">учёба · 11.03.2026</div></div>
               <div style="display:flex;gap:6px;font-size:12px;color:var(--muted2);">▶ 🖼 ✏ ▾</div>
             </div>
           </div>
@@ -653,6 +657,13 @@ Time<em>Flow</em>
   </div>
 </div>
 
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="ss-item"><span class="ss-num" data-count="2" data-suffix="">2</span><span class="ss-label">Университета</span></div>
+  <div class="ss-item"><span class="ss-num" data-count="6" data-suffix="">6</span><span class="ss-label">Функций в приложении</span></div>
+  <div class="ss-item"><span class="ss-num" data-count="100" data-suffix="%">100%</span><span class="ss-label">Бесплатно</span></div>
+  <div class="ss-item"><span class="ss-num" data-count="0" data-suffix=" ₽">0 ₽</span><span class="ss-label">Без подписки</span></div>
+</div>
 
 
 <!-- SPOTLIGHT -->
@@ -750,17 +761,22 @@ Time<em>Flow</em>
               <div style="width:28px;height:28px;background:var(--g-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">✦</div>
               <div><div style="font-size:13px;font-weight:700;color:var(--text);">TimeFlow AI</div><div style="font-size:9px;color:#4ade80;">● онлайн</div></div>
             </div>
-            <div class="sp-bubble">Привет! Расскажи, что нужно сделать — я создам задачи сам.</div>
+            
+            <div class="sp-bubble" style="width: fit-content; align-self: flex-start; margin-left: 0;">Привет! Расскажи, что нужно сделать — я создам задачи сам.</div>
+            
             <div style="display:flex;align-items:flex-end;gap:6px;justify-content:flex-end;margin-bottom:8px;">
               <div style="background:var(--p2);border-radius:10px 10px 2px 10px;padding:9px 11px;font-size:10px;color:#fff;max-width:80%;">Сдать лабу по базам данных до пятницы</div>
             </div>
-            <div class="sp-bubble" style="margin-left:32px;">Создала задачу «Лабораторная по БД» с дедлайном 11.04.2026 ✓</div>
-            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:7px 12px;margin-top:auto;">
+            
+            <div class="sp-bubble" style="width: fit-content; align-self: flex-start; margin-left: 0;">Создала задачу «Лабораторная по БД» с дедлайном 11.04.2026 ✓</div>
+            
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:7px 12px; margin-top: auto; margin-bottom: 8px;">
               <span style="font-size:13px;color:var(--muted);">🎤</span>
               <span style="font-size:10px;color:var(--muted2);flex:1;">Сообщение...</span>
               <div style="width:22px;height:22px;background:var(--p2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;">↑</div>
             </div>
-            <div class="sp-nav">
+
+            <div class="sp-nav" style="margin-top: 0;">
               <div class="sp-nav-item"><span>🏠</span><span>Главная</span></div>
               <div class="sp-nav-item"><span>📅</span><span>Пары</span></div>
               <div class="sp-nav-item"><span>📋</span><span>План</span></div>
@@ -768,7 +784,6 @@ Time<em>Flow</em>
               <div class="sp-nav-item on"><span>🤖</span><span>AI</span></div>
             </div>
           </div>
-
           <!-- Collab -->
           <div class="sp-screen" id="sp-collab">
             <div style="text-align:center;margin-bottom:14px;">
@@ -863,10 +878,10 @@ Time<em>Flow</em>
 </section>
 
 <footer>
-  <p>© 2026 TimeFlow. <span>Сделано для студентов Новосибирска.</span></p>
+  <p>© 2026 TimeFlow.</span></p>
   <p><span>Kotlin · Jetpack Compose · Firebase · Supabase</span></p>
   <p style="width:100%;text-align:center;margin-top:8px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted2);">
-    Разработано с ♥ <a href="https://github.com/Sanerkaa" target="_blank" style="color:var(--p4);text-decoration:none;font-weight:600;transition:color .2s;" onmouseover="this.style.color='var(--p5)'" onmouseout="this.style.color='var(--p4)'">Sanerka</a>
+    Разработано с   <a href="https://github.com/Sanerkaa" target="_blank" style="color:var(--p4);text-decoration:none;font-weight:600;transition:color .2s;" onmouseover="this.style.color='var(--p5)'" onmouseout="this.style.color='var(--p4)'">Sanerka</a>
   </p>
 </footer>
 
