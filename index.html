@@ -976,8 +976,20 @@ footer p span{color:var(--muted)}
           </div>
 
           <!-- Tasks -->
-          <div class="sp-screen" id="sp-tasks">
-            <div class="sp-title">Мои задачи</div>
+<div class="sp-screen" id="sp-tasks" style="position:relative;">
+            
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+              <div>
+                <div class="sp-title" style="margin-bottom:2px;">Мои задачи</div>
+                <div style="font-size:9.5px;color:var(--muted);padding:0 2px;">На сегодня</div>
+              </div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:10px;">📊</div>
+                <div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:10px;">👥</div>
+                <div style="width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:10px;">⚙️</div>
+              </div>
+            </div>
+
             <div class="sp-search">🔍 <span>Найти задачу...</span></div>
             <div style="margin-bottom:8px;">
               <span class="sp-chip on" style="background:rgba(124,58,237,.2);border-color:rgba(139,92,246,.5);color:#fff;">Все</span>
@@ -985,8 +997,15 @@ footer p span{color:var(--muted)}
               <span class="sp-chip">Запланированные</span>
             </div>
             <div style="background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.25);border-radius:9px;padding:8px 10px;font-size:10px;color:var(--p5);margin-bottom:8px;">✦ Получить AI-совет</div>
+            
             <div class="sp-row" style="border-left:3px solid var(--p3);display:flex;align-items:center;justify-content:space-between;"><div><div class="sp-row-title">Сдать курсовую по СУБД</div><div class="sp-row-sub">учёба · без срока</div></div><span style="font-size:10px;color:var(--muted2);">▶ ✏</span></div>
             <div class="sp-row" style="border-left:3px solid var(--p4);display:flex;align-items:center;justify-content:space-between;opacity:.6;"><div><div class="sp-row-title">Лабораторная №3</div><div class="sp-row-sub">учёба · 10.04</div></div><span style="font-size:10px;color:var(--muted2);">▶ ✏</span></div>
+
+            <div style="position:absolute;bottom:50px;right:4px;display:flex;flex-direction:column;gap:6px;align-items:center;">
+              <div style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.1);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:11px;">🎤</div>
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--p2);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.4);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300;">+</div>
+            </div>
+
             <div class="sp-nav">
               <div class="sp-nav-item on"><span>🏠</span><span>Главная</span></div>
               <div class="sp-nav-item"><span>📅</span><span>Пары</span></div>
@@ -995,7 +1014,6 @@ footer p span{color:var(--muted)}
               <div class="sp-nav-item"><span>🤖</span><span>AI</span></div>
             </div>
           </div>
-
           <!-- AI -->
           <div class="sp-screen" id="sp-ai">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
