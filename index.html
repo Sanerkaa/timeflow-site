@@ -315,8 +315,8 @@ footer p span{color:var(--muted)}
             </div>
           </div>
           <div class="pfab-wrap">
-            <button class="pfab pfab-mic">🎤</button>
-            <button class="pfab pfab-plus" style="font-size:20px;font-weight:300;">+</button>
+            <button class="pfab pfab-mic" onclick="showScreen('voice')">🎤</button>
+            <button class="pfab pfab-plus" style="font-size:20px;font-weight:300;" onclick="showScreen('addtask')">+</button>
           </div>
           <div class="phone-nav-wrap">
             <div class="phone-nav">
@@ -552,7 +552,7 @@ footer p span{color:var(--muted)}
                   <div style="flex:1;text-align:center;padding:4px 2px;border-radius:7px;font-size:10px;color:var(--muted);">Как в системе</div>
                 </div>
               </div>
-              <div style="padding:11px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06);">
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;" onclick="showScreen('profile')">
                 <span style="font-size:13px;">👤</span>
                 <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Профиль</div><div style="font-size:10px;color:var(--muted);">Имя, фото аккаунта</div></div>
                 <span style="color:var(--muted);font-size:16px;">›</span>
@@ -567,12 +567,12 @@ footer p span{color:var(--muted)}
             </div>
             <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--p4);margin-bottom:7px;">ИНСТРУМЕНТЫ</div>
             <div style="background:rgba(255,255,255,.04);border-radius:13px;border:1px solid rgba(255,255,255,.06);overflow:hidden;margin-bottom:10px;">
-              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.06);">
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;" onclick="showScreen('widget')">
                 <div style="width:28px;height:28px;background:rgba(251,146,60,.14);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">📊</div>
                 <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Виджет расписания</div><div style="font-size:10px;color:var(--muted);">Настроить цвета и отображение</div></div>
                 <span style="color:var(--muted);font-size:16px;">›</span>
               </div>
-              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;">
+              <div style="padding:11px 13px;display:flex;align-items:center;gap:9px;cursor:pointer;" onclick="showScreen('focus')">
                 <div style="width:28px;height:28px;background:rgba(34,197,94,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">🎯</div>
                 <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:var(--text);">Режим фокусировки</div><div style="font-size:10px;color:var(--muted);">Заблокировать отвлекающие</div></div>
                 <span style="color:var(--muted);font-size:16px;">›</span>
@@ -627,6 +627,262 @@ footer p span{color:var(--muted)}
               <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
               <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
               <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ДОБАВИТЬ ЗАДАЧУ -->
+        <div class="p-screen" id="ps-addtask">
+          <div class="pheader" style="margin-bottom:6px;">
+            <div class="ptitle">Новая задача</div>
+            <button onclick="showScreen('tasks')" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:var(--text2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+          </div>
+          <div class="px" style="flex:1;overflow-y:auto;padding-bottom:8px;">
+            <div style="border-bottom:1px solid rgba(255,255,255,.1);padding:10px 0;margin-bottom:8px;">
+              <div style="font-size:15px;font-weight:600;color:rgba(255,255,255,.25);">Название задачи</div>
+            </div>
+            <div style="font-size:12px;color:rgba(255,255,255,.2);margin-bottom:14px;">Добавить описание...</div>
+            <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 12px;margin-bottom:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--text);">🖼 Фотографии</div>
+                <span style="color:var(--muted);font-size:13px;">∧</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-bottom:6px;">
+                <div style="flex:1;background:rgba(180,60,60,.25);border-radius:8px;padding:7px;text-align:center;font-size:10px;color:#f87171;font-weight:600;">📷 Снять</div>
+                <div style="flex:1;background:rgba(255,255,255,.06);border-radius:8px;padding:7px;text-align:center;font-size:10px;color:var(--text2);font-weight:600;border:1px solid rgba(255,255,255,.1);">🖼 Галерея</div>
+              </div>
+              <div style="font-size:10px;color:var(--muted2);">Нет фотографий</div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 12px;margin-bottom:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--text);">🎤 Аудио заметки</div>
+                <span style="color:var(--muted);font-size:13px;">∧</span>
+              </div>
+              <div style="display:flex;gap:6px;margin-bottom:6px;">
+                <div style="flex:1;background:rgba(255,255,255,.08);border-radius:8px;padding:7px;text-align:center;font-size:10px;color:var(--text2);font-weight:600;">⏺ Запись</div>
+                <div style="flex:1;background:rgba(255,255,255,.06);border-radius:8px;padding:7px;text-align:center;font-size:10px;color:var(--text2);font-weight:600;border:1px solid rgba(255,255,255,.1);">📁 Импорт</div>
+              </div>
+              <div style="font-size:10px;color:var(--muted2);">Нет аудиозаписей</div>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">Параметры задачи</div>
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px 12px;margin-bottom:6px;border:1px solid rgba(255,255,255,.06);">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--p4);margin-bottom:7px;">🏷 Категория</div>
+              <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--text);margin-bottom:6px;">учёба</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                <span style="background:var(--p2);border-radius:8px;padding:3px 10px;font-size:10px;color:#fff;">учёба</span>
+                <span style="border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px 10px;font-size:10px;color:var(--muted);">лекция</span>
+                <span style="border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px 10px;font-size:10px;color:var(--muted);">семинар</span>
+                <span style="border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px 10px;font-size:10px;color:var(--muted);">работа</span>
+                <span style="border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px 10px;font-size:10px;color:var(--muted);">личное</span>
+              </div>
+            </div>
+          </div>
+          <div class="px" style="padding-bottom:14px;flex-shrink:0;">
+            <div onclick="showScreen('tasks')" style="background:rgba(167,139,250,.25);border-radius:14px;padding:13px;text-align:center;font-size:13px;font-weight:700;color:var(--p5);cursor:pointer;">Сохранить задачу</div>
+          </div>
+        </div>
+
+        <!-- ГОЛОСОВАЯ ЗАДАЧА -->
+        <div class="p-screen" id="ps-voice">
+          <div class="pheader">
+            <div><div class="ptitle">Мои задачи</div><div class="psub">На сегодня</div></div>
+            <div class="pheader-icons">
+              <button class="picon-btn" onclick="showScreen('stats')">📊</button>
+              <button class="picon-btn" onclick="showScreen('collab')">👥</button>
+              <button class="picon-btn" onclick="showScreen('settings')">⚙️</button>
+            </div>
+          </div>
+          <div class="px" style="flex:1;">
+            <div class="psearch">🔍 <span>Найти задачу...</span></div>
+            <div class="pchips">
+              <div class="pchip on">Все</div>
+              <div class="pchip">✓ Выполненные</div>
+              <div class="pchip">Запланированные</div>
+            </div>
+            <div class="pchip" style="width:fit-content;margin-bottom:8px;">учёба</div>
+            <div style="background:rgba(124,58,237,.12);border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:9px 12px;font-size:11px;color:var(--p5);margin-bottom:9px;display:flex;align-items:center;gap:6px;">
+              <span style="font-size:13px;">✦</span> Получить AI-совет по задачам
+            </div>
+<div class="ptask" style="border-left:3px solid var(--p3);display:flex;align-items:center;justify-content:space-between;">
+              <div><div class="ptask-text">Сделать проект по математике</div><div class="ptask-meta">учёба · 11.03.2026</div></div>
+              <div style="display:flex;gap:6px;font-size:12px;color:var(--muted2);">▶ 🖼 ✏ ▾</div>
+            </div>
+          </div>
+          <!-- Нижний шит голосовой записи -->
+          <div style="background:#111122;border-radius:18px 18px 0 0;padding:16px 14px 20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.08);">
+            <div style="width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 14px;"></div>
+            <div style="text-align:center;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;">Голосовая задача</div>
+            <div style="display:flex;justify-content:center;align-items:flex-end;gap:2px;height:32px;margin-bottom:16px;">
+              <div style="width:3px;background:var(--p3);border-radius:2px;height:40%;"></div>
+              <div style="width:3px;background:var(--p3);border-radius:2px;height:65%;"></div>
+              <div style="width:3px;background:var(--p3);border-radius:2px;height:90%;"></div>
+              <div style="width:3px;background:var(--p3);border-radius:2px;height:55%;"></div>
+              <div style="width:3px;background:var(--p3);border-radius:2px;height:80%;"></div>
+              <div style="width:3px;background:var(--p4);border-radius:2px;height:100%;"></div>
+              <div style="width:3px;background:var(--p4);border-radius:2px;height:70%;"></div>
+              <div style="width:3px;background:var(--p3);border-radius:2px;height:45%;"></div>
+              <div style="width:3px;background:var(--p3);border-radius:2px;height:60%;"></div>
+            </div>
+            <div style="display:flex;justify-content:center;">
+              <button onclick="showScreen('tasks')" style="width:44px;height:44px;border-radius:50%;background:rgba(239,68,68,.25);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#f87171;">■</button>
+            </div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- РЕЖИМ ФОКУСА -->
+        <div class="p-screen" id="ps-focus">
+          <div style="padding:0 14px;margin-bottom:4px;"><button onclick="showScreen('settings')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;">←</button></div>
+          <div style="text-align:center;margin-bottom:14px;">
+            <div style="width:46px;height:46px;background:var(--p2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;">🔒</div>
+            <div class="ptitle-sm">Режим фокуса</div>
+            <div class="psub">Блокировка отвлекающих приложений</div>
+          </div>
+          <div class="px" style="flex:1;overflow-y:auto;">
+            <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:11px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.06);">
+              <div style="width:30px;height:30px;background:rgba(255,255,255,.08);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">🌙</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;color:var(--text);">Фокус выключен</div>
+                <div style="font-size:10px;color:var(--muted);">Выберите приложения для блокировки</div>
+              </div>
+              <div style="width:32px;height:18px;background:rgba(255,255,255,.12);border-radius:9px;flex-shrink:0;position:relative;"><div style="width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;opacity:.4;"></div></div>
+            </div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--p4);margin-bottom:7px;">ПРИЛОЖЕНИЯ</div>
+            <div style="background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(255,255,255,.06);overflow:hidden;">
+              <div style="padding:9px 12px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.05);">
+                <div style="width:26px;height:26px;background:#1a73e8;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;">🗺</div>
+                <div style="flex:1;"><div style="font-size:11px;font-weight:600;color:var(--text);">2ГИС</div><div style="font-size:9px;color:var(--muted);">ru.dublgis.dgismobile</div></div>
+                <div style="width:28px;height:16px;background:rgba(255,255,255,.1);border-radius:8px;flex-shrink:0;"></div>
+              </div>
+              <div style="padding:9px 12px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.05);">
+                <div style="width:26px;height:26px;background:#222;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;">✦</div>
+                <div style="flex:1;"><div style="font-size:11px;font-weight:600;color:var(--text);">AI Studio</div><div style="font-size:9px;color:var(--muted);">org.chromium.webapk...</div></div>
+                <div style="width:28px;height:16px;background:rgba(255,255,255,.1);border-radius:8px;flex-shrink:0;"></div>
+              </div>
+              <div style="padding:9px 12px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.05);">
+                <div style="width:26px;height:26px;background:#e43;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;">🛍</div>
+                <div style="flex:1;"><div style="font-size:11px;font-weight:600;color:var(--text);">AliExpress</div><div style="font-size:9px;color:var(--muted);">ru.aliexpress.buyer</div></div>
+                <div style="width:28px;height:16px;background:rgba(255,255,255,.1);border-radius:8px;flex-shrink:0;"></div>
+              </div>
+              <div style="padding:9px 12px;display:flex;align-items:center;gap:9px;">
+                <div style="width:26px;height:26px;background:#c00;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:800;">64</div>
+                <div style="flex:1;"><div style="font-size:11px;font-weight:600;color:var(--text);">AIDA64</div><div style="font-size:9px;color:var(--muted);">com.finalwire.aida64</div></div>
+                <div style="width:28px;height:16px;background:rgba(255,255,255,.1);border-radius:8px;flex-shrink:0;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-nav-wrap">
+            <div class="phone-nav">
+              <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
+              <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
+              <button class="pnav-item" onclick="showScreen('plan')"><div class="pnav-dot">📋</div><span>План</span></button>
+              <button class="pnav-item" onclick="showScreen('notes')"><div class="pnav-dot">📄</div><span>Записи</span></button>
+              <button class="pnav-item" onclick="showScreen('ai')"><div class="pnav-dot">🤖</div><span>AI</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ВИДЖЕТ РАСПИСАНИЯ -->
+        <div class="p-screen" id="ps-widget">
+          <div style="padding:0 14px;margin-bottom:2px;"><button onclick="showScreen('settings')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;">←</button></div>
+          <div style="text-align:center;margin-bottom:10px;">
+            <div style="width:42px;height:42px;background:var(--p2);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 6px;">⊞</div>
+            <div class="ptitle-sm">Настройка виджета</div>
+            <div class="psub">Настройте цвета виджета</div>
+          </div>
+          <div class="px" style="flex:1;overflow-y:auto;padding-bottom:8px;">
+            <!-- Переключатель -->
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+              <button id="wt-sched" onclick="switchWidget('sched')" style="flex:1;background:var(--p2);border:none;border-radius:10px;padding:7px;font-size:11px;font-weight:600;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">📅 Расписание</button>
+              <button id="wt-tasks" onclick="switchWidget('tasks')" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">☑ Задачи</button>
+            </div>
+            <!-- Предпросмотр расписание -->
+            <div id="wp-sched" style="background:rgba(255,255,255,.06);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,.07);">
+              <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;">ПИ402/2, Сегодня</div>
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;">
+                <div style="width:20px;height:20px;background:rgba(139,92,246,.2);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--p4);">1</div>
+                <div style="font-size:10px;color:var(--muted);">8:00 – 9:30</div>
+              </div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:8px;">
+                <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;">Проектный менеджмент</div>
+                <div style="font-size:10px;color:var(--muted);margin-bottom:2px;">Семинар</div>
+                <div style="font-size:10px;color:var(--muted);">5 корпус · 5-711</div>
+              </div>
+            </div>
+            <!-- Предпросмотр задачи (скрыт) -->
+            <div id="wp-tasks" style="display:none;background:rgba(255,255,255,.06);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,.07);">
+              <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;">Мои задачи</div>
+              <div style="border-left:3px solid var(--p3);background:rgba(255,255,255,.05);border-radius:0 7px 7px 0;padding:7px 9px;margin-bottom:5px;"><div style="font-size:11px;font-weight:600;color:var(--text);">Подготовить отчёт</div><div style="font-size:9px;color:var(--muted);">учёба · сегодня</div></div>
+              <div style="border-left:3px solid var(--p4);background:rgba(255,255,255,.05);border-radius:0 7px 7px 0;padding:7px 9px;margin-bottom:5px;"><div style="font-size:11px;font-weight:600;color:var(--text);">Купить продукты</div><div style="font-size:9px;color:var(--muted);">покупки · завтра</div></div>
+              <div style="border-left:3px solid var(--p5);background:rgba(255,255,255,.05);border-radius:0 7px 7px 0;padding:7px 9px;"><div style="font-size:11px;font-weight:600;color:var(--text);">Сходить в зал</div><div style="font-size:9px;color:var(--muted);">спорт</div></div>
+            </div>
+            <!-- Табы цвета -->
+            <div style="display:flex;gap:4px;margin-bottom:8px;">
+              <div style="background:var(--p2);border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:#fff;">Фон</div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:5px 10px;font-size:10px;color:var(--muted);">Капс...</div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:5px 10px;font-size:10px;color:var(--muted);">Текст</div>
+              <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:5px 10px;font-size:10px;color:var(--muted);">Знак</div>
+            </div>
+            <!-- Цвет -->
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,.06);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div style="font-size:11px;color:var(--text2);">Выбранный цвет</div>
+                <div style="display:flex;align-items:center;gap:5px;"><div style="width:16px;height:16px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:#1C1B1F;"></div><div style="font-size:10px;color:var(--muted);">#1C1B1F</div></div>
+              </div>
+              <div style="width:100%;aspect-ratio:1;border-radius:50%;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);margin:0 auto 8px;max-width:100px;position:relative;"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:30%;height:30%;background:#1C1B1F;border-radius:50%;"></div><div style="position:absolute;top:18%;left:18%;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid rgba(0,0,0,.3);"></div></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px;"><span>Яркость</span><span>12%</span></div>
+              <div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;"><div style="height:4px;width:12%;background:rgba(255,255,255,.3);border-radius:2px;"></div></div>
+            </div>
+          </div>
+          <div class="px" style="padding-bottom:14px;flex-shrink:0;display:flex;gap:8px;">
+            <button onclick="showScreen('settings')" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;font-size:12px;color:var(--muted);cursor:pointer;">Сброс</button>
+            <button onclick="showScreen('settings')" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px;font-size:12px;color:var(--text2);cursor:pointer;">Вернуть</button>
+          </div>
+          <div class="px" style="padding-bottom:14px;flex-shrink:0;">
+            <div onclick="showScreen('settings')" style="background:rgba(167,139,250,.25);border-radius:14px;padding:11px;text-align:center;font-size:13px;font-weight:700;color:var(--p5);cursor:pointer;">✓ Сохранить</div>
+          </div>
+        </div>
+
+        <!-- ПРОФИЛЬ -->
+        <div class="p-screen" id="ps-profile">
+          <div class="px" style="padding-top:4px;margin-bottom:2px;"><button onclick="showScreen('settings')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:28px;height:28px;color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">←</button></div>
+          <div style="text-align:center;padding:10px 14px 18px;flex-shrink:0;">
+            <div style="position:relative;display:inline-block;margin-bottom:10px;">
+              <div style="width:68px;height:68px;border-radius:50%;background:var(--g-soft);border:2px solid var(--p3);display:flex;align-items:center;justify-content:center;font-size:28px;">👤</div>
+              <div style="position:absolute;bottom:2px;right:2px;width:20px;height:20px;background:rgba(100,100,150,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:1px solid rgba(255,255,255,.2);">📷</div>
+            </div>
+            <div style="font-size:15px;font-weight:700;color:var(--text);">Sanerkaa ^ ^</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:3px;">Нажми на фото, чтобы изменить</div>
+          </div>
+          <div class="px" style="flex:1;">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--p4);margin-bottom:7px;">ПРОФИЛЬ</div>
+            <div style="background:rgba(255,255,255,.04);border-radius:13px;border:1px solid rgba(255,255,255,.06);overflow:hidden;margin-bottom:10px;">
+              <div style="padding:11px 12px;display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,.05);">
+                <div style="width:28px;height:28px;background:rgba(99,102,241,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">👤</div>
+                <div style="flex:1;"><div style="font-size:10px;color:var(--muted);margin-bottom:1px;">Имя</div><div style="font-size:12px;font-weight:600;color:var(--text);">Sanerkaa ^ ^</div></div>
+                <span style="font-size:14px;color:var(--muted);">✏</span>
+              </div>
+              <div style="padding:11px 12px;display:flex;align-items:center;gap:9px;">
+                <div style="width:28px;height:28px;background:rgba(251,146,60,.18);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">🖼</div>
+                <div style="flex:1;"><div style="font-size:10px;color:var(--muted);margin-bottom:1px;">Фото профиля</div><div style="font-size:12px;font-weight:600;color:var(--text);">Выбрать из галереи</div></div>
+                <span style="font-size:16px;color:var(--muted);">›</span>
+              </div>
+            </div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--p4);margin-bottom:7px;">АККАУНТ</div>
+            <div style="background:rgba(255,255,255,.04);border-radius:13px;border:1px solid rgba(255,255,255,.06);overflow:hidden;">
+              <div style="padding:11px 12px;display:flex;align-items:center;gap:9px;">
+                <div style="width:28px;height:28px;background:rgba(239,68,68,.14);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">↪</div>
+                <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#f87171;">Выйти из аккаунта</div></div>
+                <span style="font-size:16px;color:var(--muted);">›</span>
+              </div>
             </div>
           </div>
         </div>
@@ -872,6 +1128,17 @@ footer p span{color:var(--muted)}
 
 <script>
 function showScreen(name){document.querySelectorAll('.p-screen').forEach(s=>s.classList.remove('active'));document.getElementById('ps-'+name).classList.add('active')}
+function switchWidget(tab){
+  const isSched=tab==='sched';
+  document.getElementById('wp-sched').style.display=isSched?'block':'none';
+  document.getElementById('wp-tasks').style.display=isSched?'none':'block';
+  document.getElementById('wt-sched').style.background=isSched?'var(--p2)':'rgba(255,255,255,.06)';
+  document.getElementById('wt-sched').style.color=isSched?'#fff':'var(--muted)';
+  document.getElementById('wt-sched').style.border=isSched?'none':'1px solid rgba(255,255,255,.1)';
+  document.getElementById('wt-tasks').style.background=isSched?'rgba(255,255,255,.06)':'var(--p2)';
+  document.getElementById('wt-tasks').style.color=isSched?'var(--muted)':'#fff';
+  document.getElementById('wt-tasks').style.border=isSched?'1px solid rgba(255,255,255,.1)':'none';
+}
 
 // ── Анимированные цифры ──
 function animateCount(el){
