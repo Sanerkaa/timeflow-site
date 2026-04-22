@@ -1320,6 +1320,10 @@ footer p span{color:var(--muted)}
   <div class="dl-card reveal">
     <h2>Скачай TimeFlow</h2>
     <p>Бесплатно. Только Android. Без рекламы.</p>
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-family:var(--font-h);font-size:48px;font-weight:800;background:var(--g-soft);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;" id="dl-count">0</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.5px;">скачиваний</div>
+    </div>
     <div class="dl-btns">
       <a href="https://github.com/Sanerkaa/timeflow-site/releases/download/v1.0/TimeFlow.apk" download="TimeFlow.apk" class="btn-store">
         <span class="btn-store-icon">📦</span>
@@ -1430,6 +1434,48 @@ const scrollBar=document.getElementById('scrollBar');
 window.addEventListener('scroll',()=>{scrollBar.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%'},{passive:true});
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}})},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+// Счётчик скачиваний
+function countUp(el,target,duration,isFloat){
+  const start=performance.now();
+  const update=now=>{
+    const p=Math.min((now-start)/duration,1);
+    const ease=1-Math.pow(1-p,3);
+    const val=isFloat?(ease*target).toFixed(1):Math.round(ease*target).toLocaleString('ru-RU');
+    el.textContent=val;
+    if(p<1)requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+let dlTotal=0;
+fetch('https://api.github.com/repos/Sanerkaa/timeflow-site/releases')
+  .then(r=>r.json())
+  .then(releases=>{
+    releases.forEach(rel=>{
+      (rel.assets||[]).forEach(a=>{dlTotal+=a.download_count});
+    });
+    const dlCard=document.querySelector('.dl-card');
+    if(!dlCard)return;
+    const dlObs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting){
+        countUp(document.getElementById('dl-count'),dlTotal||0,1800,false);
+        dlObs.disconnect();
+      }
+    },{threshold:.3});
+    dlObs.observe(dlCard);
+  })
+  .catch(()=>{
+    // При ошибке — показываем 0
+    const dlCard=document.querySelector('.dl-card');
+    if(dlCard){
+      const dlObs=new IntersectionObserver(entries=>{
+        if(entries[0].isIntersecting){
+          countUp(document.getElementById('dl-count'),0,800,false);
+          dlObs.disconnect();
+        }
+      },{threshold:.3});
+      dlObs.observe(dlCard);
+    }
+  });
 document.querySelectorAll('.feat-card').forEach(card=>{
   card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;card.style.transform=`perspective(700px) rotateY(${x*8}deg) rotateX(${-y*8}deg)`;card.style.boxShadow=`${-x*10}px ${-y*10}px 28px rgba(91,33,182,.12)`});
   card.addEventListener('mouseleave',()=>{card.style.transform='';card.style.boxShadow=''})
