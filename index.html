@@ -975,7 +975,7 @@ footer p span{color:var(--muted)}
             </div>
           </div>
           <!-- Нижний шит голосовой записи -->
-          <div style="background:#111122;border-radius:18px 18px 0 0;padding:16px 14px 20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.08);">
+          <div style="background:#111122;border-radius:18px 18px 0 0;padding:16px 14px 20px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.08);margin-top:auto;">
             <div style="width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 14px;"></div>
             <div style="text-align:center;font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;">Голосовая задача</div>
             <div style="display:flex;justify-content:center;align-items:flex-end;gap:2px;height:32px;margin-bottom:16px;">
@@ -993,7 +993,7 @@ footer p span{color:var(--muted)}
               <button onclick="showScreen('tasks')" style="width:44px;height:44px;border-radius:50%;background:rgba(239,68,68,.25);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#f87171;">■</button>
             </div>
           </div>
-          <div class="phone-nav-wrap">
+          <div class="phone-nav-wrap" style="margin-top:0;">
             <div class="phone-nav">
               <button class="pnav-item active" onclick="showScreen('tasks')"><div class="pnav-dot">🏠</div><span>Главная</span></button>
               <button class="pnav-item" onclick="showScreen('schedule')"><div class="pnav-dot">📅</div><span>Пары</span></button>
@@ -1210,6 +1210,14 @@ footer p span{color:var(--muted)}
           <div class="sfeature-num">04</div>
           <div class="sfeature-title">Совместный режим</div>
           <div class="sfeature-desc">Работай с одногруппниками над общими задачами в реальном времени.</div>
+        </div>
+      </div>
+      <div class="sfeature" data-screen="sp-tasks">
+        <div class="sfeature-icon">📄</div>
+        <div>
+          <div class="sfeature-num">05</div>
+          <div class="sfeature-title">Силлабус → Задачи</div>
+          <div class="sfeature-desc">Сфотографируй силлабус — ИИ сам разберёт учебный план и создаст задачи с датами на весь семестр.</div>
         </div>
       </div>
     </div>
