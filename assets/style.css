@@ -422,3 +422,124 @@ footer {
 }
 .done img { width: 96px; margin: 0 auto 26px; }
 .done .lead { margin-inline: auto; }
+
+/* ── Заставка загрузки ─────────────────────────────────────────────────── */
+
+/* Песочные часы из фирменного знака: песок пересыпается сверху вниз, потом
+   часы переворачиваются и всё повторяется. Переворот ровно на 180°, а часы
+   симметричны — поэтому в конце цикла картинка совпадает с началом, и стык
+   не виден.
+
+   Заставка обязана исчезнуть даже без JavaScript, иначе сайт превратится в
+   один сиреневый экран. Поэтому у неё два независимых выключателя: скрипт
+   снимает её по событию load, а если скрипт не отработал — своя анимация
+   гасит её через четыре секунды. */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(60% 50% at 50% 42%, var(--lilac-soft), transparent 70%),
+    var(--paper);
+  animation: loaderFailsafe .5s ease 4s forwards;
+}
+
+.loader.is-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .55s ease, visibility 0s linear .55s;
+}
+
+@keyframes loaderFailsafe {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+
+.loader-in { text-align: center; }
+
+.loader-word {
+  display: block;
+  margin-top: 22px;
+  font-family: var(--display);
+  font-size: 1.45rem;
+  color: var(--plum);
+  letter-spacing: .06em;
+}
+
+/* Полоска не показывает долю загруженного — её никто не знает. Она просто
+   говорит, что работа идёт */
+.loader-track {
+  display: block;
+  width: 132px;
+  height: 3px;
+  margin: 18px auto 0;
+  border-radius: 3px;
+  background: var(--lilac);
+  overflow: hidden;
+}
+.loader-track span {
+  display: block;
+  width: 45%;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  animation: loaderSweep 1.4s cubic-bezier(.65, 0, .35, 1) infinite;
+}
+@keyframes loaderSweep {
+  0% { transform: translateX(-105%); }
+  100% { transform: translateX(325%); }
+}
+
+/* Размер задан стилем, а не только атрибутами: в разметке они нужны, чтобы
+   место под знак было занято до того, как доедет css, и заставка не дёрнулась */
+.loader-glass { display: block; margin: 0 auto; width: 108px; height: 144px; }
+
+/* Заливка и обводка колб — разными фигурами: песок ложится между ними, и
+   обводка остаётся во всю толщину, а не наполовину закрашенной песком */
+.tf-bulb { fill: var(--surface); }
+.tf-edge { fill: none; stroke: var(--plum); stroke-width: 3.5; stroke-linejoin: round; }
+.tf-cap { fill: var(--plum); }
+.tf-sand-top, .tf-sand-bottom { fill: var(--accent); }
+.tf-stream { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 9; }
+
+/* transform-box: view-box — иначе сдвиг считался бы от рамки самой фигуры,
+   а не от системы координат svg, и песок уехал бы мимо колбы */
+.tf-glass, .tf-sand-top, .tf-sand-bottom { transform-box: view-box; }
+.tf-glass { transform-origin: 60px 80px; animation: tfFlip 3.2s cubic-bezier(.7, 0, .3, 1) infinite; }
+.tf-sand-top { animation: tfDrain 3.2s ease-in-out infinite; }
+.tf-sand-bottom { animation: tfFill 3.2s ease-in-out infinite; }
+.tf-stream { animation: tfGrains .45s linear infinite, tfStream 3.2s linear infinite; }
+
+@keyframes tfDrain {
+  0%, 4% { transform: translateY(0); }
+  76%, 100% { transform: translateY(58px); }
+}
+@keyframes tfFill {
+  0%, 4% { transform: translateY(58px); }
+  76%, 100% { transform: translateY(0); }
+}
+@keyframes tfFlip {
+  0%, 80% { transform: rotate(0deg); }
+  100% { transform: rotate(180deg); }
+}
+@keyframes tfGrains { to { stroke-dashoffset: -14; } }
+@keyframes tfStream {
+  0%, 4% { opacity: 0; }
+  8%, 72% { opacity: 1; }
+  77%, 100% { opacity: 0; }
+}
+
+/* Кому движение мешает — тому неподвижный знак и та же заставка */
+@media (prefers-reduced-motion: reduce) {
+  .loader { animation-delay: 1.2s; }
+  .tf-glass, .tf-sand-top, .tf-sand-bottom, .tf-stream, .loader-track span {
+    animation: none;
+  }
+  .tf-sand-top { transform: translateY(29px); }
+  .tf-sand-bottom { transform: translateY(29px); }
+  .loader-track span { width: 100%; }
+}
