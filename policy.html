@@ -8,12 +8,13 @@
 <link rel="icon" href="assets/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <!-- Класс js ставим до отрисовки: блоки, которые всплывают при
      прокрутке, прячутся только при живом скрипте. Без него класса
      нет, прятать некому — и страница видна целиком. -->
 <script>document.documentElement.className = "js"</script>
+<script src="assets/site.js" defer></script>
 </head>
 <body>
 
@@ -231,72 +232,6 @@
   </div>
 </footer>
 
-<script>
-(function () {
-  var reduced = window.matchMedia &&
-    matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* Заставку снимаем, когда страница догрузилась, но не раньше, чем через
-     полсекунды от начала: на быстром соединении она иначе просто мигнёт.
-     Если скрипт не отработает вовсе, заставку погасит своя анимация — см.
-     loaderFailsafe в style.css. */
-  var loader = document.getElementById('loader');
-  if (loader) {
-    var hide = function () {
-      var passed = window.performance ? performance.now() : 500;
-      setTimeout(function () {
-        loader.classList.add('is-done');
-      }, Math.max(0, 500 - passed));
-    };
-    if (document.readyState === 'complete') hide();
-    else window.addEventListener('load', hide);
-  }
-
-  /* Тень у шапки появляется, только когда под неё что-то уехало: на самом
-     верху страницы она лишняя */
-  var top = document.querySelector('.top');
-  if (top) {
-    var stick = function () {
-      top.classList.toggle('is-stuck', window.scrollY > 8);
-    };
-    stick();
-    addEventListener('scroll', stick, { passive: true });
-  }
-
-  /* Блоки всплывают, когда до них дошли. Без IntersectionObserver и при
-     выключенном движении показываем всё сразу — стиль .reveal сам по себе
-     ничего не прячет, прячет только .js .reveal:not(.is-in). */
-  var items = [].slice.call(document.querySelectorAll('.reveal'));
-  var showAll = function () {
-    items.forEach(function (el) { el.classList.add('is-in'); });
-  };
-
-  if (reduced || !('IntersectionObserver' in window)) {
-    showAll();
-    return;
-  }
-
-  var seen = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-in');
-      seen.unobserve(entry.target);
-    });
-  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
-
-  items.forEach(function (el, i) {
-    // Соседи в одном ряду трогаются друг за другом, но задержку копим
-    // только внутри группы, иначе низ страницы ждал бы секунды
-    var order = 0, prev = el.previousElementSibling;
-    while (prev && prev.className === el.className) {
-      order++;
-      prev = prev.previousElementSibling;
-    }
-    el.style.setProperty('--delay', Math.min(order, 3) * 90 + 'ms');
-    seen.observe(el);
-  });
-})();
-</script>
 
 </body>
 </html>
