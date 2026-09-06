@@ -366,12 +366,11 @@ footer {
 }
 
 .foot-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 34px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px 78px;
   margin-bottom: 34px;
 }
-@media (max-width: 760px) { .foot-grid { grid-template-columns: 1fr; } }
 
 .foot-grid h4 {
   font-size: .82rem;
@@ -666,7 +665,7 @@ footer {
 .btn-main:hover { box-shadow: 0 16px 34px rgba(112, 64, 144, .34); }
 
 /* Ссылки в тексте подчёркиваются растущей линией вместо резкого underline */
-p a:not(.btn), .foot-grid a, .requisites a {
+p a:not(.btn), .foot-grid a:not(.brand), .requisites a {
   text-decoration: none;
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 0 1px;
@@ -674,7 +673,7 @@ p a:not(.btn), .foot-grid a, .requisites a {
   background-repeat: no-repeat;
   transition: background-size .3s cubic-bezier(.2, .7, .3, 1), color .2s ease;
 }
-p a:not(.btn):hover, .foot-grid a:hover, .requisites a:hover {
+p a:not(.btn):hover, .foot-grid a:not(.brand):hover, .requisites a:hover {
   text-decoration: none;
   background-size: 100% 1px;
   color: var(--accent);
