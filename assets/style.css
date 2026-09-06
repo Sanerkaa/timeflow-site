@@ -171,8 +171,6 @@ p { margin: 0 0 1em; }
 
 .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
 
-.hero-note { margin-top: 18px; font-size: .9rem; color: var(--muted); }
-
 .hero-art { display: flex; justify-content: center; }
 .hero-art img { width: min(230px, 70%); filter: drop-shadow(0 24px 50px rgba(87, 48, 113, .22)); }
 
@@ -325,8 +323,6 @@ summary {
   list-style: none;
 }
 summary::-webkit-details-marker { display: none; }
-summary::after { content: " +"; color: var(--accent); float: right; }
-details[open] summary::after { content: " –"; }
 details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
 
 /* ── Полоса призыва ────────────────────────────────────────────────────── */
@@ -425,10 +421,12 @@ footer {
 
 /* ── Заставка загрузки ─────────────────────────────────────────────────── */
 
-/* Песочные часы из фирменного знака: песок пересыпается сверху вниз, потом
-   часы переворачиваются и всё повторяется. Переворот ровно на 180°, а часы
-   симметричны — поэтому в конце цикла картинка совпадает с началом, и стык
-   не виден.
+/* Песочные часы с фирменного знака: та же рамка со скруглёнными углами, те
+   же колбы с узкой перемычкой. Песок пересыпается сверху вниз, потом часы
+   переворачиваются и всё повторяется. Переворот ровно на 180°, а колбы
+   симметричны — поэтому в конце цикла картинка совпадает с началом и стык
+   не виден. Блик на стекле в переворот не входит: он нарисован вне
+   вращающейся группы и всегда остаётся сверху.
 
    Заставка обязана исчезнуть даже без JavaScript, иначе сайт превратится в
    один сиреневый экран. Поэтому у неё два независимых выключателя: скрипт
@@ -448,11 +446,17 @@ footer {
   animation: loaderFailsafe .5s ease 4s forwards;
 }
 
+/* Уходит не просто прозрачностью, а с лёгким наездом: так переход к первому
+   экрану читается как продолжение, а не как смена картинки */
 .loader.is-done {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity .55s ease, visibility 0s linear .55s;
+  transform: scale(1.06);
+  transition:
+    opacity .5s ease,
+    transform .5s cubic-bezier(.4, 0, .2, 1),
+    visibility 0s linear .5s;
 }
 
 @keyframes loaderFailsafe {
@@ -496,50 +500,223 @@ footer {
 
 /* Размер задан стилем, а не только атрибутами: в разметке они нужны, чтобы
    место под знак было занято до того, как доедет css, и заставка не дёрнулась */
-.loader-glass { display: block; margin: 0 auto; width: 108px; height: 144px; }
+.loader-glass {
+  display: block;
+  margin: 0 auto;
+  width: 112px;
+  height: 183px;
+  filter: drop-shadow(0 16px 28px rgba(87, 48, 113, .18));
+}
 
-/* Заливка и обводка колб — разными фигурами: песок ложится между ними, и
-   обводка остаётся во всю толщину, а не наполовину закрашенной песком */
-.tf-bulb { fill: var(--surface); }
-.tf-edge { fill: none; stroke: var(--plum); stroke-width: 3.5; stroke-linejoin: round; }
-.tf-cap { fill: var(--plum); }
-.tf-sand-top, .tf-sand-bottom { fill: var(--accent); }
-.tf-stream { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 5 9; }
+.tf-frame { fill: #7a4fa0; }
+.tf-body { fill: url(#tfBody); }
+.tf-sand-top, .tf-sand-bottom, .tf-grain { fill: #b9a0d4; }
+.tf-glare { fill: #6b3f92; opacity: .5; }
 
 /* transform-box: view-box — иначе сдвиг считался бы от рамки самой фигуры,
    а не от системы координат svg, и песок уехал бы мимо колбы */
-.tf-glass, .tf-sand-top, .tf-sand-bottom { transform-box: view-box; }
-.tf-glass { transform-origin: 60px 80px; animation: tfFlip 3.2s cubic-bezier(.7, 0, .3, 1) infinite; }
-.tf-sand-top { animation: tfDrain 3.2s ease-in-out infinite; }
-.tf-sand-bottom { animation: tfFill 3.2s ease-in-out infinite; }
-.tf-stream { animation: tfGrains .45s linear infinite, tfStream 3.2s linear infinite; }
+.tf-glass, .tf-sand-top, .tf-sand-bottom, .tf-grain { transform-box: view-box; }
+
+.tf-glass {
+  transform-origin: 60px 98px;
+  animation: tfFlip 3.6s cubic-bezier(.66, 0, .3, 1) infinite;
+}
+.tf-sand-top { animation: tfDrain 3.6s ease-in-out infinite; }
+.tf-sand-bottom { animation: tfFill 3.6s ease-in-out infinite; }
+
+/* Песчинки падают по одной дорожке, но с разным разбегом — получается
+   непрерывная струйка, а не мигающая точка */
+.tf-grain {
+  transform-origin: 60px 98px;
+  animation: tfGrain 1.05s cubic-bezier(.4, 0, .8, .4) infinite;
+}
+.tf-grain-2 { animation-delay: .35s; }
+.tf-grain-3 { animation-delay: .7s; }
+.tf-fall { animation: tfStream 3.6s linear infinite; }
 
 @keyframes tfDrain {
   0%, 4% { transform: translateY(0); }
-  76%, 100% { transform: translateY(58px); }
+  74%, 100% { transform: translateY(66px); }
 }
 @keyframes tfFill {
   0%, 4% { transform: translateY(58px); }
-  76%, 100% { transform: translateY(0); }
+  74%, 100% { transform: translateY(0); }
 }
 @keyframes tfFlip {
   0%, 80% { transform: rotate(0deg); }
   100% { transform: rotate(180deg); }
 }
-@keyframes tfGrains { to { stroke-dashoffset: -14; } }
+@keyframes tfGrain {
+  0% { transform: translateY(-4px) scaleY(.7); opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { transform: translateY(44px) scaleY(1.15); opacity: 0; }
+}
 @keyframes tfStream {
-  0%, 4% { opacity: 0; }
-  8%, 72% { opacity: 1; }
-  77%, 100% { opacity: 0; }
+  0%, 5% { opacity: 0; }
+  10%, 70% { opacity: 1; }
+  75%, 100% { opacity: 0; }
 }
 
-/* Кому движение мешает — тому неподвижный знак и та же заставка */
+/* ── Движение на странице ──────────────────────────────────────────────── */
+
+/* Первый экран собирается по частям: сначала подпись, потом заголовок и так
+   далее. Задержки маленькие — это должно читаться как «страница появилась»,
+   а не как представление. */
+.hero .eyebrow,
+.hero h1,
+.hero .lead,
+.hero-actions,
+.hero-art { animation: riseIn .7s cubic-bezier(.2, .7, .3, 1) both; }
+
+.hero h1 { animation-delay: .06s; }
+.hero .lead { animation-delay: .12s; }
+.hero-actions { animation-delay: .18s; }
+.hero-art { animation-delay: .1s; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Знак едва заметно покачивается — как настоящие часы на подставке */
+.hero-art img { animation: float 7s ease-in-out infinite; }
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-9px) rotate(-1.2deg); }
+}
+
+/* Сиреневое пятно за первым экраном медленно дышит */
+.hero::before { animation: breathe 16s ease-in-out infinite; }
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.12) translate(-14px, 10px); opacity: .75; }
+}
+
+/* Блоки всплывают, когда до них долистали. Прячем их только при живом
+   скрипте: без него класс is-in никто не поставит, и страница осталась бы
+   пустой. Задержку внутри ряда ставит скрипт через --delay. */
+.js .reveal:not(.is-in) {
+  opacity: 0;
+  transform: translateY(22px);
+}
+.reveal {
+  transition:
+    opacity .6s ease var(--delay, 0ms),
+    transform .6s cubic-bezier(.2, .7, .3, 1) var(--delay, 0ms);
+}
+
+/* Шапка отделяется тенью, только когда под неё что-то уехало */
+.top { transition: box-shadow .25s ease, background .25s ease; }
+.top.is-stuck { box-shadow: 0 6px 24px rgba(63, 43, 82, .08); }
+
+/* Карточки и снимки приподнимаются под курсором */
+.card, .plan, .shot {
+  transition:
+    transform .28s cubic-bezier(.2, .7, .3, 1),
+    box-shadow .28s ease,
+    border-color .28s ease;
+}
+.card:hover, .plan:hover {
+  transform: translateY(-5px);
+  border-color: var(--lilac);
+  box-shadow: var(--shadow);
+}
+.card-mark {
+  transition: transform .35s cubic-bezier(.2, .7, .3, 1), background .28s ease;
+}
+.card:hover .card-mark {
+  transform: translateY(-2px) rotate(-6deg) scale(1.06);
+  background: var(--lilac);
+}
+
+.shot:hover { transform: translateY(-6px); box-shadow: 0 26px 60px rgba(63, 43, 82, .16); }
+/* Картинку внутри чуть приближаем — рамка обрезает лишнее сама */
+.shot img { transition: transform .5s cubic-bezier(.2, .7, .3, 1); }
+.shot:hover img { transform: scale(1.03); }
+
+/* Нажатие должно чувствоваться: кнопка проседает под пальцем */
+.btn:active { transform: translateY(0) scale(.97); }
+.btn-main:hover { box-shadow: 0 16px 34px rgba(112, 64, 144, .34); }
+
+/* Ссылки в тексте подчёркиваются растущей линией вместо резкого underline */
+p a:not(.btn), .foot-grid a, .requisites a {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size .3s cubic-bezier(.2, .7, .3, 1), color .2s ease;
+}
+p a:not(.btn):hover, .foot-grid a:hover, .requisites a:hover {
+  text-decoration: none;
+  background-size: 100% 1px;
+  color: var(--accent);
+}
+
+/* Полоса призыва: градиент медленно переливается */
+.strip {
+  background: linear-gradient(135deg, var(--lilac-soft), var(--lilac), var(--lilac-soft));
+  background-size: 220% 220%;
+  animation: stripShift 18s ease-in-out infinite;
+}
+@keyframes stripShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Значок «частых вопросов»: две палочки, вертикальная отъезжает — плюс
+   плавно становится минусом. Раньше символ просто подменялся текстом, и
+   переход был рывком. Разметку это не трогает: обе палочки рисуются
+   псевдоэлементами, так что работает на всех страницах сразу. */
+summary { position: relative; padding-right: 34px; }
+
+summary::before,
+summary::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  float: none;
+  width: 14px;
+  height: 2px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: transform .3s cubic-bezier(.2, .7, .3, 1);
+}
+summary::after { transform: rotate(90deg); }
+details[open] summary::after { transform: rotate(0deg); }
+
+/* Ответ разворачивается, а не выпрыгивает */
+details[open] > p { animation: faqOpen .32s ease both; }
+@keyframes faqOpen {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Видимая рамка при переходе с клавиатуры — её раньше не было вовсе */
+a:focus-visible, summary:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Кому движение мешает — тому неподвижная страница. Здесь важно не просто
+   убрать анимации, а не оставить блоки спрятанными навсегда. */
 @media (prefers-reduced-motion: reduce) {
-  .loader { animation-delay: 1.2s; }
-  .tf-glass, .tf-sand-top, .tf-sand-bottom, .tf-stream, .loader-track span {
-    animation: none;
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
   }
-  .tf-sand-top { transform: translateY(29px); }
+
+  .loader { animation-delay: 1.2s; }
+  .tf-sand-top { transform: translateY(33px); }
   .tf-sand-bottom { transform: translateY(29px); }
+  .tf-fall { opacity: 0; }
   .loader-track span { width: 100%; }
+
+  .js .reveal:not(.is-in) { opacity: 1; transform: none; }
 }

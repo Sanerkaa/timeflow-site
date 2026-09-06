@@ -10,29 +10,54 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<!-- Класс js ставим до отрисовки: блоки, которые всплывают при
+     прокрутке, прячутся только при живом скрипте. Без него класса
+     нет, прятать некому — и страница видна целиком. -->
+<script>document.documentElement.className = "js"</script>
 </head>
 <body>
 
-<!-- Заставка на время загрузки: песочные часы из фирменного знака -->
+<!-- Заставка на время загрузки: песочные часы с фирменного знака.
+     Колбы, рамка и «блик» повторяют логотип, песок пересыпается сверху
+     вниз, потом часы переворачиваются. Блик намеренно вынесен из
+     вращающейся группы: он остаётся наверху, как отсвет на стекле, и
+     переворот не утаскивает его вниз. -->
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-in">
-    <svg class="loader-glass" viewBox="0 0 120 160" width="92" height="123" aria-hidden="true" focusable="false">
+    <svg class="loader-glass" viewBox="0 0 120 196" width="112" height="183" aria-hidden="true" focusable="false">
       <defs>
-        <clipPath id="tfTop"><path d="M26 22 H94 L60 78 Z"/></clipPath>
-        <clipPath id="tfBottom"><path d="M60 82 L94 138 H26 Z"/></clipPath>
+        <clipPath id="tfTop"><path d="M25 15H95A7 7 0 0 1 102 22V58C102 82 63 80 63 98H57C57 80 18 82 18 58V22A7 7 0 0 1 25 15Z"/></clipPath>
+        <clipPath id="tfBot"><path d="M57 98H63C63 116 102 114 102 138V174A7 7 0 0 1 95 181H25A7 7 0 0 1 18 174V138C18 114 57 116 57 98Z"/></clipPath>
+        <linearGradient id="tfBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f2ecf8"/>
+          <stop offset="1" stop-color="#e2d7ee"/>
+        </linearGradient>
       </defs>
+
       <g class="tf-glass">
-        <path class="tf-bulb" d="M26 22 H94 L60 78 Z"/>
-        <path class="tf-bulb" d="M60 82 L94 138 H26 Z"/>
-        <g clip-path="url(#tfTop)"><rect class="tf-sand-top" x="24" y="20" width="72" height="60"/></g>
-        <line class="tf-stream" x1="60" y1="78" x2="60" y2="138"/>
-        <g clip-path="url(#tfBottom)"><rect class="tf-sand-bottom" x="24" y="80" width="72" height="60"/></g>
-        <path class="tf-edge" d="M26 22 H94 L60 78 Z"/>
-        <path class="tf-edge" d="M60 82 L94 138 H26 Z"/>
-        <rect class="tf-cap" x="18" y="12" width="84" height="9" rx="4.5"/>
-        <rect class="tf-cap" x="18" y="139" width="84" height="9" rx="4.5"/>
+        <path class="tf-frame" d="M20 4H100A16 16 0 0 1 116 20V56C116 84 82 80 82 98C82 116 116 112 116 140V176A16 16 0 0 1 100 192H20A16 16 0 0 1 4 176V140C4 112 38 116 38 98C38 80 4 84 4 56V20A16 16 0 0 1 20 4Z"/>
+        <path class="tf-body" d="M25 15H95A7 7 0 0 1 102 22V58C102 82 63 80 63 98H57C57 80 18 82 18 58V22A7 7 0 0 1 25 15Z"/>
+        <path class="tf-body" d="M57 98H63C63 116 102 114 102 138V174A7 7 0 0 1 95 181H25A7 7 0 0 1 18 174V138C18 114 57 116 57 98Z"/>
+
+        <g clip-path="url(#tfTop)">
+          <path class="tf-sand-top" d="M-10 34C22 34 46 46 60 68 74 46 98 34 130 34V210H-10Z"/>
+        </g>
+        <g clip-path="url(#tfBot)">
+          <path class="tf-sand-bottom" d="M-10 108c30 0 44 24 70 24s40-24 70-24v104H-10Z"/>
+        </g>
+
+        <!-- Падающие песчинки: три штуки со сдвигом по времени, чтобы
+             струйка не выглядела мигающей точкой -->
+        <g class="tf-fall">
+          <ellipse class="tf-grain" cx="60" cy="98" rx="2.4" ry="3.2"/>
+          <ellipse class="tf-grain tf-grain-2" cx="60" cy="98" rx="1.9" ry="2.6"/>
+          <ellipse class="tf-grain tf-grain-3" cx="60" cy="98" rx="2.2" ry="2.9"/>
+        </g>
       </g>
+
+      <rect class="tf-glare" x="28" y="23" width="32" height="11" rx="5.5"/>
     </svg>
+
     <span class="loader-word">TimeFlow</span>
     <span class="loader-track"><span></span></span>
   </div>
@@ -207,23 +232,69 @@
 </footer>
 
 <script>
-/* Заставку снимаем, когда страница догрузилась, но не раньше, чем через
-   полсекунды от начала: на быстром соединении она иначе просто мигнёт.
-   Если скрипт не отработает вовсе, заставку погасит своя анимация — см.
-   loaderFailsafe в style.css. */
 (function () {
-  var loader = document.getElementById('loader');
-  if (!loader) return;
+  var reduced = window.matchMedia &&
+    matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function hide() {
-    var passed = window.performance ? performance.now() : 500;
-    setTimeout(function () {
-      loader.classList.add('is-done');
-    }, Math.max(0, 500 - passed));
+  /* Заставку снимаем, когда страница догрузилась, но не раньше, чем через
+     полсекунды от начала: на быстром соединении она иначе просто мигнёт.
+     Если скрипт не отработает вовсе, заставку погасит своя анимация — см.
+     loaderFailsafe в style.css. */
+  var loader = document.getElementById('loader');
+  if (loader) {
+    var hide = function () {
+      var passed = window.performance ? performance.now() : 500;
+      setTimeout(function () {
+        loader.classList.add('is-done');
+      }, Math.max(0, 500 - passed));
+    };
+    if (document.readyState === 'complete') hide();
+    else window.addEventListener('load', hide);
   }
 
-  if (document.readyState === 'complete') hide();
-  else window.addEventListener('load', hide);
+  /* Тень у шапки появляется, только когда под неё что-то уехало: на самом
+     верху страницы она лишняя */
+  var top = document.querySelector('.top');
+  if (top) {
+    var stick = function () {
+      top.classList.toggle('is-stuck', window.scrollY > 8);
+    };
+    stick();
+    addEventListener('scroll', stick, { passive: true });
+  }
+
+  /* Блоки всплывают, когда до них дошли. Без IntersectionObserver и при
+     выключенном движении показываем всё сразу — стиль .reveal сам по себе
+     ничего не прячет, прячет только .js .reveal:not(.is-in). */
+  var items = [].slice.call(document.querySelectorAll('.reveal'));
+  var showAll = function () {
+    items.forEach(function (el) { el.classList.add('is-in'); });
+  };
+
+  if (reduced || !('IntersectionObserver' in window)) {
+    showAll();
+    return;
+  }
+
+  var seen = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-in');
+      seen.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+
+  items.forEach(function (el, i) {
+    // Соседи в одном ряду трогаются друг за другом, но задержку копим
+    // только внутри группы, иначе низ страницы ждал бы секунды
+    var order = 0, prev = el.previousElementSibling;
+    while (prev && prev.className === el.className) {
+      order++;
+      prev = prev.previousElementSibling;
+    }
+    el.style.setProperty('--delay', Math.min(order, 3) * 90 + 'ms');
+    seen.observe(el);
+  });
 })();
 </script>
 
