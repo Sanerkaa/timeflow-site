@@ -235,12 +235,43 @@ section { padding: 72px 0; }
 
 /* ── Снимки экрана ─────────────────────────────────────────────────────── */
 
+/* minmax(0, 1fr), а не просто 1fr: снимок лежит в обёртке, и колонка
+   брала за минимум натуральную ширину картинки — 620 пикселей. Колонки
+   вылезали за контейнер, страница становилась шире экрана, и на телефоне
+   из-под шапки выглядывала полоса фона. */
 .shots {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 26px;
 }
-@media (max-width: 900px) { .shots { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) {
+  .shots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* На телефоне две колонки давали снимки шириной с ноготь: разобрать на них
+   было нечего, а подписи ломались по одному слову в строку. Поэтому здесь
+   лента с прокруткой вбок — как в магазинах приложений. Соседний снимок
+   выглядывает из-за края, и видно, что можно листать. */
+@media (max-width: 700px) {
+  .shots {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Выходим за поля .wrap ровно на них: лента идёт от края до края
+       экрана, но шире экрана не становится */
+    margin-inline: -20px;
+    padding: 4px 20px 16px;
+    scroll-padding-inline: 20px;
+    scrollbar-width: none;
+  }
+  .shots::-webkit-scrollbar { display: none; }
+
+  .shot-slot {
+    flex: 0 0 78%;
+    scroll-snap-align: center;
+  }
+}
 
 .shot {
   border-radius: 26px;
