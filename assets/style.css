@@ -994,3 +994,51 @@ details[open]::details-content { block-size: auto; }
   .section-head h2::after { transform: scaleX(1); }
   details::details-content { block-size: auto; overflow: visible; }
 }
+
+/* ── Свет от курсора ───────────────────────────────────────────────────── */
+
+/* Мягкое сиреневое пятно, которое ходит за мышью — будто над страницей
+   держат лампу.
+
+   z-index: -1 — ключевое. Слой лежит на фоне страницы, но под содержимым:
+   свет ложится на фон между карточками и в отступах разделов, а сами
+   карточки его загораживают, как предметы загораживают свет. Будь слой
+   сверху, он размывал бы текст.
+
+   Размер задан элементу, а не градиенту: двигать элемент через transform
+   браузер умеет не трогая раскладку, а пересчитывать позицию градиента на
+   каждый кадр — нет. */
+.glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 620px;
+  height: 620px;
+  margin: -310px 0 0 -310px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(138, 84, 178, .34),
+    rgba(138, 84, 178, .14) 46%,
+    rgba(138, 84, 178, 0) 72%
+  );
+  opacity: 0;
+  /* Отставание нарочное: свет догоняет курсор, а не приклеен к нему —
+     так он читается как лампа, а не как курсор нестандартной формы */
+  transition: opacity .6s ease, transform .28s cubic-bezier(.2, .7, .3, 1);
+  will-change: transform;
+}
+
+.glow.is-on { opacity: 1; }
+
+/* Пальцем лампу не поводишь, а на телефоне пятно замерло бы там, где
+   человек последний раз коснулся экрана */
+@media (hover: none), (pointer: coarse) {
+  .glow { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow { display: none; }
+}

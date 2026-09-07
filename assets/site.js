@@ -161,6 +161,34 @@
     }
   }
 
+  /* ── Свет от курсора ───────────────────────────────────────────────── */
+
+  /* Пятно света ходит за мышью. Двигаем через transform, а не через left
+     и top: смещение браузер делает на видеокарте, не пересчитывая
+     раскладку, — иначе на каждое движение мыши перекладывалась бы вся
+     страница. Отставание и плавность задаёт css. */
+  var glow = document.getElementById('glow');
+  if (glow && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var gx = 0, gy = 0;
+    var shine = perFrame(function () {
+      glow.style.transform =
+        'translate3d(' + gx.toFixed(0) + 'px,' + gy.toFixed(0) + 'px,0)';
+      // Зажигаем только когда мышь уже двигалась: иначе при загрузке пятно
+      // вспыхнуло бы в левом верхнем углу
+      glow.classList.add('is-on');
+    });
+    addEventListener('mousemove', function (e) {
+      gx = e.clientX;
+      gy = e.clientY;
+      shine();
+    }, { passive: true });
+
+    // Мышь ушла за пределы окна — свет гаснет
+    document.addEventListener('mouseleave', function () {
+      glow.classList.remove('is-on');
+    });
+  }
+
   /* ── Цена набегает ─────────────────────────────────────────────────── */
 
   /* Считаем не саму цену, а долю от неё: в разметке цена написана словами
