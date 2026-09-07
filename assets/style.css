@@ -899,3 +899,98 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
   .top::after { display: none; }
   .btn-main:hover::after { animation: none; }
 }
+
+/* ── Знак в шапке переворачивается ─────────────────────────────────────── */
+
+/* Единственная анимация здесь, которая не выдумана: песочные часы для того
+   и нужны, чтобы их переворачивать. Наводите — и они переворачиваются. */
+.brand img { transition: transform .65s cubic-bezier(.5, 0, .2, 1); }
+.brand:hover img { transform: rotate(180deg); }
+
+/* ── Иконки карточек прорисовываются ───────────────────────────────────── */
+
+/* Lucide — это линии, и им идёт появляться росчерком. Работает на пунктире:
+   вся фигура превращается в один штрих длиной 120 с таким же разрывом,
+   и сдвиг разрыва от 120 к нулю выводит линию из ничего.
+
+   120 взято с запасом: самая длинная фигура здесь — рамка блокнота, у неё
+   периметр 72. Будь число меньше длины фигуры, вместо линии вышел бы
+   пунктир.
+
+   Прячем только при живом скрипте: без него класс is-in никто не поставит,
+   и иконки остались бы невидимыми навсегда. */
+.js .card.reveal .card-mark svg > * {
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+}
+.js .card.reveal.is-in .card-mark svg > * {
+  animation: drawIcon .85s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+/* Фигуры выводятся не разом, а следом друг за другом */
+.card-mark svg > *:nth-child(2) { animation-delay: .06s; }
+.card-mark svg > *:nth-child(3) { animation-delay: .12s; }
+.card-mark svg > *:nth-child(4) { animation-delay: .18s; }
+.card-mark svg > *:nth-child(5) { animation-delay: .24s; }
+.card-mark svg > *:nth-child(6) { animation-delay: .30s; }
+.card-mark svg > *:nth-child(7) { animation-delay: .36s; }
+.card-mark svg > *:nth-child(8) { animation-delay: .42s; }
+
+@keyframes drawIcon {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── Росчерк под заголовком раздела ────────────────────────────────────── */
+
+/* Короткая черта, а не во всю ширину: это акцент, а не подчёркивание.
+   Прочерчивается, когда до раздела долистали. */
+.section-head h2 {
+  position: relative;
+  display: inline-block;
+  padding-bottom: .16em;
+}
+.section-head h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 54px;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), rgba(112, 64, 144, .35));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .6s cubic-bezier(.2, .7, .3, 1) .12s;
+}
+.section-head.is-in h2::after { transform: scaleX(1); }
+
+/* Без скрипта класса is-in не будет, и росчерк не появился бы вовсе */
+html:not(.js) .section-head h2::after { transform: scaleX(1); }
+
+/* ── Ответ в вопросах разворачивается по высоте ────────────────────────── */
+
+/* Раньше ответ проявлялся, но карточка под ним прыгала на свою новую
+   высоту рывком. Здесь анимируется сама высота.
+
+   allow-keywords нужен затем, что высота едет от нуля к auto, а такое
+   браузер по умолчанию анимировать не умеет. Где это не поддержано,
+   останется прежнее поведение — открывается сразу, и ничего не ломается. */
+:root { interpolate-size: allow-keywords; }
+
+details::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size .34s cubic-bezier(.2, .7, .3, 1),
+    content-visibility .34s allow-discrete;
+}
+details[open]::details-content { block-size: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .card.reveal .card-mark svg > * {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+  .section-head h2::after { transform: scaleX(1); }
+  details::details-content { block-size: auto; overflow: visible; }
+}
