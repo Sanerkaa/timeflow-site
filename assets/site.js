@@ -128,20 +128,30 @@
   // Пальцем такое не наклонить, а на телефоне hover залипает — там не нужно
   if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
     cards.forEach(function (card) {
-      var x = 0, y = 0;
+      var x = 0, y = 0, flat = true;
+
+      /* Решение о наклоне принимается здесь, а не в обработчике события:
+         расчёт отложен до кадра, и выпрямить карточку прямо в обработчике
+         не вышло бы: уже назначенный кадр всё равно вернул бы наклон обратно. */
       var apply = perFrame(function () {
-        card.style.setProperty('--ry', (x * tilt).toFixed(2) + 'deg');
-        card.style.setProperty('--rx', (-y * tilt).toFixed(2) + 'deg');
+        card.style.setProperty('--ry', flat ? '0deg' : (x * tilt).toFixed(2) + 'deg');
+        card.style.setProperty('--rx', flat ? '0deg' : (-y * tilt).toFixed(2) + 'deg');
       });
+
       card.addEventListener('mousemove', function (e) {
+        // Над кнопкой карточку не наклоняем. Наклон смещает её края, и у
+        // кнопки под курсором край уезжает то под него, то из-под него —
+        // курсор начинает мигать между рукой и стрелкой.
+        flat = !!e.target.closest('a, button');
         var box = card.getBoundingClientRect();
         x = (e.clientX - box.left) / box.width - .5;
         y = (e.clientY - box.top) / box.height - .5;
         apply();
       });
+
       card.addEventListener('mouseleave', function () {
-        card.style.setProperty('--ry', '0deg');
-        card.style.setProperty('--rx', '0deg');
+        flat = true;
+        apply();
       });
     });
 

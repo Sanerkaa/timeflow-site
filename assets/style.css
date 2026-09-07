@@ -126,7 +126,11 @@ p { margin: 0 0 1em; }
   cursor: pointer;
   transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
 }
-.btn:hover { text-decoration: none; transform: translateY(-2px); }
+/* Увеличение, а не подъём. Подъём уводил нижний край кнопки из-под
+   курсора: наведение терялось, кнопка возвращалась на место, наведение
+   появлялось снова — и курсор мигал между рукой и стрелкой по нескольку
+   раз в секунду. Кнопка, которая растёт, из-под курсора уйти не может. */
+.btn:hover { text-decoration: none; transform: scale(1.035); }
 
 .btn-main {
   background: var(--accent);
@@ -692,7 +696,7 @@ footer {
 .shot:hover img { transform: scale(1.03); }
 
 /* Нажатие должно чувствоваться: кнопка проседает под пальцем */
-.btn:active { transform: translateY(0) scale(.97); }
+.btn:active { transform: scale(.97); }
 .btn-main:hover { box-shadow: 0 16px 34px rgba(112, 64, 144, .34); }
 
 /* Ссылки в тексте подчёркиваются растущей линией вместо резкого underline */
