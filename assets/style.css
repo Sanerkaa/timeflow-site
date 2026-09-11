@@ -21,6 +21,90 @@
   --display: "Nunito", "Manrope", -apple-system, "Segoe UI", sans-serif;
   --body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+
+  /* Ниже — то, что раньше было вписано прямо в правила. Вынесено сюда
+     целиком: тёмная тема переопределяет только этот список, а сами
+     правила у обеих тем одни и те же. */
+  --on-accent: #fff;             /* текст на сиреневой кнопке */
+  --halo: rgba(218, 208, 230, .75);
+  --top-glass: rgba(248, 245, 251, .55);
+  --top-solid: rgba(248, 245, 251, .96);
+  --glow-core: rgba(138, 84, 178, .34);
+  --glow-mid: rgba(138, 84, 178, .14);
+  --glow-edge: rgba(138, 84, 178, 0);
+  --accent-half: rgba(112, 64, 144, .45);
+  --accent-none: rgba(112, 64, 144, 0);
+  --shadow-hover: 0 26px 60px rgba(63, 43, 82, .16);
+  --shadow-stuck: 0 6px 24px rgba(63, 43, 82, .08);
+  --btn-shadow: 0 10px 26px rgba(112, 64, 144, .28);
+  --btn-shadow-hover: 0 16px 34px rgba(112, 64, 144, .34);
+  --pick-shadow: 0 18px 44px rgba(112, 64, 144, .16);
+  --mark-drop: 0 24px 50px rgba(87, 48, 113, .22);
+  --loader-drop: 0 16px 28px rgba(87, 48, 113, .18);
+  --fill-bg: #fdf3c7;
+  --fill-ink: #6b5800;
+  /* Знак в заставке: рамка, колбы, песок, блик */
+  --mark-frame: #7a4fa0;
+  --mark-glass-1: #f2ecf8;
+  --mark-glass-2: #e2d7ee;
+  --mark-sand: #b9a0d4;
+  --mark-glare: #6b3f92;
+  --mark-glare-a: .5;
+  color-scheme: light;
+}
+
+/* ── Тёмная тема ────────────────────────────────────────────────────────
+
+   Не инверсия светлой, а свой набор: фон — глубокий сливовый, а не
+   чёрный, чтобы сиреневый знак не висел в пустоте; сиреневый акцент
+   поднят до #c49bec, потому что рабочий #704090 на тёмном фоне
+   недобирает по контрасту и ссылки перестают читаться. Текст на кнопке,
+   наоборот, тёмный: светлая плашка со белыми буквами слепит.
+
+   Тему ставит атрибут, а не медиазапрос: человек может выбрать её
+   вручную, и выбор должен пережить перезагрузку. Системную настройку
+   учитывает скрипт в <head> — он и ставит атрибут до первой отрисовки,
+   поэтому страница не мигает светлым. */
+
+[data-theme="dark"] {
+  --paper: #131019;
+  --surface: #1c1826;
+  --lilac: #3b3050;
+  --lilac-soft: #262036;
+  --plum: #efe8f7;
+  --ink: #cbc2da;
+  --muted: #9c91af;
+  --accent: #c49bec;
+  --accent-deep: #d9bef8;
+  --line: #302943;
+  --shadow: 0 20px 52px rgba(0, 0, 0, .5);
+  --shadow-sm: 0 8px 22px rgba(0, 0, 0, .34);
+
+  --on-accent: #1d1428;
+  --halo: rgba(104, 66, 148, .5);
+  --top-glass: rgba(19, 16, 25, .62);
+  --top-solid: rgba(19, 16, 25, .96);
+  --glow-core: rgba(158, 104, 208, .26);
+  --glow-mid: rgba(158, 104, 208, .11);
+  --glow-edge: rgba(158, 104, 208, 0);
+  --accent-half: rgba(196, 155, 236, .45);
+  --accent-none: rgba(196, 155, 236, 0);
+  --shadow-hover: 0 26px 60px rgba(0, 0, 0, .55);
+  --shadow-stuck: 0 6px 24px rgba(0, 0, 0, .4);
+  --btn-shadow: 0 10px 26px rgba(120, 72, 168, .38);
+  --btn-shadow-hover: 0 16px 34px rgba(140, 88, 196, .46);
+  --pick-shadow: 0 18px 44px rgba(140, 88, 196, .28);
+  --mark-drop: 0 24px 50px rgba(0, 0, 0, .5);
+  --loader-drop: 0 16px 28px rgba(0, 0, 0, .45);
+  --fill-bg: #3a3319;
+  --fill-ink: #f0dd93;
+  --mark-frame: #8e64b8;
+  --mark-glass-1: #2c2340;
+  --mark-glass-2: #221a31;
+  --mark-sand: #a583c8;
+  --mark-glare: #e2cdf7;
+  --mark-glare-a: .28;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -71,7 +155,7 @@ p { margin: 0 0 1em; }
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(248, 245, 251, .55);
+  background: var(--top-glass);
   backdrop-filter: blur(18px) saturate(170%);
   -webkit-backdrop-filter: blur(18px) saturate(170%);
   border-bottom: 1px solid rgba(230, 223, 238, .8);
@@ -79,7 +163,7 @@ p { margin: 0 0 1em; }
 
 /* Без размытия полупрозрачная шапка превратилась бы в кашу из букв */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .top { background: rgba(248, 245, 251, .96); }
+  .top { background: var(--top-solid); }
 }
 
 .top .wrap {
@@ -134,10 +218,10 @@ p { margin: 0 0 1em; }
 
 .btn-main {
   background: var(--accent);
-  color: #fff;
-  box-shadow: 0 10px 26px rgba(112, 64, 144, .28);
+  color: var(--on-accent);
+  box-shadow: var(--btn-shadow);
 }
-.btn-main:hover { background: var(--accent-deep); color: #fff; }
+.btn-main:hover { background: var(--accent-deep); color: var(--on-accent); }
 
 .btn-ghost {
   background: var(--surface);
@@ -159,7 +243,7 @@ p { margin: 0 0 1em; }
   inset: -180px -10% auto auto;
   width: 620px;
   height: 620px;
-  background: radial-gradient(circle, rgba(218, 208, 230, .75), transparent 62%);
+  background: radial-gradient(circle, var(--halo), transparent 62%);
   z-index: -1;
 }
 
@@ -188,7 +272,7 @@ p { margin: 0 0 1em; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
 
 .hero-art { display: flex; justify-content: center; }
-.hero-art img { width: min(230px, 70%); filter: drop-shadow(0 24px 50px rgba(87, 48, 113, .22)); }
+.hero-art img { width: min(230px, 70%); filter: drop-shadow(var(--mark-drop)); }
 
 @media (max-width: 900px) {
   .hero { padding-top: 56px; }
@@ -312,7 +396,7 @@ section { padding: 72px 0; }
 
 .plan.pick {
   border-color: var(--accent);
-  box-shadow: 0 18px 44px rgba(112, 64, 144, .16);
+  box-shadow: var(--pick-shadow);
   position: relative;
 }
 
@@ -322,7 +406,7 @@ section { padding: 72px 0; }
   top: -13px;
   left: 30px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-size: .74rem;
   font-weight: 700;
   letter-spacing: .05em;
@@ -419,7 +503,7 @@ footer {
 .foot-grid a { color: var(--ink); }
 
 .requisites { line-height: 1.9; }
-.fill { background: #fdf3c7; padding: 0 6px; border-radius: 4px; color: #6b5800; }
+.fill { background: var(--fill-bg); padding: 0 6px; border-radius: 4px; color: var(--fill-ink); }
 
 /* ── Юридические страницы ──────────────────────────────────────────────── */
 
@@ -559,13 +643,13 @@ footer {
   margin: 0 auto;
   width: 112px;
   height: 183px;
-  filter: drop-shadow(0 16px 28px rgba(87, 48, 113, .18));
+  filter: drop-shadow(var(--loader-drop));
 }
 
-.tf-frame { fill: #7a4fa0; }
+.tf-frame { fill: var(--mark-frame); }
 .tf-body { fill: url(#tfBody); }
-.tf-sand-top, .tf-sand-bottom, .tf-grain { fill: #b9a0d4; }
-.tf-glare { fill: #6b3f92; opacity: .5; }
+.tf-sand-top, .tf-sand-bottom, .tf-grain { fill: var(--mark-sand); }
+.tf-glare { fill: var(--mark-glare); opacity: var(--mark-glare-a); }
 
 /* transform-box: view-box — иначе сдвиг считался бы от рамки самой фигуры,
    а не от системы координат svg, и песок уехал бы мимо колбы */
@@ -661,7 +745,7 @@ footer {
 
 /* Шапка отделяется тенью, только когда под неё что-то уехало */
 .top { transition: box-shadow .25s ease, background .25s ease; }
-.top.is-stuck { box-shadow: 0 6px 24px rgba(63, 43, 82, .08); }
+.top.is-stuck { box-shadow: var(--shadow-stuck); }
 
 /* Карточки и снимки приподнимаются под курсором */
 .card, .plan {
@@ -690,14 +774,14 @@ footer {
   background: var(--lilac);
 }
 
-.shot:hover { transform: translateY(-6px); box-shadow: 0 26px 60px rgba(63, 43, 82, .16); }
+.shot:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
 /* Картинку внутри чуть приближаем — рамка обрезает лишнее сама */
 .shot img { transition: transform .5s cubic-bezier(.2, .7, .3, 1); }
 .shot:hover img { transform: scale(1.03); }
 
 /* Нажатие должно чувствоваться: кнопка проседает под пальцем */
 .btn:active { transform: scale(.97); }
-.btn-main:hover { box-shadow: 0 16px 34px rgba(112, 64, 144, .34); }
+.btn-main:hover { box-shadow: var(--btn-shadow-hover); }
 
 /* Ссылки в тексте подчёркиваются растущей линией вместо резкого underline */
 p a:not(.btn), .foot-grid a:not(.brand), .requisites a {
@@ -874,8 +958,8 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
   background: linear-gradient(
     90deg,
     var(--accent),
-    rgba(112, 64, 144, .45) 78%,
-    rgba(112, 64, 144, 0)
+    var(--accent-half) 78%,
+    var(--accent-none)
   );
   opacity: .85;
   transform: scaleX(var(--read, 0));
@@ -961,7 +1045,7 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
   width: 54px;
   height: 3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--accent), rgba(112, 64, 144, .35));
+  background: linear-gradient(90deg, var(--accent), var(--accent-half));
   transform: scaleX(0);
   transform-origin: 0 50%;
   transition: transform .6s cubic-bezier(.2, .7, .3, 1) .12s;
@@ -1024,9 +1108,9 @@ details[open]::details-content { block-size: auto; }
   border-radius: 50%;
   background: radial-gradient(
     circle closest-side,
-    rgba(138, 84, 178, .34),
-    rgba(138, 84, 178, .14) 46%,
-    rgba(138, 84, 178, 0) 72%
+    var(--glow-core),
+    var(--glow-mid) 46%,
+    var(--glow-edge) 72%
   );
   opacity: 0;
   /* Отставание нарочное: свет догоняет курсор, а не приклеен к нему —
@@ -1045,4 +1129,149 @@ details[open]::details-content { block-size: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   .glow { display: none; }
+}
+
+/* Колбы в заставке залиты градиентом из разметки, а его остановки — тоже
+   свойства css, поэтому тема достаёт и их */
+#tfBody stop:first-child { stop-color: var(--mark-glass-1); }
+#tfBody stop:last-child { stop-color: var(--mark-glass-2); }
+
+/* ── Часы на первом экране ─────────────────────────────────────────────
+
+   Знак-картинка и трёхмерная сцена лежат в одной коробке друг на друге:
+   пока сцена не готова (или не завелась вовсе), виден знак; когда
+   отрисовался первый кадр, они меняются местами растворением — без
+   скачка раскладки, потому что коробка своего размера не меняет. */
+
+.hero-stage {
+  position: relative;
+  width: min(330px, 88%);
+  aspect-ratio: .78;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-stage .hero-art-in {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .5s ease;
+}
+
+.hero-glass {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity .8s ease;
+  /* Крутить часы можно мышью, но палец по ним должен листать страницу */
+  touch-action: pan-y;
+  cursor: grab;
+}
+.hero-glass:active { cursor: grabbing; }
+
+.hero-art.is-3d .hero-glass { opacity: 1; }
+.hero-art.is-3d .hero-art-in { opacity: 0; pointer-events: none; }
+
+@media (max-width: 900px) {
+  .hero-stage { width: min(215px, 60%); }
+}
+
+/* ── Шапка на телефоне ─────────────────────────────────────────────────
+
+   Переключатель темы занял место, и последняя ссылка перестала влезать:
+   на узком экране в шапке остаются он и «Скачать». Разделы от этого не
+   теряются — в подвале они все, и на телефоне до него один жест. */
+
+@media (max-width: 560px) {
+  .top .wrap { gap: 12px; }
+  .top nav { gap: 12px; }
+  .top nav a:not(.btn) { display: none; }
+  .theme-switch { width: 34px; height: 34px; }
+  .theme-switch svg { width: 17px; height: 17px; }
+  .btn-sm { padding: 9px 16px; font-size: .88rem; }
+}
+
+/* ── Переключатель темы ────────────────────────────────────────────────
+
+   Солнце превращается в месяц: лучи поджимаются и гаснут, а по диску
+   сверху справа наезжает вырез. Вырез — это чёрный круг в маске, то есть
+   в нём именно дырка, а не плашка цвета фона: шапка полупрозрачная, и
+   плашка выдала бы себя, как только под неё что-нибудь подъедет. */
+
+.theme-switch {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform .2s ease, border-color .2s ease, background .25s ease;
+}
+.theme-switch:hover { transform: scale(1.08); border-color: var(--lilac); }
+.theme-switch:active { transform: scale(.94); }
+.theme-switch svg { width: 19px; height: 19px; overflow: visible; }
+
+.theme-switch .rays,
+.theme-switch .bite {
+  transform-box: view-box;
+  transform-origin: center;
+  transition:
+    transform .55s cubic-bezier(.36, 1.32, .5, 1),
+    opacity .35s ease;
+}
+
+/* Светлая тема: вырез отведён за край диска, лучи на месте */
+.theme-switch .bite { transform: translate(9.5px, -9.5px); }
+.theme-switch .disc { fill: currentColor; }
+
+[data-theme="dark"] .theme-switch .bite { transform: translate(4.6px, -4.6px); }
+[data-theme="dark"] .theme-switch .rays { transform: scale(.4) rotate(40deg); opacity: 0; }
+
+/* ── Смена темы ────────────────────────────────────────────────────────
+
+   Где браузер умеет переходы между состояниями страницы, новая тема
+   наезжает кругом от самой кнопки — будто её оттуда налили. Где не
+   умеет, цвета просто переезжают за треть секунды: для этого на время
+   перехода странице ставится класс, а не постоянный transition, иначе
+   любое наведение тянуло бы за собой фон.
+
+   Переход именно круговой и от кнопки: так видно, что тему поменяли
+   вы и вот этим нажатием. */
+
+.theming,
+.theming * {
+  transition:
+    background-color .34s ease,
+    border-color .34s ease,
+    color .34s ease,
+    fill .34s ease,
+    box-shadow .34s ease !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  /* Новая тема ложится поверх старой: круг вырезается по ней */
+  ::view-transition-old(root) { z-index: 1; }
+  ::view-transition-new(root) { z-index: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch .rays,
+  .theme-switch .bite { transition: none; }
 }

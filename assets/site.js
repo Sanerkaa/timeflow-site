@@ -9,6 +9,92 @@
   var reduced = window.matchMedia &&
     matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* ── Тема ──────────────────────────────────────────────────────────── */
+
+  /* Свой выбор сильнее системной настройки, но только если он сделан:
+     пока в памяти пусто, сайт идёт за системой и продолжает её слушать —
+     телефон переключился на ночной режим, переключился и сайт.
+
+     Сама смена: где браузер умеет переходы между состояниями страницы,
+     новая тема наезжает кругом от кнопки, будто её оттуда налили. Где не
+     умеет — цвета переезжают через класс, который висит только на время
+     перехода: постоянный transition на цвета тянул бы за собой каждое
+     наведение. */
+
+  var root = document.documentElement;
+  var themeSwitch = document.getElementById('themeSwitch');
+
+  var markTheme = function (name) {
+    root.dataset.theme = name;
+    var bar = document.querySelector('meta[name="theme-color"]');
+    if (bar) bar.setAttribute('content', name === 'dark' ? '#131019' : '#f8f5fb');
+    if (themeSwitch) {
+      themeSwitch.setAttribute('aria-pressed', name === 'dark' ? 'true' : 'false');
+      themeSwitch.setAttribute(
+        'aria-label',
+        name === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему'
+      );
+    }
+    // Часам на первом экране тема тоже нужна: у них свои цвета стекла,
+    // песка и света
+    document.dispatchEvent(new CustomEvent('tf:theme', { detail: name }));
+  };
+
+  markTheme(root.dataset.theme === 'dark' ? 'dark' : 'light');
+
+  var system = window.matchMedia && matchMedia('(prefers-color-scheme: dark)');
+  if (system && system.addEventListener) {
+    system.addEventListener('change', function () {
+      var saved = null;
+      try { saved = localStorage.getItem('tf-theme'); } catch (e) { saved = null; }
+      if (saved === 'light' || saved === 'dark') return;
+      markTheme(system.matches ? 'dark' : 'light');
+    });
+  }
+
+  if (themeSwitch) {
+    themeSwitch.addEventListener('click', function () {
+      var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('tf-theme', next); } catch (e) {}
+
+      // Круг растёт из кнопки, поэтому радиуса нужно до самого дальнего
+      // угла окна — иначе он не докроет страницу
+      var box = themeSwitch.getBoundingClientRect();
+      var x = box.left + box.width / 2;
+      var y = box.top + box.height / 2;
+      var reach = Math.sqrt(
+        Math.pow(Math.max(x, innerWidth - x), 2) +
+        Math.pow(Math.max(y, innerHeight - y), 2)
+      );
+
+      if (reduced || !document.startViewTransition) {
+        if (!reduced) {
+          root.classList.add('theming');
+          setTimeout(function () { root.classList.remove('theming'); }, 420);
+        }
+        markTheme(next);
+        return;
+      }
+
+      var turn = document.startViewTransition(function () { markTheme(next); });
+      turn.ready.then(function () {
+        root.animate(
+          {
+            clipPath: [
+              'circle(0px at ' + x + 'px ' + y + 'px)',
+              'circle(' + reach + 'px at ' + x + 'px ' + y + 'px)',
+            ],
+          },
+          {
+            duration: 620,
+            easing: 'cubic-bezier(.3, .7, .2, 1)',
+            pseudoElement: '::view-transition-new(root)',
+          }
+        );
+      }).catch(function () {});
+    });
+  }
+
   /* ── Заставка ──────────────────────────────────────────────────────── */
 
   /* Снимаем, когда страница догрузилась, но не раньше, чем через полсекунды
@@ -157,6 +243,7 @@
 
     /* Знак на первом экране чуть ходит за курсором */
     var art = document.querySelector('.hero-art-in');
+    var artBox = art && art.closest ? art.closest('.hero-art') : null;
     if (art) {
       var ax = 0, ay = 0;
       var move = perFrame(function () {
@@ -164,6 +251,9 @@
           'translate3d(' + ax.toFixed(1) + 'px,' + ay.toFixed(1) + 'px,0)';
       });
       addEventListener('mousemove', function (e) {
+        // Когда знак сменился трёхмерными часами, за курсором ходят уже
+        // они сами — внутри сцены, наклоном, а не сдвигом картинки
+        if (artBox && artBox.classList.contains('is-3d')) return;
         ax = (e.clientX / innerWidth - .5) * 22;
         ay = (e.clientY / innerHeight - .5) * 16;
         move();

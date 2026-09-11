@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Цвет полосы браузера на телефоне; скрипт ниже правит его под тему -->
+<meta name="theme-color" content="#f8f5fb">
 <title>Политика конфиденциальности — TimeFlow</title>
 <meta name="description" content="Какие данные собирает приложение TimeFlow, зачем они нужны, кому передаются и как их удалить.">
 <link rel="icon" href="assets/icon-180.png">
@@ -10,10 +12,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
-<!-- Класс js ставим до отрисовки: блоки, которые всплывают при
-     прокрутке, прячутся только при живом скрипте. Без него класса
-     нет, прятать некому — и страница видна целиком. -->
-<script>document.documentElement.className = "js"</script>
+<!-- Класс js и тему ставим до первой отрисовки.
+
+     Класс js: блоки, которые всплывают при прокрутке, прячутся только
+     при живом скрипте. Без него класса нет, прятать некому — и
+     страница видна целиком.
+
+     Тема: сначала та, что человек выбрал сам, иначе системная. Код
+     стоит здесь, а не в site.js, именно из-за порядка: site.js
+     отложенный, и страница успела бы мигнуть светлым. -->
+<script>
+(function () {
+  var root = document.documentElement;
+  root.className = "js";
+  var pick = null;
+  try { pick = localStorage.getItem("tf-theme"); } catch (e) { pick = null; }
+  if (pick !== "light" && pick !== "dark") {
+    pick = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  root.dataset.theme = pick;
+  var bar = document.querySelector('meta[name="theme-color"]');
+  if (bar) bar.setAttribute("content", pick === "dark" ? "#131019" : "#f8f5fb");
+})();
+</script>
 <script src="assets/site.js" defer></script>
 </head>
 <body>
@@ -72,6 +93,24 @@
     <nav>
       <a href="/tariffs">Тарифы</a>
       <a href="/oferta" class="hide-sm">Оферта</a>
+      <button class="theme-switch" id="themeSwitch" type="button"
+              aria-label="Включить тёмную тему" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <!-- Вырез месяца — дырка в маске, а не плашка цвета фона:
+               шапка полупрозрачная, плашку было бы видно -->
+          <mask id="tfBite">
+            <rect x="0" y="0" width="24" height="24" fill="#fff"/>
+            <circle class="bite" cx="12" cy="12" r="5.4" fill="#000"/>
+          </mask>
+          <g class="rays" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none">
+            <path d="M12 2.2v2"/><path d="M12 19.8v2"/>
+            <path d="M2.2 12h2"/><path d="M19.8 12h2"/>
+            <path d="M5.5 5.5l1.4 1.4"/><path d="M17.1 17.1l1.4 1.4"/>
+            <path d="M18.5 5.5l-1.4 1.4"/><path d="M6.9 17.1l-1.4 1.4"/>
+          </g>
+          <circle class="disc" cx="12" cy="12" r="5.4" mask="url(#tfBite)"/>
+        </svg>
+      </button>
       <a href="https://github.com/Sanerkaa/timeflow-site/releases/latest/download/TimeFlow.apk" class="btn btn-main btn-sm">Скачать</a>
     </nav>
   </div>
