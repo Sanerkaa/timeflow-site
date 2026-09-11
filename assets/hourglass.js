@@ -57,7 +57,7 @@ const REPOSE = 0.62;      /* тангенс угла откоса насыпи: 
                              не успевает довести её до предела. */
 const FLOW = 1.1;         // как прытко оползает насыпь: 0.3 — вязко, 1.5 — как вода
 const PASSES = 3;         // сколько раз за шаг пересчитывать оползание (дороже всего)
-const GRID = 52;          // мелкость сетки столбиков: 36 дешевле, 64 глаже, растёт как квадрат
+const GRID = 64;          // мелкость сетки столбиков: 44 дешевле, 80 глаже, растёт как квадрат
 const THIN = 0.0015;      // тоньше этого слой песка считается отсутствующим
 const SMOOTH = 3;         /* сколько раз сглаживать поверхность при отрисовке.
                              Расчёт не трогает, только вид: 0 — как есть, по
@@ -387,6 +387,21 @@ function build(THREE) {
     }
   }
 
+  /* Каёмка — клетки сразу за краем полости. Песка в них не бывает:
+     расчёт работает только по inside. Нужны они для отрисовки — чтобы
+     обвод песка у стекла шёл по окружности, а не ступенями по клеткам
+     (см. shape). */
+  const skirt = new Uint8Array(CELLS);
+  for (let j = 0; j < GRID; j++) {
+    for (let i = 0; i < GRID; i++) {
+      const c = j * GRID + i;
+      if (inside[c]) continue;
+      const near = (i > 0 && inside[c - 1]) || (i < GRID - 1 && inside[c + 1]) ||
+        (c >= GRID && inside[c - GRID]) || (c + GRID < CELLS && inside[c + GRID]);
+      skirt[c] = near ? 1 : 0;
+    }
+  }
+
   let bulbVolume = 0;
   for (let c = 0; c < CELLS; c++) if (inside[c]) bulbVolume += cCap[c] * CELL * CELL;
   const sandVolume = bulbVolume * FILL;
@@ -417,13 +432,19 @@ function build(THREE) {
      решается на каждом кадре — см. shape(). */
   const vertexOf = new Int32Array(CELLS).fill(-1);
   let vertices = 0;
-  for (let c = 0; c < CELLS; c++) if (inside[c]) vertexOf[c] = vertices++;
+  for (let c = 0; c < CELLS; c++) if (inside[c] || skirt[c]) vertexOf[c] = vertices++;
 
+  /* Клетка идёт в дело, если хотя бы один её угол внутри полости, а
+     остальные — внутри или в каёмке. Так у обвода не остаётся ступеней:
+     клетки на самом краю не выбрасываются, а дорисовываются до стенки. */
   const quads = [];
   for (let j = 0; j < GRID - 1; j++) {
     for (let i = 0; i < GRID - 1; i++) {
       const a = j * GRID + i, b = a + 1, d = a + GRID, e = d + 1;
-      if (!inside[a] || !inside[b] || !inside[d] || !inside[e]) continue;
+      const okA = inside[a] || skirt[a], okB = inside[b] || skirt[b];
+      const okD = inside[d] || skirt[d], okE = inside[e] || skirt[e];
+      if (!okA || !okB || !okD || !okE) continue;
+      if (!inside[a] && !inside[b] && !inside[d] && !inside[e]) continue;
       quads.push(a, b, d, e);
     }
   }
@@ -442,9 +463,15 @@ function build(THREE) {
     color: theme.sand, roughness: 0.88, metalness: 0.02,
     side: THREE.DoubleSide, envMapIntensity: 0.5,
   });
-  /* Крупинки: ровная заливка читается как пластилин. Рябь считается от
-     положения точки на самой поверхности, поэтому держится за песок, а не
-     ползёт по экрану. */
+  /* Крупинки: ровная заливка читается как пластилин.
+
+     Рябь считается от положения точки на поверхности — так она держится
+     за песок, а не ползёт по экрану. Но берутся только две координаты
+     из трёх, без высоты, и вот почему: округление высоты на склоне даёт
+     полосы поперёк склона, ровно как горизонтали на карте. Высоты у
+     насыпи гладкие (наклон держится 0.62 без единой полки), а рябь
+     рисовала на них лесенку. Без высоты рябь ложится как вид сверху и
+     никаких полос не делает. */
   sandMat.onBeforeCompile = (shader) => {
     shader.vertexShader = 'varying vec3 vGrain;\n' + shader.vertexShader.replace(
       '#include <begin_vertex>',
@@ -453,8 +480,8 @@ function build(THREE) {
     shader.fragmentShader = 'varying vec3 vGrain;\n' + shader.fragmentShader.replace(
       '#include <color_fragment>',
       '#include <color_fragment>\n' +
-      '  vec3 gq = floor(vGrain * 190.0);\n' +
-      '  float gs = fract(sin(dot(gq, vec3(12.9898, 78.233, 37.719))) * 43758.5453);\n' +
+      '  vec2 gq = floor(vGrain.xz * 210.0);\n' +
+      '  float gs = fract(sin(dot(gq, vec2(12.9898, 78.233))) * 43758.5453);\n' +
       '  diffuseColor.rgb *= 0.86 + 0.28 * gs;'
     );
   };
@@ -533,6 +560,9 @@ function build(THREE) {
   const thick = new Float32Array(CELLS); // толщина слоя в столбике
   const soft = new Float32Array(CELLS);  // она же, сглаженная по соседям
   const blur = new Float32Array(CELLS);  // промежуточный слой сглаживания
+  const vx = new Float32Array(CELLS);    // где на самом деле стоит вершина
+  const vz = new Float32Array(CELLS);
+  const from = new Int32Array(CELLS);    // у кого каёмка берёт значения
   const area = CELL * CELL;
   let grains = 0;                        // сколько песчинок сейчас в полёте
 
@@ -829,6 +859,26 @@ function build(THREE) {
       surf[c] = draining ? cFloor[c] + soft[c] : HY - soft[c];
     }
 
+    /* Каёмка берёт толщину и высоту у самого «мокрого» соседа внутри
+       полости: песок у стекла не кончается сам собой, его там режет
+       стекло. Откуда взяли — запоминаем, чтобы оттуда же взять и
+       наклон поверхности для освещения. */
+    for (let c = 0; c < CELLS; c++) {
+      if (!skirt[c]) continue;
+      const i = c % GRID;
+      let best = -1, top = -1;
+      for (let k = 0; k < 4; k++) {
+        if (k === 0 && i === GRID - 1) continue;
+        if (k === 1 && i === 0) continue;
+        const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
+        if (d < 0 || d >= CELLS || !inside[d]) continue;
+        if (soft[d] > top) { top = soft[d]; best = d; }
+      }
+      from[c] = best;
+      soft[c] = best >= 0 ? soft[best] : 0;
+      surf[c] = best >= 0 ? surf[best] : (draining ? 0 : HY);
+    }
+
     for (let c = 0; c < CELLS; c++) {
       if (!inside[c]) continue;
       const i = c % GRID;
@@ -841,15 +891,14 @@ function build(THREE) {
       const dx = (surf[right] - surf[left]) / spanX;
       const dz = (surf[front] - surf[back]) / spanZ;
 
-      let x = px[c], z = pz[c];
-      if (edge[c]) {
-        /* Крайний столбик дотягиваем до стекла: сетка кончается за
-           полклетки до стенки, и без этого между песком и стеклом
-           оставалась бы щель */
-        const r = Math.hypot(x, z);
-        const w = radiusAt(surf[c]) * 0.99;
-        if (w > r && r > 1e-5) { x *= w / r; z *= w / r; }
-      }
+      /* Столбики внутри полости стоят там, где стоят: до стекла сетку
+         дотягивает каёмка (ниже), а раньше это делал сдвиг крайнего
+         ряда — от него оставались ступени, потому что дело было не в
+         вершинах, а в выброшенных клетках. */
+      const x = px[c], z = pz[c];
+
+      vx[c] = x;
+      vz[c] = z;
 
       const vi = vertexOf[c] * 3;
       pos[vi] = x;
@@ -862,10 +911,12 @@ function build(THREE) {
       nor[vi + 1] = ny / len;
       nor[vi + 2] = nz / len;
 
-      // Дно насыпи под этой вершиной
-      lowPos[vi] = px[c];
-      lowPos[vi + 1] = dir * (draining ? cFloor[c] : HY);
-      lowPos[vi + 2] = pz[c];
+      /* Дно насыпи — под этой же вершиной, не под серединой клетки. В
+         пересыпающей колбе донце — стенка воронки, и её высоту берём на
+         том радиусе, где вершина оказалась. */
+      lowPos[vi] = x;
+      lowPos[vi + 1] = dir * (draining ? floorAt(Math.hypot(x, z)) : HY);
+      lowPos[vi + 2] = z;
 
       // Дно смотрит в другую сторону, чем верх: прочь от массы песка
       const bx = face * (draining ? fdx[c] : 0);
@@ -875,6 +926,36 @@ function build(THREE) {
       lowNor[vi] = bx / blen;
       lowNor[vi + 1] = by / blen;
       lowNor[vi + 2] = bz / blen;
+    }
+
+    /* Каёмка: садится ровно на стенку колбы на своей высоте, а наклон
+       поверхности и дно берёт у того же соседа, откуда взяла высоту. */
+    for (let c = 0; c < CELLS; c++) {
+      if (!skirt[c]) continue;
+      const vi = vertexOf[c] * 3;
+      const src = from[c];
+      const r = Math.hypot(px[c], pz[c]);
+      const w = radiusAt(surf[c]) * 0.995;
+      const x = r > 1e-5 ? px[c] * w / r : 0;
+      const z = r > 1e-5 ? pz[c] * w / r : 0;
+      vx[c] = x;
+      vz[c] = z;
+
+      pos[vi] = x;
+      pos[vi + 1] = dir * surf[c];
+      pos[vi + 2] = z;
+      lowPos[vi] = x;
+      lowPos[vi + 1] = dir * (draining ? floorAt(Math.hypot(x, z)) : HY);
+      lowPos[vi + 2] = z;
+
+      if (src >= 0) {
+        const si = vertexOf[src] * 3;
+        nor[vi] = nor[si]; nor[vi + 1] = nor[si + 1]; nor[vi + 2] = nor[si + 2];
+        lowNor[vi] = lowNor[si]; lowNor[vi + 1] = lowNor[si + 1]; lowNor[vi + 2] = lowNor[si + 2];
+      } else {
+        nor[vi] = 0; nor[vi + 1] = dir * face; nor[vi + 2] = 0;
+        lowNor[vi] = 0; lowNor[vi + 1] = -dir * face; lowNor[vi + 2] = 0;
+      }
     }
 
     /* Сборка треугольников.
@@ -924,8 +1005,8 @@ function build(THREE) {
         const dryC = w1 ? c2 : c1;
         const span = soft[wetC] - soft[dryC];
         const u = span > 1e-9 ? Math.min(1, Math.max(0, (soft[wetC] - THIN) / span)) : 1;
-        const cx = px[wetC] + (px[dryC] - px[wetC]) * u;
-        const cz = pz[wetC] + (pz[dryC] - pz[wetC]) * u;
+        const cx = vx[wetC] + (vx[dryC] - vx[wetC]) * u;
+        const cz = vz[wetC] + (vz[dryC] - vz[wetC]) * u;
         const cs = draining ? floorAt(Math.hypot(cx, cz)) + THIN : HY - THIN;
 
         const vi = extra * 3;
