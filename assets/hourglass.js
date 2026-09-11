@@ -856,7 +856,33 @@ function build(THREE) {
 
     for (let c = 0; c < CELLS; c++) {
       if (!inside[c]) continue;
+      // Толщина не больше, чем столбик может держать
+      if (soft[c] > cCap[c]) soft[c] = cCap[c];
       surf[c] = draining ? cFloor[c] + soft[c] : HY - soft[c];
+    }
+
+    /* Сглаживание самой поверхности, поверх сглаживания толщины. Нужно
+       из-за первых секунд после переворота: песок ещё не оплыл, и у
+       стекла столбики стоят полными до потолка полости, а рядом — уже
+       нет. Разница между соседями получается в клетку, и по верху
+       насыпи идёт гребёнка, из каждой клетки по волоску. Толщину так не
+       сгладить: упирается она не в соседей, а в саму колбу.
+
+       После сглаживания высоту возвращаем в разрешённые пределы — от
+       стенки воронки до потолка полости, — чтобы песок не выглядывал
+       ни сквозь стекло, ни из-под донца. */
+    for (let c = 0; c < CELLS; c++) {
+      if (!inside[c]) continue;
+      const i = c % GRID;
+      const l = i > 0 && inside[c - 1] ? c - 1 : c;
+      const r = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
+      const b = c >= GRID && inside[c - GRID] ? c - GRID : c;
+      const f = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
+      blur[c] = (2 * surf[c] + surf[l] + surf[r] + surf[b] + surf[f]) / 6;
+    }
+    for (let c = 0; c < CELLS; c++) {
+      if (!inside[c]) continue;
+      surf[c] = Math.min(HY, Math.max(cFloor[c], blur[c]));
     }
 
     /* Каёмка берёт толщину и высоту у самого «мокрого» соседа внутри
