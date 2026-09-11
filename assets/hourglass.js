@@ -39,11 +39,44 @@ const R = 0.600;   // самый широкий радиус полости
 const NECK = 0.052; // радиус горловины
 const HY = 0.920;  // от горловины до донца колбы
 
-const GRID = 52;         // сетка столбиков песка на колбу
+/* ── Настройки ───────────────────────────────────────────────────────────
+
+   Всё, что имеет смысл крутить руками, собрано здесь. Рядом с каждым
+   числом — что оно делает и в каких пределах разумно. Менять можно прямо
+   тут, ничего больше не трогая: остальной код читает эти имена.
+
+   Размеры выше (R, NECK, HY) и профиль колбы PROFILE — это уже форма
+   часов, а не настройка: их менять стоит вместе с оглядкой на рисунок. */
+
+// Песок
+const FILL = 0.46;        // какую долю колбы занимает песок: 0.3 — на треть, 0.6 — почти доверху
+const DRAIN_SECONDS = 15; // за сколько секунд пересыпается полная колба
+const REPOSE = 0.62;      /* тангенс угла откоса насыпи: 0.5 — 27°, 0.62 — 32°, 0.9 — 42°.
+                             Пока сверху сыплется, склон выходит немного круче
+                             заданного: насыпь всё время подсыпают, и оползание
+                             не успевает довести её до предела. */
+const FLOW = 1.1;         // как прытко оползает насыпь: 0.3 — вязко, 1.5 — как вода
+const PASSES = 3;         // сколько раз за шаг пересчитывать оползание (дороже всего)
+const GRID = 52;          // мелкость сетки столбиков: 36 дешевле, 64 глаже, растёт как квадрат
+const THIN = 0.0015;      // тоньше этого слой песка считается отсутствующим
+
+// Песчинки
+const GRAIN_COUNT = 16000; // на сколько песчинок делится колба: чем больше, тем ровнее ложится
+const GRAINS = 1200;       // сколько песчинок может лететь одновременно
+const GRAIN_SIZE = 0.036;  // размер песчинки на вид
+const FALL = 3.6;          // ускорение падения
+
+// Движение часов
+const SPRING = 44;   // жёсткость пружины переворота: больше — резче
+const DAMP = 7.2;    // трение пружины: меньше — сильнее перебег и качание
+const WHIRL = 13;    // предел скорости вращения, рад/с (примерно два оборота)
+const SLIP = 1.4;    // трение свободного вращения вбок: меньше — дольше крутится
+const REST = 1.8;    // сколько секунд пустые часы стоят до самопереворота
+const LEAN = 0.38;   // наклон за курсором вбок, радианы
+const NOD = 0.24;    // наклон за курсором вверх-вниз
+const BOB = 0.03;    // покачивание на месте
+
 const CELL = 2 * R / GRID;
-const REPOSE = 0.62;     // тангенс угла откоса, ~32°
-const DRAIN_SECONDS = 15; // за сколько пересыпается полная колба
-const GRAINS = 420;      // сколько песчинок может лететь одновременно
 
 /* Таблица профиля в обе стороны: радиус по высоте и высота по радиусу.
    Нужны обе — первая рисует стекло, вторая говорит, на какой высоте
@@ -340,7 +373,7 @@ function build(THREE) {
 
   let bulbVolume = 0;
   for (let c = 0; c < CELLS; c++) if (inside[c]) bulbVolume += cCap[c] * CELL * CELL;
-  const sandVolume = bulbVolume * 0.46;
+  const sandVolume = bulbVolume * FILL;
 
   const vol = [new Float32Array(CELLS), new Float32Array(CELLS)];
   fillLevel(vol[0], sandVolume);
@@ -440,14 +473,14 @@ function build(THREE) {
   grainGeo.setAttribute('position', new THREE.BufferAttribute(grainPos, 3));
   grainGeo.setDrawRange(0, 0);
   const grainMat = new THREE.PointsMaterial({
-    size: 0.052, sizeAttenuation: true, alphaTest: 0.45,
+    size: GRAIN_SIZE, sizeAttenuation: true, alphaTest: 0.45,
     map: grainTexture(THREE), color: theme.sand,
   });
   const stream = new THREE.Points(grainGeo, grainMat);
   stream.frustumCulled = false;
   clock.add(stream);
 
-  const grainVolume = sandVolume / 6000;
+  const grainVolume = sandVolume / GRAIN_COUNT;
   let pending = 0;
 
   /* ── Пересыпание ────────────────────────────────────────────────────
@@ -458,12 +491,26 @@ function build(THREE) {
   const holes = [];
   for (let c = 0; c < CELLS; c++) if (inside[c] && cFloor[c] < 0.001) holes.push(c);
 
+  /* Соседи для оползания — восемь, вместе с наклонными.
+
+     С четырьмя песок мог течь только по осям сетки, и насыпь вырастала
+     не конусом, а четырёхгранной пирамидой: угол откоса соблюдался по
+     осям, а по диагонали склон выходил круче ровно в корень из двух
+     (замерено: 0.82 против 0.59 при заданных 0.62). Отсюда и ребра, и
+     ступени на склонах. С восемью соседями растекание почти одинаково
+     во все стороны, и насыпь получается конусом.
+
+     Расстояние до наклонного соседа больше в корень из двух — и порог
+     угла откоса, и порция песка считаются с поправкой на это. */
+  const STEP_I = [1, -1, 0, 0, 1, 1, -1, -1];
+  const STEP_J = [0, 0, 1, -1, 1, -1, 1, -1];
+  const STEP_D = [1, 1, 1, 1, Math.SQRT2, Math.SQRT2, Math.SQRT2, Math.SQRT2];
+
   const phi = new Float32Array(CELLS);   // высота с поправкой на уклон
   const surf = new Float32Array(CELLS);  // поверхность песка для отрисовки
   const thick = new Float32Array(CELLS); // толщина слоя в столбике
   const soft = new Float32Array(CELLS);  // она же, сглаженная по соседям
   const area = CELL * CELL;
-  const FALL = 3.6;                      // ускорение падения песчинок
   let grains = 0;                        // сколько песчинок сейчас в полёте
 
   function simulate(dt, gx, gy, gz) {
@@ -502,28 +549,31 @@ function build(THREE) {
       phi[c] = (draining ? cFloor[c] + t : t) - (gx * px[c] + gz * pz[c]) * lean;
     }
 
-    for (let pass = 0; pass < 3; pass++) {
-      for (let c = 0; c < CELLS; c++) {
-        if (!inside[c] || v[c] <= 0) continue;
-        const i = c % GRID;
-        for (let k = 0; k < 4; k++) {
-          if (k === 0 && i === GRID - 1) continue;
-          if (k === 1 && i === 0) continue;
-          const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
-          if (d < 0 || d >= CELLS || !inside[d]) continue;
-          const over = phi[c] - phi[d] - limit;
-          if (over <= 0) continue;
-          /* В столбик, набитый до стекла, песок не лезет. Без этой
-             проверки перетекание шло по одним высотам и не знало, что у
-             кромки колба сужается и держать там нечего: песок толкали
-             туда и дальше, столбики набивались выше возможного, а потом
-             торчали шипами. */
-          const space = cCap[d] * area - v[d];
-          if (space <= 0) continue;
-          const move = Math.min(v[c] * 0.3, over * area * flow, space);
-          if (move <= 0) continue;
-          v[c] -= move; v[d] += move;
-          phi[c] -= move / area; phi[d] += move / area;
+    for (let pass = 0; pass < PASSES; pass++) {
+      for (let j = 0; j < GRID; j++) {
+        for (let i = 0; i < GRID; i++) {
+          const c = j * GRID + i;
+          if (!inside[c] || v[c] <= 0) continue;
+          for (let k = 0; k < 8; k++) {
+            const ni = i + STEP_I[k];
+            const nj = j + STEP_J[k];
+            if (ni < 0 || ni >= GRID || nj < 0 || nj >= GRID) continue;
+            const d = nj * GRID + ni;
+            if (!inside[d]) continue;
+            const over = phi[c] - phi[d] - limit * STEP_D[k];
+            if (over <= 0) continue;
+            /* В столбик, набитый до стекла, песок не лезет. Без этой
+               проверки перетекание шло по одним высотам и не знало, что
+               у кромки колба сужается и держать там нечего: песок
+               толкали туда и дальше, столбики набивались выше
+               возможного, а потом торчали шипами. */
+            const space = cCap[d] * area - v[d];
+            if (space <= 0) continue;
+            const move = Math.min(v[c] * 0.15, over * area * flow / STEP_D[k], space);
+            if (move <= 0) continue;
+            v[c] -= move; v[d] += move;
+            phi[c] -= move / area; phi[d] += move / area;
+          }
         }
       }
     }
@@ -543,13 +593,13 @@ function build(THREE) {
         if (!inside[c] || v[c] <= 0) continue;
         const room = cCap[c] * area;
         if (v[c] <= room) continue;
-        const i = c % GRID;
+        const i = c % GRID, j = (c - i) / GRID;
         let best = -1, most = 0;
-        for (let k = 0; k < 4; k++) {
-          if (k === 0 && i === GRID - 1) continue;
-          if (k === 1 && i === 0) continue;
-          const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
-          if (d < 0 || d >= CELLS || !inside[d]) continue;
+        for (let k = 0; k < 8; k++) {
+          const ni = i + STEP_I[k], nj = j + STEP_J[k];
+          if (ni < 0 || ni >= GRID || nj < 0 || nj >= GRID) continue;
+          const d = nj * GRID + ni;
+          if (!inside[d]) continue;
           const free = cCap[d] * area - v[d];
           if (free > most) { most = free; best = d; }
         }
@@ -647,22 +697,31 @@ function build(THREE) {
     }
   }
 
-  /* Упавшая песчинка ложится не строго в свою ячейку, а с растеканием
-     по соседям: иначе на насыпи вырастают отдельные пики в одну ячейку
-     шириной, и оползание не успевает их сглаживать. */
+  /* Упавшая песчинка ложится не в одну ячейку, а мазком три на три.
+
+     Иначе видно, как заполняется колба: своя порция песка у песчинки
+     невелика, но в пересчёте на один столбик это заметная ступенька, и
+     насыпь росла на глазах квадратиками. Мазком та же порция
+     размазывается по девяти столбикам, и ступенька выходит на порядок
+     ниже. Сумма веса — единица, песка не прибавляется и не убывает; то,
+     что не влезло у стенки, остаётся в самой ячейке. */
+  const SPOT_I = [0, 1, -1, 0, 0, 1, 1, -1, -1];
+  const SPOT_J = [0, 0, 0, 1, -1, 1, -1, 1, -1];
+  const SPOT_W = [0.25, 0.125, 0.125, 0.125, 0.125, 0.0625, 0.0625, 0.0625, 0.0625];
+
   function settle(ch, c, amount) {
     const v = vol[ch];
-    const i = c % GRID;
-    let spread = 0;
-    for (let k = 0; k < 4; k++) {
-      if (k === 0 && i === GRID - 1) continue;
-      if (k === 1 && i === 0) continue;
-      const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
-      if (d < 0 || d >= CELLS || !inside[d]) continue;
-      v[d] += amount * 0.12;
-      spread += 0.12;
+    const i = c % GRID, j = (c - i) / GRID;
+    let placed = 0;
+    for (let k = 0; k < 9; k++) {
+      const ni = i + SPOT_I[k], nj = j + SPOT_J[k];
+      if (ni < 0 || ni >= GRID || nj < 0 || nj >= GRID) continue;
+      const d = nj * GRID + ni;
+      if (!inside[d]) continue;
+      v[d] += amount * SPOT_W[k];
+      placed += SPOT_W[k];
     }
-    v[c] += amount * (1 - spread);
+    if (placed < 1) v[c] += amount * (1 - placed);
   }
 
   function cellAt(x, z) {
@@ -681,7 +740,6 @@ function build(THREE) {
 
   /* ── Поверхность песка в геометрию ──────────────────────────────────── */
 
-  const THIN = 0.0015;      // тоньше этого песка в столбике считай что нет
   const brim = new Uint8Array(CELLS);
 
   function shape(ch, gy) {
@@ -861,53 +919,77 @@ function build(THREE) {
      струйка замирает в боковом положении и меняет направление после
      переворота, а насыпь слегка съезжает вместе с наклоном за курсором. */
 
-  const SPRING = 44, DAMP = 7.2;
-  /* Предел скорости вращения — примерно два оборота в секунду. Он нужен
-     из-за того, как считается скорость протяжки: путь мыши делится на
-     время кадра, и если вся протяжка пришла одним событием, получались
-     сотни радиан в секунду. Часы уходили в юлу на десяток оборотов от
-     одного движения рукой. */
-  const WHIRL = 13;
-  const REST = 1.8;        // сколько часы стоят пустыми до самопереворота
+  /* Предел скорости вращения (WHIRL в настройках) нужен из-за того, как
+     считается скорость протяжки: путь мыши делится на время кадра, и
+     если вся протяжка пришла одним событием, получались сотни радиан в
+     секунду — часы уходили в юлу на десяток оборотов от одного движения
+     рукой. */
   let flip = 0, flipVel = 0, target = 0, still = 0;
+  let yaw = 0, yawVel = 0, yawDelta = 0;
   let leanX = 0, leanY = 0, wantX = 0, wantY = 0;
-  let dragging = false, dragDelta = 0, lastPointer = 0, dragged = 0;
+  let dragging = false, dragDelta = 0, dragged = 0;
+  let lastY = 0, lastX = 0, byFinger = false;
 
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+  /* Протяжка. Вбок — свободное вращение вокруг своей оси: часы можно
+     развернуть и разглядеть с любой стороны, и они докручиваются по
+     инерции, пока не остановит трение. Вверх-вниз — переворот, он
+     притягивается к ровному положению пружиной.
+
+     Пальцем крутится только вбок: вертикаль остаётся странице, иначе
+     часы на первом экране перехватывали бы прокрутку. Это уже описано
+     в css как touch-action: pan-y — браузер отдаёт нам боковые жесты, а
+     на вертикальных присылает pointercancel. */
   canvas.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'mouse') return;
-    // Иначе протяжка по часам заодно выделяет текст первого экрана
-    e.preventDefault();
-    dragging = true; dragged = 0; dragDelta = 0;
-    lastPointer = e.clientY;
+    dragging = true;
+    byFinger = e.pointerType !== 'mouse';
+    // Мышью — чтобы протяжка не выделяла текст первого экрана
+    if (!byFinger) e.preventDefault();
+    dragged = 0; dragDelta = 0; yawDelta = 0;
+    lastY = e.clientY;
+    lastX = e.clientX;
     canvas.setPointerCapture(e.pointerId);
   });
 
   canvas.addEventListener('pointermove', (e) => {
     if (!dragging) return;
-    const dy = e.clientY - lastPointer;
-    lastPointer = e.clientY;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    dragged += Math.abs(dx) + Math.abs(dy);
+
+    const spin = (dx / Math.max(80, canvas.clientWidth)) * Math.PI * 2.2;
+    yaw += spin;
+    yawDelta += spin;
+
+    if (byFinger) return;
     const turn = (dy / Math.max(80, canvas.clientHeight)) * Math.PI * 1.8;
     flip += turn;
     dragDelta += turn;
-    dragged += Math.abs(dy);
   });
 
-  const drop = () => {
+  const drop = (tookOver) => {
     if (!dragging) return;
     dragging = false;
+    // Прокрутку страницы забрал браузер — часы тут ни при чём
+    if (tookOver) return;
     // Дёрнули и отпустили, почти не сдвинув — это нажатие, а не вращение
-    if (dragged < 5) { target = Math.round(flip / Math.PI) * Math.PI + Math.PI; return; }
+    if (dragged < 5 && !byFinger) {
+      target = Math.round(flip / Math.PI) * Math.PI + Math.PI;
+      return;
+    }
     const whirl = Math.max(-WHIRL, Math.min(WHIRL, flipVel));
     target = Math.round((flip + whirl * 0.22) / Math.PI) * Math.PI;
   };
-  canvas.addEventListener('pointerup', drop);
-  canvas.addEventListener('pointercancel', drop);
+  canvas.addEventListener('pointerup', () => drop(false));
+  canvas.addEventListener('pointercancel', () => drop(true));
 
-  // На телефоне тянуть нечего: касание переворачивает
+  // На телефоне переворачивает касание — но только касание, а не
+  // протяжка, которой часы разворачивают вбок
   canvas.addEventListener('click', () => {
-    if (fine) return;
+    if (fine || dragged > 6) return;
     if (Math.abs(flipVel) < 0.5) target = Math.round(flip / Math.PI) * Math.PI + Math.PI;
   });
 
@@ -938,8 +1020,8 @@ function build(THREE) {
 
   if (fine) {
     addEventListener('mousemove', (e) => {
-      wantY = (e.clientX / innerWidth - 0.5) * 0.38;
-      wantX = (e.clientY / innerHeight - 0.5) * 0.24;
+      wantY = (e.clientX / innerWidth - 0.5) * LEAN;
+      wantX = (e.clientY / innerHeight - 0.5) * NOD;
 
       if (!box) box = canvas.getBoundingClientRect();
       const now = e.clientX >= box.left && e.clientX <= box.right &&
@@ -1025,10 +1107,18 @@ function build(THREE) {
     if (dragging) {
       // Пока тянут, скорость берём из самого движения мыши
       flipVel = dt > 0 ? Math.max(-WHIRL, Math.min(WHIRL, dragDelta / dt)) : 0;
+      yawVel = dt > 0 ? Math.max(-WHIRL, Math.min(WHIRL, yawDelta / dt)) : 0;
       dragDelta = 0;
+      yawDelta = 0;
     } else {
       flipVel += (SPRING * (target - flip) - DAMP * flipVel) * dt;
       flip += flipVel * dt;
+      /* Вращение вбок ничего не притягивает: у песочных часов нет
+         «правильной» стороны, и они просто докручиваются, пока не
+         остановит трение. */
+      yawVel *= Math.exp(-SLIP * dt);
+      yaw += yawVel * dt;
+      if (Math.abs(yawVel) < 0.002) yawVel = 0;
     }
 
     const ease = Math.min(1, dt * 5);
@@ -1036,9 +1126,9 @@ function build(THREE) {
     leanY += (wantY - leanY) * ease;
 
     clock.rotation.x = flip + leanX;
-    clock.rotation.y = leanY + Math.sin(time * 0.32) * 0.06 + flipVel * 0.03;
+    clock.rotation.y = yaw + leanY + Math.sin(time * 0.32) * 0.06 + flipVel * 0.03;
     clock.rotation.z = Math.sin(time * 0.5) * 0.018;
-    clock.position.y = Math.sin(time * 0.75) * 0.03;
+    clock.position.y = Math.sin(time * 0.75) * BOB;
 
     if (mix < 1) {
       mix = Math.min(1, mix + dt * 3);
@@ -1068,7 +1158,8 @@ function build(THREE) {
     }
     if (acc > STEP * 4) acc = 0;
 
-    const settled = Math.abs(flipVel) < 0.2 && Math.abs(target - flip) < 0.05;
+    const settled = Math.abs(flipVel) < 0.2 && Math.abs(target - flip) < 0.05 &&
+      Math.abs(yawVel) < 0.2;
     if (!dragging && settled && grains === 0) {
       still += dt;
       if (still > REST && spent(down.y)) { target += Math.PI; still = 0; }
