@@ -274,12 +274,12 @@ function build(THREE) {
   const shadeTex = new THREE.CanvasTexture(radialCanvas('rgba(58,32,80,.9)', 'rgba(58,32,80,0)'));
   shadeTex.colorSpace = THREE.SRGBColorSpace;
   const shade = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.1, 0.85),
+    new THREE.PlaneGeometry(1.9, 0.44),
     new THREE.MeshBasicMaterial({
       map: shadeTex, transparent: true, opacity: theme.shade, depthWrite: false,
     })
   );
-  shade.position.set(0, -1.33, -0.2);
+  shade.position.set(0, -1.1, -0.2);
   scene.add(shade);
 
   /* ── Песок ──────────────────────────────────────────────────────────
@@ -460,6 +460,8 @@ function build(THREE) {
 
   const phi = new Float32Array(CELLS);   // высота с поправкой на уклон
   const surf = new Float32Array(CELLS);  // поверхность песка для отрисовки
+  const thick = new Float32Array(CELLS); // толщина слоя в столбике
+  const soft = new Float32Array(CELLS);  // она же, сглаженная по соседям
   const area = CELL * CELL;
   const FALL = 3.6;                      // ускорение падения песчинок
   let grains = 0;                        // сколько песчинок сейчас в полёте
@@ -701,9 +703,25 @@ function build(THREE) {
          так не даёт столбику перерасти колбу, но если однажды даст,
          пусть это будет ошибка в полмиллиметра, а не шип сквозь
          стекло. */
-      const t = Math.min(v[c] / area, cCap[c]);
-      surf[c] = draining ? cFloor[c] + t : HY - t;
+      thick[c] = Math.min(v[c] / area, cCap[c]);
       brim[c] = 0;
+    }
+
+    /* Сглаживание толщины — только для отрисовки, объёмы не трогаются.
+       Без него граница песка шла лесенкой в клетку шириной: у подошвы
+       горки песок сходит на ноль, и край выглядел ровным рядом
+       треугольников. Сглаженная толщина у края падает плавно, перепад
+       между соседями становится в разы меньше — и край сходит на ноль,
+       а не обрывается зубцами. */
+    for (let c = 0; c < CELLS; c++) {
+      if (!inside[c]) continue;
+      const i = c % GRID;
+      const l = i > 0 && inside[c - 1] ? c - 1 : c;
+      const r = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
+      const b = c >= GRID && inside[c - GRID] ? c - GRID : c;
+      const f = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
+      soft[c] = (2 * thick[c] + thick[l] + thick[r] + thick[b] + thick[f]) / 6;
+      surf[c] = draining ? cFloor[c] + soft[c] : HY - soft[c];
     }
 
     /* Края песка. Пустой столбик, рядом с которым песок ещё есть, тоже
@@ -727,7 +745,7 @@ function build(THREE) {
        Сторону узнаём по cFloor: у столбика ближе к оси стенка воронки
        ниже. Это тот же радиус, только без корней на каждую клетку. */
     for (let c = 0; c < CELLS; c++) {
-      if (!inside[c] || v[c] / area >= THIN) continue;
+      if (!inside[c] || soft[c] >= THIN) continue;
       const i = c % GRID;
       let level = 0, near = false, outer = true;
       for (let k = 0; k < 4; k++) {
@@ -735,7 +753,7 @@ function build(THREE) {
         if (k === 1 && i === 0) continue;
         const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
         if (d < 0 || d >= CELLS || !inside[d]) continue;
-        if (v[d] / area < THIN) continue;
+        if (soft[d] < THIN) continue;
         near = true;
         if (surf[d] > level) level = surf[d];
         // Песок дальше от оси, чем этот столбик, — значит он ниже нас по
@@ -812,7 +830,7 @@ function build(THREE) {
     for (let q = 0; q < quadCount; q++) {
       const k = q * 4;
       const a = cells[k], b = cells[k + 1], d = cells[k + 2], e = cells[k + 3];
-      if (!wet(v, a) || !wet(v, b) || !wet(v, d) || !wet(v, e)) continue;
+      if (!wet(a) || !wet(b) || !wet(d) || !wet(e)) continue;
       idx[at++] = vertexOf[a]; idx[at++] = vertexOf[d]; idx[at++] = vertexOf[b];
       idx[at++] = vertexOf[b]; idx[at++] = vertexOf[d]; idx[at++] = vertexOf[e];
     }
@@ -826,8 +844,8 @@ function build(THREE) {
     low.attributes.normal.needsUpdate = true;
   }
 
-  function wet(v, c) {
-    return brim[c] !== 0 || v[c] / area >= THIN;
+  function wet(c) {
+    return brim[c] !== 0 || soft[c] >= THIN;
   }
 
   /* ── Переворот, наклон, покачивание ─────────────────────────────────
