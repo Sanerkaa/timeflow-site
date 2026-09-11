@@ -59,6 +59,10 @@ const FLOW = 1.1;         // как прытко оползает насыпь: 
 const PASSES = 3;         // сколько раз за шаг пересчитывать оползание (дороже всего)
 const GRID = 52;          // мелкость сетки столбиков: 36 дешевле, 64 глаже, растёт как квадрат
 const THIN = 0.0015;      // тоньше этого слой песка считается отсутствующим
+const SMOOTH = 3;         /* сколько раз сглаживать поверхность при отрисовке.
+                             Расчёт не трогает, только вид: 0 — как есть, по
+                             клеткам; 3 — спад у подошвы растянут на три
+                             клетки, и край сходит на ноль незаметно. */
 
 // Песчинки
 const GRAIN_COUNT = 16000; // на сколько песчинок делится колба: чем больше, тем ровнее ложится
@@ -205,10 +209,22 @@ function build(THREE) {
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 20);
   camera.position.set(0, 0.06, 4.7);
 
-  /* Часы висят в отдельной группе: её и качает, и переворачивает, а
-     подсветка с тенью остаются на месте */
+  /* Часы висят в двух вложенных группах, и это не для красоты.
+
+     Внешняя (spinner) поворачивает их вбок и наклоняет за курсором —
+     это движения «от экрана», и они должны считаться в мировых осях.
+     Внутренняя (clock) переворачивает.
+
+     Будь всё в одной группе, после переворота на 180° ось поворота
+     вбок смотрела бы в другую сторону, и часы крутились бы зеркально:
+     тянешь вправо — они влево. Внешняя группа от переворота не
+     зависит, поэтому направление всегда одно.
+
+     Подсветка и тень остаются в сцене и не крутятся. */
+  const spinner = new THREE.Group();
+  scene.add(spinner);
   const clock = new THREE.Group();
-  scene.add(clock);
+  spinner.add(clock);
 
   let theme = THEMES[document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'];
   renderer.toneMappingExposure = theme.exposure;
@@ -510,6 +526,9 @@ function build(THREE) {
   const surf = new Float32Array(CELLS);  // поверхность песка для отрисовки
   const thick = new Float32Array(CELLS); // толщина слоя в столбике
   const soft = new Float32Array(CELLS);  // она же, сглаженная по соседям
+  const blur = new Float32Array(CELLS);  // промежуточный слой сглаживания
+  const brimX = new Float32Array(CELLS); // куда сдвинута вершина на границе
+  const brimZ = new Float32Array(CELLS);
   const area = CELL * CELL;
   let grains = 0;                        // сколько песчинок сейчас в полёте
 
@@ -637,11 +656,16 @@ function build(THREE) {
       const a = Math.random() * Math.PI * 2;
       const rr = Math.sqrt(Math.random()) * NECK * 0.7;
       const k = grains * 3;
+      /* Разбег внутри шага расчёта. Без него все песчинки одного шага
+         вылетают из одной точки с одной скоростью и падают ровными
+         рядами — струйка выглядит лесенкой. */
+      const head = Math.random();
+      const speed = 0.12 + Math.random() * 0.22;
       grainPos[k] = Math.cos(a) * rr;
-      grainPos[k + 1] = gy < 0 ? -0.03 : 0.03;
+      grainPos[k + 1] = (gy < 0 ? -0.03 : 0.03) + gy * speed * head * 0.03;
       grainPos[k + 2] = Math.sin(a) * rr;
       grainVel[k] = gx * 0.2 + (Math.random() - 0.5) * 0.12;
-      grainVel[k + 1] = gy * (0.16 + Math.random() * 0.1);
+      grainVel[k + 1] = gy * speed;
       grainVel[k + 2] = gz * 0.2 + (Math.random() - 0.5) * 0.12;
       grainAge[grains] = 0;
       grains++;
@@ -766,65 +790,81 @@ function build(THREE) {
     }
 
     /* Сглаживание толщины — только для отрисовки, объёмы не трогаются.
-       Без него граница песка шла лесенкой в клетку шириной: у подошвы
-       горки песок сходит на ноль, и край выглядел ровным рядом
-       треугольников. Сглаженная толщина у края падает плавно, перепад
-       между соседями становится в разы меньше — и край сходит на ноль,
-       а не обрывается зубцами. */
+
+       Нужно оно вот для чего: у подошвы горки склон круче клетки. Песок
+       сходит на ноль быстрее, чем сетка успевает это показать, и граница
+       рисовалась рядом треугольников в клетку шириной. Сглаживание
+       растягивает спад на две-три клетки — перепад между соседями у
+       края падает в разы, и край сходит на ноль незаметно.
+
+       Проходов несколько (SMOOTH): один спад почти не растягивает, три
+       дают заметно более гладкий край и слегка закругляют вершину
+       горки — песку это идёт. */
+    for (let c = 0; c < CELLS; c++) soft[c] = thick[c];
+
+    for (let pass = 0; pass < SMOOTH; pass++) {
+      for (let c = 0; c < CELLS; c++) {
+        if (!inside[c]) continue;
+        const i = c % GRID;
+        const l = i > 0 && inside[c - 1] ? c - 1 : c;
+        const r = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
+        const b = c >= GRID && inside[c - GRID] ? c - GRID : c;
+        const f = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
+        blur[c] = (2 * soft[c] + soft[l] + soft[r] + soft[b] + soft[f]) / 6;
+      }
+      for (let c = 0; c < CELLS; c++) if (inside[c]) soft[c] = blur[c];
+    }
+
     for (let c = 0; c < CELLS; c++) {
       if (!inside[c]) continue;
-      const i = c % GRID;
-      const l = i > 0 && inside[c - 1] ? c - 1 : c;
-      const r = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
-      const b = c >= GRID && inside[c - GRID] ? c - GRID : c;
-      const f = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
-      soft[c] = (2 * thick[c] + thick[l] + thick[r] + thick[b] + thick[f]) / 6;
       surf[c] = draining ? cFloor[c] + soft[c] : HY - soft[c];
     }
 
-    /* Края песка. Пустой столбик, рядом с которым песок ещё есть, тоже
-       идёт в сетку — иначе поверхность обрывалась бы по клеткам
-       лесенкой. Но краёв у насыпи в пересыпающей колбе два, и вести себя
-       они должны по-разному.
+    /* Граница песка.
 
-       Внешний край — там, где песок кончается у стекла. Поверхность
-       ровная, а стенка расходится воронкой, значит песок кончается по
-       окружности: вершину поднимаем на уровень песка и выносим ровно на
-       тот радиус, где этот уровень встречает стенку. Все такие вершины
-       ложатся на одну окружность, и край выходит ровным.
+       Толщина слоя задана в серединах клеток, а граница насыпи проходит
+       между ними — там, где слой сходит на ноль. Раньше граница шла по
+       клеткам: клетка либо в сетке, либо нет. Отсюда зубцы по подошве
+       горки и волнистая линия у стекла.
 
-       Внутренний край — спуск к горловине, откуда песок уже утёк. Такую
-       вершину поднимать нельзя: раньше поднимались обе, и из внутренних
-       складывалась полка — масса песка обрывалась в воздухе выше
-       горловины, а струйка начиналась ниже, с просветом. Здесь столбик
-       остаётся лежать на стенке воронки, и поверхность непрерывно сходит
-       к горловине.
+       Теперь вершина пустой клетки, у которой есть сосед с песком,
+       сдвигается вдоль отрезка к этому соседу ровно туда, где толщина
+       переходит через порог. Точка перехода считается по значениям в
+       обеих серединах, поэтому едет плавно, а не прыгает по клеткам —
+       граница получается кривой, и поверхность сходит в ноль ровно на
+       ней.
 
-       Сторону узнаём по cFloor: у столбика ближе к оси стенка воронки
-       ниже. Это тот же радиус, только без корней на каждую клетку. */
+       Это заодно убрало две прежние заплатки: поднятие кромки на уровень
+       песка и вынос её к стенке по радиусу. Обе делали то же самое, но
+       грубо, и от них оставалась то полка выше горловины, то бахрома. */
     for (let c = 0; c < CELLS; c++) {
       if (!inside[c] || soft[c] >= THIN) continue;
       const i = c % GRID;
-      let level = 0, near = false, outer = true;
+      let sx = 0, sz = 0, hits = 0;
       for (let k = 0; k < 4; k++) {
         if (k === 0 && i === GRID - 1) continue;
         if (k === 1 && i === 0) continue;
         const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
         if (d < 0 || d >= CELLS || !inside[d]) continue;
         if (soft[d] < THIN) continue;
-        near = true;
-        if (surf[d] > level) level = surf[d];
-        // Песок дальше от оси, чем этот столбик, — значит он ниже нас по
-        // воронке, и мы на спуске к горловине, а не на внешней кромке
-        if (cFloor[d] > cFloor[c]) outer = false;
+        // Доля пути от соседа с песком до этой клетки, на которой слой
+        // становится тоньше порога
+        const span = soft[d] - soft[c];
+        const u = span > 1e-9 ? Math.min(1, Math.max(0, (soft[d] - THIN) / span)) : 1;
+        sx += px[d] + (px[c] - px[d]) * u;
+        sz += pz[d] + (pz[c] - pz[d]) * u;
+        hits++;
       }
-      if (!near) continue;
-      if (draining && outer) {
-        brim[c] = 1;
-        surf[c] = level;
-      } else {
-        brim[c] = 2;   // просто в сетку, ничего не поднимая
-      }
+      if (!hits) continue;
+      brim[c] = 1;
+      brimX[c] = sx / hits;
+      brimZ[c] = sz / hits;
+      /* На границе толщина ровно пороговая. В пересыпающей колбе
+         донцем служит стенка воронки, и её высоту надо взять уже на
+         новом месте вершины, а не в середине клетки. */
+      surf[c] = draining
+        ? floorAt(Math.hypot(brimX[c], brimZ[c])) + THIN
+        : HY - THIN;
     }
 
     for (let c = 0; c < CELLS; c++) {
@@ -840,13 +880,17 @@ function build(THREE) {
       const dz = (surf[front] - surf[back]) / spanZ;
 
       let x = px[c], z = pz[c];
-      /* Столбик у самого стекла и столбик на линии песка дотягиваем до
-         стенки: в первом случае иначе осталась бы щель в полклетки,
-         во втором — лесенка вместо ровного края */
-      if (edge[c] || brim[c] === 1) {
+      if (brim[c]) {
+        // Вершина на границе песка стоит не в середине клетки
+        x = brimX[c];
+        z = brimZ[c];
+      } else if (edge[c]) {
+        /* Крайний столбик дотягиваем до стекла: сетка кончается за
+           полклетки до стенки, и без этого между песком и стеклом
+           оставалась бы щель */
         const r = Math.hypot(x, z);
         const w = radiusAt(surf[c]) * 0.99;
-        if ((w > r || brim[c] === 1) && r > 1e-5) { x *= w / r; z *= w / r; }
+        if (w > r && r > 1e-5) { x *= w / r; z *= w / r; }
       }
 
       const vi = vertexOf[c] * 3;
@@ -960,6 +1004,8 @@ function build(THREE) {
     lastY = e.clientY;
     dragged += Math.abs(dx) + Math.abs(dy);
 
+    // Тянем вправо — часы поворачиваются вправо: ближняя к нам сторона
+    // уезжает вправо вместе с курсором
     const spin = (dx / Math.max(80, canvas.clientWidth)) * Math.PI * 2.2;
     yaw += spin;
     yawDelta += spin;
@@ -1125,8 +1171,9 @@ function build(THREE) {
     leanX += (wantX - leanX) * ease;
     leanY += (wantY - leanY) * ease;
 
-    clock.rotation.x = flip + leanX;
-    clock.rotation.y = yaw + leanY + Math.sin(time * 0.32) * 0.06 + flipVel * 0.03;
+    spinner.rotation.y = yaw + leanY + Math.sin(time * 0.32) * 0.06 + flipVel * 0.03;
+    spinner.rotation.x = leanX;
+    clock.rotation.x = flip;
     clock.rotation.z = Math.sin(time * 0.5) * 0.018;
     clock.position.y = Math.sin(time * 0.75) * BOB;
 
@@ -1146,8 +1193,13 @@ function build(THREE) {
       renderer.toneMappingExposure = was.exposure + (theme.exposure - was.exposure) * mix;
     }
 
-    // Куда для песка «вниз» в своих координатах часов
-    down.set(0, -1, 0).applyQuaternion(flipped.copy(clock.quaternion).invert());
+    /* Куда для песка «вниз» в своих координатах часов. Берём поворот с
+       учётом внешней группы: вращение вбок песку безразлично (он вокруг
+       той же оси, что и сила тяжести), а наклон за курсором — нет, и
+       насыпь от него слегка съезжает. */
+    spinner.updateMatrixWorld(true);
+    clock.getWorldQuaternion(flipped);
+    down.set(0, -1, 0).applyQuaternion(flipped.invert());
 
     acc += dt;
     let steps = 0;
