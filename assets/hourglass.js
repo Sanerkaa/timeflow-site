@@ -866,6 +866,11 @@ function build(THREE) {
       if (!drawn[c]) continue;
       // Толщина не больше, чем столбик может держать
       if (soft[c] > cCap[c]) soft[c] = cCap[c];
+      /* Совсем тонкий слой у края приравниваем к пороговому. В точке
+         перехода толщина ровно пороговая, а в соседней клетке — чуть
+         больше; разница крошечная, но по краю от неё идёт точечная
+         рябь. Пропадает при этом треть процента высоты колбы. */
+      if (soft[c] < THIN * 3) soft[c] = THIN;
       surf[c] = draining ? cFloor[c] + soft[c] : HY - soft[c];
     }
 
@@ -915,6 +920,27 @@ function build(THREE) {
       from[c] = best;
       soft[c] = best >= 0 ? soft[best] : 0;
       surf[c] = best >= 0 ? surf[best] : (draining ? 0 : HY);
+    }
+
+    /* Кольцо каёмки сглаживаем по себе же. Соседние клетки каёмки берут
+       высоту у разных соседей внутри, и без этого кольцо выходит не
+       ровным, а с мелкой пилой — по верхней кромке песка видно волоски. */
+    for (let pass = 0; pass < 2; pass++) {
+      for (let c = 0; c < CELLS; c++) {
+        if (!skirt[c]) continue;
+        const i = c % GRID;
+        let sum = surf[c], count = 1;
+        for (let k = 0; k < 4; k++) {
+          if (k === 0 && i === GRID - 1) continue;
+          if (k === 1 && i === 0) continue;
+          const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
+          if (d < 0 || d >= CELLS || !skirt[d]) continue;
+          sum += surf[d];
+          count++;
+        }
+        blur[c] = sum / count;
+      }
+      for (let c = 0; c < CELLS; c++) if (skirt[c]) surf[c] = blur[c];
     }
 
     for (let c = 0; c < CELLS; c++) {
