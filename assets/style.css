@@ -1171,6 +1171,9 @@ details[open]::details-content { block-size: auto; }
   /* Крутить часы можно мышью, но палец по ним должен листать страницу */
   touch-action: pan-y;
   cursor: grab;
+  /* Протяжка по часам — это вращение, а не выделение текста вокруг */
+  user-select: none;
+  -webkit-user-select: none;
 }
 .hero-glass:active { cursor: grabbing; }
 

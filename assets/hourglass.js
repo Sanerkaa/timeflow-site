@@ -39,7 +39,7 @@ const R = 0.600;   // самый широкий радиус полости
 const NECK = 0.052; // радиус горловины
 const HY = 0.920;  // от горловины до донца колбы
 
-const GRID = 42;         // сетка столбиков песка на колбу
+const GRID = 52;         // сетка столбиков песка на колбу
 const CELL = 2 * R / GRID;
 const REPOSE = 0.62;     // тангенс угла откоса, ~32°
 const DRAIN_SECONDS = 15; // за сколько пересыпается полная колба
@@ -321,6 +321,23 @@ function build(THREE) {
     }
   }
 
+  /* Наклон стенки воронки по клеткам. Нужен для освещения дна насыпи, а
+     форма колбы не меняется — значит считается один раз. */
+  const fdx = new Float32Array(CELLS);
+  const fdz = new Float32Array(CELLS);
+  for (let j = 0; j < GRID; j++) {
+    for (let i = 0; i < GRID; i++) {
+      const c = j * GRID + i;
+      if (!inside[c]) continue;
+      const left = i > 0 && inside[c - 1] ? c - 1 : c;
+      const right = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
+      const back = c >= GRID && inside[c - GRID] ? c - GRID : c;
+      const front = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
+      fdx[c] = (cFloor[right] - cFloor[left]) / (((right - left) || 1) * CELL);
+      fdz[c] = (cFloor[front] - cFloor[back]) / ((((front - back) / GRID) || 1) * CELL);
+    }
+  }
+
   let bulbVolume = 0;
   for (let c = 0; c < CELLS; c++) if (inside[c]) bulbVolume += cCap[c] * CELL * CELL;
   const sandVolume = bulbVolume * 0.46;
@@ -399,6 +416,21 @@ function build(THREE) {
     return mesh;
   });
 
+  /* Дно насыпи: в пересыпающей колбе это стенка воронки, в принимающей —
+     донце. Клетки те же, что у верхней поверхности, поэтому указатель
+     на них общий — свой набор треугольников для дна не нужен. */
+  const sandFloor = [0, 1].map((ch) => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3));
+    g.setIndex(sandMesh[ch].geometry.index);
+    g.setDrawRange(0, 0);
+    const mesh = new THREE.Mesh(g, sandMat);
+    mesh.frustumCulled = false;
+    clock.add(mesh);
+    return mesh;
+  });
+
   /* Летящие песчинки. Их немного: это струйка, а не вся масса песка —
      масса живёт в столбиках. */
   const grainPos = new Float32Array(GRAINS * 3);
@@ -448,7 +480,18 @@ function build(THREE) {
     const dir = ch === 0 ? 1 : -1;
     const gAx = gy * dir;
     const draining = gAx < 0;
-    const lean = 1 / Math.max(0.22, Math.abs(gAx));
+    const axial = Math.abs(gAx);
+    /* Боковой наклон входит в уклон делением на осевую часть силы
+       тяжести — и у лежащих на боку часов это деление на почти ноль.
+       Поэтому наклон ограничен сверху: больше 45° уклон всё равно
+       означает «песок едет вниз», а без ограничения он превращался в
+       перекос на всю колбу и сваливал песок к стеклу целыми столбиками.
+
+       По той же причине в боковом положении почти останавливается и сам
+       поток: в жизни песок там держат стенки колбы, а в расчёте стенок
+       поперёк оси нет — есть только столбики. */
+    const lean = Math.min(1.1, 1 / Math.max(0.3, axial));
+    const flow = 0.65 * Math.min(1, axial * 1.6);
     const limit = REPOSE * CELL;
 
     for (let c = 0; c < CELLS; c++) {
@@ -468,7 +511,14 @@ function build(THREE) {
           if (d < 0 || d >= CELLS || !inside[d]) continue;
           const over = phi[c] - phi[d] - limit;
           if (over <= 0) continue;
-          const move = Math.min(v[c] * 0.5, over * area * 0.45);
+          /* В столбик, набитый до стекла, песок не лезет. Без этой
+             проверки перетекание шло по одним высотам и не знало, что у
+             кромки колба сужается и держать там нечего: песок толкали
+             туда и дальше, столбики набивались выше возможного, а потом
+             торчали шипами. */
+          const space = cCap[d] * area - v[d];
+          if (space <= 0) continue;
+          const move = Math.min(v[c] * 0.3, over * area * flow, space);
           if (move <= 0) continue;
           v[c] -= move; v[d] += move;
           phi[c] -= move / area; phi[d] += move / area;
@@ -476,25 +526,36 @@ function build(THREE) {
       }
     }
 
-    /* Столбик не может быть выше, чем позволяет стекло: лишнее уходит
-       самому низкому соседу. Без этого насыпь в узкой части колбы
-       прорастала бы сквозь стенку. */
-    for (let c = 0; c < CELLS; c++) {
-      if (!inside[c] || v[c] <= 0) continue;
-      const room = cCap[c] * area;
-      if (v[c] <= room) continue;
-      const i = c % GRID;
-      let best = -1, low = Infinity;
-      for (let k = 0; k < 4; k++) {
-        if (k === 0 && i === GRID - 1) continue;
-        if (k === 1 && i === 0) continue;
-        const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
-        if (d < 0 || d >= CELLS || !inside[d]) continue;
-        if (phi[d] < low) { low = phi[d]; best = d; }
+    /* Столбик не может быть выше, чем позволяет колба: у стекла она
+       сужается, и там столбик держит сущие капли. Лишнее отдаётся тому
+       соседу, у кого есть место, и ровно столько, сколько влезает.
+
+       Раньше лишнее уходило «самому низкому соседу» — при боковом
+       перекосе это оказывался сосед ещё ближе к стеклу, где места ещё
+       меньше. Столбики у кромки набивались в десятки раз выше
+       возможного и потом торчали шипами. Что не влезло никуда, остаётся
+       на месте: на следующем шаге соседи расступятся, а объём песка при
+       этом не теряется. */
+    for (let round = 0; round < 2; round++) {
+      for (let c = 0; c < CELLS; c++) {
+        if (!inside[c] || v[c] <= 0) continue;
+        const room = cCap[c] * area;
+        if (v[c] <= room) continue;
+        const i = c % GRID;
+        let best = -1, most = 0;
+        for (let k = 0; k < 4; k++) {
+          if (k === 0 && i === GRID - 1) continue;
+          if (k === 1 && i === 0) continue;
+          const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
+          if (d < 0 || d >= CELLS || !inside[d]) continue;
+          const free = cCap[d] * area - v[d];
+          if (free > most) { most = free; best = d; }
+        }
+        if (best < 0) continue;
+        const extra = Math.min(v[c] - room, most);
+        v[c] -= extra;
+        v[best] += extra;
       }
-      const extra = v[c] - room;
-      v[c] = room;
-      if (best >= 0) v[best] += extra;
     }
   }
 
@@ -630,26 +691,45 @@ function build(THREE) {
     const pos = geo.attributes.position.array;
     const nor = geo.attributes.normal.array;
     const idx = geo.index.array;
+    const low = sandFloor[ch].geometry;
+    const lowPos = low.attributes.position.array;
+    const lowNor = low.attributes.normal.array;
 
     for (let c = 0; c < CELLS; c++) {
       if (!inside[c]) continue;
-      surf[c] = draining ? cFloor[c] + v[c] / area : HY - v[c] / area;
+      /* Толщина зажата вместимостью столбика. Это страховка: расчёт и
+         так не даёт столбику перерасти колбу, но если однажды даст,
+         пусть это будет ошибка в полмиллиметра, а не шип сквозь
+         стекло. */
+      const t = Math.min(v[c] / area, cCap[c]);
+      surf[c] = draining ? cFloor[c] + t : HY - t;
       brim[c] = 0;
     }
 
-    /* Линия песка в пересыпающей колбе. Поверхность там ровная, а стенка
-       расходится воронкой — значит песок кончается по окружности, и
-       сетка столбиков эту окружность сама по себе передаёт лесенкой.
+    /* Края песка. Пустой столбик, рядом с которым песок ещё есть, тоже
+       идёт в сетку — иначе поверхность обрывалась бы по клеткам
+       лесенкой. Но краёв у насыпи в пересыпающей колбе два, и вести себя
+       они должны по-разному.
 
-       Поэтому у пустых столбиков, рядом с которыми песок ещё есть,
-       вершина не остаётся на стенке, а выносится ровно на уровень песка
-       и ровно на тот радиус, где этот уровень встречает стенку. Все
-       такие вершины ложатся на одну окружность — край получается
-       ровным, без отсечения по клеткам и без бахромы. */
+       Внешний край — там, где песок кончается у стекла. Поверхность
+       ровная, а стенка расходится воронкой, значит песок кончается по
+       окружности: вершину поднимаем на уровень песка и выносим ровно на
+       тот радиус, где этот уровень встречает стенку. Все такие вершины
+       ложатся на одну окружность, и край выходит ровным.
+
+       Внутренний край — спуск к горловине, откуда песок уже утёк. Такую
+       вершину поднимать нельзя: раньше поднимались обе, и из внутренних
+       складывалась полка — масса песка обрывалась в воздухе выше
+       горловины, а струйка начиналась ниже, с просветом. Здесь столбик
+       остаётся лежать на стенке воронки, и поверхность непрерывно сходит
+       к горловине.
+
+       Сторону узнаём по cFloor: у столбика ближе к оси стенка воронки
+       ниже. Это тот же радиус, только без корней на каждую клетку. */
     for (let c = 0; c < CELLS; c++) {
       if (!inside[c] || v[c] / area >= THIN) continue;
       const i = c % GRID;
-      let level = 0, near = false;
+      let level = 0, near = false, outer = true;
       for (let k = 0; k < 4; k++) {
         if (k === 0 && i === GRID - 1) continue;
         if (k === 1 && i === 0) continue;
@@ -658,10 +738,17 @@ function build(THREE) {
         if (v[d] / area < THIN) continue;
         near = true;
         if (surf[d] > level) level = surf[d];
+        // Песок дальше от оси, чем этот столбик, — значит он ниже нас по
+        // воронке, и мы на спуске к горловине, а не на внешней кромке
+        if (cFloor[d] > cFloor[c]) outer = false;
       }
       if (!near) continue;
-      brim[c] = 1;
-      if (draining) surf[c] = level;
+      if (draining && outer) {
+        brim[c] = 1;
+        surf[c] = level;
+      } else {
+        brim[c] = 2;   // просто в сетку, ничего не поднимая
+      }
     }
 
     for (let c = 0; c < CELLS; c++) {
@@ -680,10 +767,10 @@ function build(THREE) {
       /* Столбик у самого стекла и столбик на линии песка дотягиваем до
          стенки: в первом случае иначе осталась бы щель в полклетки,
          во втором — лесенка вместо ровного края */
-      if (edge[c] || (brim[c] && draining)) {
+      if (edge[c] || brim[c] === 1) {
         const r = Math.hypot(x, z);
         const w = radiusAt(surf[c]) * 0.99;
-        if ((w > r || brim[c]) && r > 1e-5) { x *= w / r; z *= w / r; }
+        if ((w > r || brim[c] === 1) && r > 1e-5) { x *= w / r; z *= w / r; }
       }
 
       const vi = vertexOf[c] * 3;
@@ -696,6 +783,27 @@ function build(THREE) {
       nor[vi] = nx / len;
       nor[vi + 1] = ny / len;
       nor[vi + 2] = nz / len;
+
+      /* Дно. На линии песка (brim) верх и низ — одна и та же точка:
+         толщина там ноль, и масса замыкается без боковой стенки. */
+      if (brim[c]) {
+        lowPos[vi] = x;
+        lowPos[vi + 1] = pos[vi + 1];
+        lowPos[vi + 2] = z;
+      } else {
+        lowPos[vi] = px[c];
+        lowPos[vi + 1] = dir * (draining ? cFloor[c] : HY);
+        lowPos[vi + 2] = pz[c];
+      }
+
+      // Дно смотрит в другую сторону, чем верх: прочь от массы песка
+      const bx = face * (draining ? fdx[c] : 0);
+      const bz = face * (draining ? fdz[c] : 0);
+      const by = -dir * face;
+      const blen = Math.hypot(bx, by, bz) || 1;
+      lowNor[vi] = bx / blen;
+      lowNor[vi + 1] = by / blen;
+      lowNor[vi + 2] = bz / blen;
     }
 
     /* Клетка рисуется, если песок есть во всех четырёх углах. Углы на
@@ -709,14 +817,17 @@ function build(THREE) {
       idx[at++] = vertexOf[b]; idx[at++] = vertexOf[d]; idx[at++] = vertexOf[e];
     }
     geo.setDrawRange(0, at);
+    low.setDrawRange(0, at);
 
     geo.attributes.position.needsUpdate = true;
     geo.attributes.normal.needsUpdate = true;
     geo.index.needsUpdate = true;
+    low.attributes.position.needsUpdate = true;
+    low.attributes.normal.needsUpdate = true;
   }
 
   function wet(v, c) {
-    return brim[c] === 1 || v[c] / area >= THIN;
+    return brim[c] !== 0 || v[c] / area >= THIN;
   }
 
   /* ── Переворот, наклон, покачивание ─────────────────────────────────
@@ -733,6 +844,12 @@ function build(THREE) {
      переворота, а насыпь слегка съезжает вместе с наклоном за курсором. */
 
   const SPRING = 44, DAMP = 7.2;
+  /* Предел скорости вращения — примерно два оборота в секунду. Он нужен
+     из-за того, как считается скорость протяжки: путь мыши делится на
+     время кадра, и если вся протяжка пришла одним событием, получались
+     сотни радиан в секунду. Часы уходили в юлу на десяток оборотов от
+     одного движения рукой. */
+  const WHIRL = 13;
   const REST = 1.8;        // сколько часы стоят пустыми до самопереворота
   let flip = 0, flipVel = 0, target = 0, still = 0;
   let leanX = 0, leanY = 0, wantX = 0, wantY = 0;
@@ -742,6 +859,8 @@ function build(THREE) {
 
   canvas.addEventListener('pointerdown', (e) => {
     if (e.pointerType !== 'mouse') return;
+    // Иначе протяжка по часам заодно выделяет текст первого экрана
+    e.preventDefault();
     dragging = true; dragged = 0; dragDelta = 0;
     lastPointer = e.clientY;
     canvas.setPointerCapture(e.pointerId);
@@ -762,7 +881,8 @@ function build(THREE) {
     dragging = false;
     // Дёрнули и отпустили, почти не сдвинув — это нажатие, а не вращение
     if (dragged < 5) { target = Math.round(flip / Math.PI) * Math.PI + Math.PI; return; }
-    target = Math.round((flip + flipVel * 0.22) / Math.PI) * Math.PI;
+    const whirl = Math.max(-WHIRL, Math.min(WHIRL, flipVel));
+    target = Math.round((flip + whirl * 0.22) / Math.PI) * Math.PI;
   };
   canvas.addEventListener('pointerup', drop);
   canvas.addEventListener('pointercancel', drop);
@@ -886,7 +1006,7 @@ function build(THREE) {
 
     if (dragging) {
       // Пока тянут, скорость берём из самого движения мыши
-      flipVel = dt > 0 ? dragDelta / dt : 0;
+      flipVel = dt > 0 ? Math.max(-WHIRL, Math.min(WHIRL, dragDelta / dt)) : 0;
       dragDelta = 0;
     } else {
       flipVel += (SPRING * (target - flip) - DAMP * flipVel) * dt;
