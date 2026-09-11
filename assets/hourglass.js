@@ -430,6 +430,12 @@ function build(THREE) {
   const quadCount = quads.length / 4;
   const cells = new Int32Array(quads);
 
+  /* Вершины: по одной в середине каждой клетки плюс запас под вершины на
+     контуре. Клетка на границе даёт не больше четырёх таких (по одной на
+     ребро) и не больше четырёх треугольников. */
+  const SLOTS = vertices + quadCount * 4;
+  const TRIS = quadCount * 4;
+
   /* Песок непрозрачный, и это важно: стекло рисуется после него и с ним
      смешивается. Край насыпи держится не на прозрачности, а на сетке. */
   const sandMat = new THREE.MeshStandardMaterial({
@@ -455,9 +461,9 @@ function build(THREE) {
 
   const sandMesh = [0, 1].map(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3));
-    g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3));
-    g.setIndex(new THREE.BufferAttribute(new Uint32Array(quadCount * 6), 1));
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(SLOTS * 3), 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(SLOTS * 3), 3));
+    g.setIndex(new THREE.BufferAttribute(new Uint32Array(TRIS * 3), 1));
     g.setDrawRange(0, 0);
     const mesh = new THREE.Mesh(g, sandMat);
     mesh.frustumCulled = false;
@@ -470,8 +476,8 @@ function build(THREE) {
      на них общий — свой набор треугольников для дна не нужен. */
   const sandFloor = [0, 1].map((ch) => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3));
-    g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(vertices * 3), 3));
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(SLOTS * 3), 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(SLOTS * 3), 3));
     g.setIndex(sandMesh[ch].geometry.index);
     g.setDrawRange(0, 0);
     const mesh = new THREE.Mesh(g, sandMat);
@@ -527,8 +533,6 @@ function build(THREE) {
   const thick = new Float32Array(CELLS); // толщина слоя в столбике
   const soft = new Float32Array(CELLS);  // она же, сглаженная по соседям
   const blur = new Float32Array(CELLS);  // промежуточный слой сглаживания
-  const brimX = new Float32Array(CELLS); // куда сдвинута вершина на границе
-  const brimZ = new Float32Array(CELLS);
   const area = CELL * CELL;
   let grains = 0;                        // сколько песчинок сейчас в полёте
 
@@ -764,7 +768,13 @@ function build(THREE) {
 
   /* ── Поверхность песка в геометрию ──────────────────────────────────── */
 
-  const brim = new Uint8Array(CELLS);
+  /* Обход клетки по кругу: a → b → e → d. В этом порядке соседние углы
+     всегда лежат на одном ребре, и границу можно найти одним проходом.
+     Оба массива заведены один раз: shape() зовётся дважды на кадр, и
+     новые массивы на каждую клетку были бы мусором на сотни тысяч
+     штук в секунду. */
+  const ring = new Int32Array(4);   // углы клетки по кругу
+  const poly = new Int32Array(8);   // вершины мокрой части клетки
 
   function shape(ch, gy) {
     const v = vol[ch];
@@ -786,7 +796,6 @@ function build(THREE) {
          пусть это будет ошибка в полмиллиметра, а не шип сквозь
          стекло. */
       thick[c] = Math.min(v[c] / area, cCap[c]);
-      brim[c] = 0;
     }
 
     /* Сглаживание толщины — только для отрисовки, объёмы не трогаются.
@@ -820,53 +829,6 @@ function build(THREE) {
       surf[c] = draining ? cFloor[c] + soft[c] : HY - soft[c];
     }
 
-    /* Граница песка.
-
-       Толщина слоя задана в серединах клеток, а граница насыпи проходит
-       между ними — там, где слой сходит на ноль. Раньше граница шла по
-       клеткам: клетка либо в сетке, либо нет. Отсюда зубцы по подошве
-       горки и волнистая линия у стекла.
-
-       Теперь вершина пустой клетки, у которой есть сосед с песком,
-       сдвигается вдоль отрезка к этому соседу ровно туда, где толщина
-       переходит через порог. Точка перехода считается по значениям в
-       обеих серединах, поэтому едет плавно, а не прыгает по клеткам —
-       граница получается кривой, и поверхность сходит в ноль ровно на
-       ней.
-
-       Это заодно убрало две прежние заплатки: поднятие кромки на уровень
-       песка и вынос её к стенке по радиусу. Обе делали то же самое, но
-       грубо, и от них оставалась то полка выше горловины, то бахрома. */
-    for (let c = 0; c < CELLS; c++) {
-      if (!inside[c] || soft[c] >= THIN) continue;
-      const i = c % GRID;
-      let sx = 0, sz = 0, hits = 0;
-      for (let k = 0; k < 4; k++) {
-        if (k === 0 && i === GRID - 1) continue;
-        if (k === 1 && i === 0) continue;
-        const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
-        if (d < 0 || d >= CELLS || !inside[d]) continue;
-        if (soft[d] < THIN) continue;
-        // Доля пути от соседа с песком до этой клетки, на которой слой
-        // становится тоньше порога
-        const span = soft[d] - soft[c];
-        const u = span > 1e-9 ? Math.min(1, Math.max(0, (soft[d] - THIN) / span)) : 1;
-        sx += px[d] + (px[c] - px[d]) * u;
-        sz += pz[d] + (pz[c] - pz[d]) * u;
-        hits++;
-      }
-      if (!hits) continue;
-      brim[c] = 1;
-      brimX[c] = sx / hits;
-      brimZ[c] = sz / hits;
-      /* На границе толщина ровно пороговая. В пересыпающей колбе
-         донцем служит стенка воронки, и её высоту надо взять уже на
-         новом месте вершины, а не в середине клетки. */
-      surf[c] = draining
-        ? floorAt(Math.hypot(brimX[c], brimZ[c])) + THIN
-        : HY - THIN;
-    }
-
     for (let c = 0; c < CELLS; c++) {
       if (!inside[c]) continue;
       const i = c % GRID;
@@ -880,11 +842,7 @@ function build(THREE) {
       const dz = (surf[front] - surf[back]) / spanZ;
 
       let x = px[c], z = pz[c];
-      if (brim[c]) {
-        // Вершина на границе песка стоит не в середине клетки
-        x = brimX[c];
-        z = brimZ[c];
-      } else if (edge[c]) {
+      if (edge[c]) {
         /* Крайний столбик дотягиваем до стекла: сетка кончается за
            полклетки до стенки, и без этого между песком и стеклом
            оставалась бы щель */
@@ -904,17 +862,10 @@ function build(THREE) {
       nor[vi + 1] = ny / len;
       nor[vi + 2] = nz / len;
 
-      /* Дно. На линии песка (brim) верх и низ — одна и та же точка:
-         толщина там ноль, и масса замыкается без боковой стенки. */
-      if (brim[c]) {
-        lowPos[vi] = x;
-        lowPos[vi + 1] = pos[vi + 1];
-        lowPos[vi + 2] = z;
-      } else {
-        lowPos[vi] = px[c];
-        lowPos[vi + 1] = dir * (draining ? cFloor[c] : HY);
-        lowPos[vi + 2] = pz[c];
-      }
+      // Дно насыпи под этой вершиной
+      lowPos[vi] = px[c];
+      lowPos[vi + 1] = dir * (draining ? cFloor[c] : HY);
+      lowPos[vi + 2] = pz[c];
 
       // Дно смотрит в другую сторону, чем верх: прочь от массы песка
       const bx = face * (draining ? fdx[c] : 0);
@@ -926,16 +877,83 @@ function build(THREE) {
       lowNor[vi + 2] = bz / blen;
     }
 
-    /* Клетка рисуется, если песок есть во всех четырёх углах. Углы на
-       линии песка (brim) тоже считаются песком — они и держат край. */
+    /* Сборка треугольников.
+
+       Клетка целиком в песке — два треугольника, как обычно. Клетка на
+       границе разрезается: идём по её углам по кругу, мокрые углы
+       берём как есть, а на каждом ребре, где толщина переходит порог,
+       ставим новую вершину ровно в точке перехода. Получается
+       многоугольник из трёх-шести вершин — мокрая часть клетки; его
+       разбиваем веером.
+
+       Граница поэтому идёт точно по контуру, а не по клеткам: точка
+       перехода считается из толщин в обеих серединах и двигается
+       плавно, сколь угодно мелкими долями клетки. Толщина в ней ровно
+       пороговая, то есть ноль на вид, и верх с дном там сходятся —
+       масса замыкается сама. */
     let at = 0;
+    let extra = vertices;
+
     for (let q = 0; q < quadCount; q++) {
       const k = q * 4;
-      const a = cells[k], b = cells[k + 1], d = cells[k + 2], e = cells[k + 3];
-      if (!wet(a) || !wet(b) || !wet(d) || !wet(e)) continue;
-      idx[at++] = vertexOf[a]; idx[at++] = vertexOf[d]; idx[at++] = vertexOf[b];
-      idx[at++] = vertexOf[b]; idx[at++] = vertexOf[d]; idx[at++] = vertexOf[e];
+      const corner0 = cells[k], corner1 = cells[k + 1];
+      const corner2 = cells[k + 2], corner3 = cells[k + 3];
+      ring[0] = corner0; ring[1] = corner1; ring[2] = corner3; ring[3] = corner2;
+
+      let wetCount = 0;
+      for (let s2 = 0; s2 < 4; s2++) if (soft[ring[s2]] >= THIN) wetCount++;
+      if (wetCount === 0) continue;
+
+      if (wetCount === 4) {
+        idx[at++] = vertexOf[corner0]; idx[at++] = vertexOf[corner2]; idx[at++] = vertexOf[corner1];
+        idx[at++] = vertexOf[corner1]; idx[at++] = vertexOf[corner2]; idx[at++] = vertexOf[corner3];
+        continue;
+      }
+
+      let m = 0;
+      for (let s2 = 0; s2 < 4; s2++) {
+        const c1 = ring[s2];
+        const c2 = ring[(s2 + 1) & 3];
+        const w1 = soft[c1] >= THIN;
+        const w2 = soft[c2] >= THIN;
+        if (w1) poly[m++] = vertexOf[c1];
+        if (w1 === w2) continue;
+
+        // Точка перехода на ребре между мокрым и сухим углом
+        const wetC = w1 ? c1 : c2;
+        const dryC = w1 ? c2 : c1;
+        const span = soft[wetC] - soft[dryC];
+        const u = span > 1e-9 ? Math.min(1, Math.max(0, (soft[wetC] - THIN) / span)) : 1;
+        const cx = px[wetC] + (px[dryC] - px[wetC]) * u;
+        const cz = pz[wetC] + (pz[dryC] - pz[wetC]) * u;
+        const cs = draining ? floorAt(Math.hypot(cx, cz)) + THIN : HY - THIN;
+
+        const vi = extra * 3;
+        const wi = vertexOf[wetC] * 3;
+        pos[vi] = cx;
+        pos[vi + 1] = dir * cs;
+        pos[vi + 2] = cz;
+        nor[vi] = nor[wi];
+        nor[vi + 1] = nor[wi + 1];
+        nor[vi + 2] = nor[wi + 2];
+        // Дно в этой точке совпадает с верхом: толщины здесь нет
+        lowPos[vi] = cx;
+        lowPos[vi + 1] = pos[vi + 1];
+        lowPos[vi + 2] = cz;
+        lowNor[vi] = lowNor[wi];
+        lowNor[vi + 1] = lowNor[wi + 1];
+        lowNor[vi + 2] = lowNor[wi + 2];
+
+        poly[m++] = extra++;
+      }
+
+      for (let t = 1; t < m - 1; t++) {
+        idx[at++] = poly[0];
+        idx[at++] = poly[t];
+        idx[at++] = poly[t + 1];
+      }
     }
+
     geo.setDrawRange(0, at);
     low.setDrawRange(0, at);
 
@@ -946,9 +964,6 @@ function build(THREE) {
     low.attributes.normal.needsUpdate = true;
   }
 
-  function wet(c) {
-    return brim[c] !== 0 || soft[c] >= THIN;
-  }
 
   /* ── Переворот, наклон, покачивание ─────────────────────────────────
 
