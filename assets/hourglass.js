@@ -346,7 +346,6 @@ function build(THREE) {
   const pz = new Float32Array(CELLS);
   const cFloor = new Float32Array(CELLS);  // высота стенки воронки
   const cCap = new Float32Array(CELLS);    // сколько песка столбик держит
-  const edge = new Uint8Array(CELLS);      // столбик у самого стекла
 
   for (let j = 0; j < GRID; j++) {
     for (let i = 0; i < GRID; i++) {
@@ -358,15 +357,6 @@ function build(THREE) {
       inside[c] = r <= R - 0.004 ? 1 : 0;
       cFloor[c] = floorAt(r);
       cCap[c] = Math.max(0.02, HY - cFloor[c]);
-    }
-  }
-  for (let j = 0; j < GRID; j++) {
-    for (let i = 0; i < GRID; i++) {
-      const c = j * GRID + i;
-      if (!inside[c]) continue;
-      const out = (i === 0 || !inside[c - 1]) || (i === GRID - 1 || !inside[c + 1]) ||
-        (j === 0 || !inside[c - GRID]) || (j === GRID - 1 || !inside[c + GRID]);
-      edge[c] = out ? 1 : 0;
     }
   }
 
@@ -387,17 +377,35 @@ function build(THREE) {
     }
   }
 
-  /* Каёмка — клетки сразу за краем полости. Песка в них не бывает:
-     расчёт работает только по inside. Нужны они для отрисовки — чтобы
-     обвод песка у стекла шёл по окружности, а не ступенями по клеткам
-     (см. shape). */
+  /* Две маски, и это важно различать.
+
+     inside — где живёт песок в расчёте. drawn — что уходит в сетку
+     отрисовки: то же самое, но без узкой полоски у самой кромки, где
+     полость сходит в тонкий клин. Потолок там опускается к донцу почти
+     вертикально, поверхность песка в клине — это сам потолок, и сетка
+     столбиков такую стенку передаёт зубцами: между соседними клетками
+     высота прыгает в пять раз больше, чем на любом склоне насыпи.
+     Никакое сглаживание этого не берёт, потому что ступени не в песке,
+     а в форме колбы.
+
+     Песок в этой полоске по-прежнему считается и никуда не пропадает —
+     её просто показывает одно гладкое кольцо каёмки, которое и так
+     садится ровно на стенку.
+
+     Каёмка — клетки сразу за краем drawn. Песка в них не бывает вовсе:
+     расчёт работает только по inside. */
+  const SKIN = 3 * CELL;   // полоска у кромки, которую не рисуем
+  const drawn = new Uint8Array(CELLS);
   const skirt = new Uint8Array(CELLS);
+  for (let c = 0; c < CELLS; c++) {
+    drawn[c] = inside[c] && cCap[c] > SKIN ? 1 : 0;
+  }
   for (let j = 0; j < GRID; j++) {
     for (let i = 0; i < GRID; i++) {
       const c = j * GRID + i;
-      if (inside[c]) continue;
-      const near = (i > 0 && inside[c - 1]) || (i < GRID - 1 && inside[c + 1]) ||
-        (c >= GRID && inside[c - GRID]) || (c + GRID < CELLS && inside[c + GRID]);
+      if (drawn[c]) continue;
+      const near = (i > 0 && drawn[c - 1]) || (i < GRID - 1 && drawn[c + 1]) ||
+        (c >= GRID && drawn[c - GRID]) || (c + GRID < CELLS && drawn[c + GRID]);
       skirt[c] = near ? 1 : 0;
     }
   }
@@ -432,7 +440,7 @@ function build(THREE) {
      решается на каждом кадре — см. shape(). */
   const vertexOf = new Int32Array(CELLS).fill(-1);
   let vertices = 0;
-  for (let c = 0; c < CELLS; c++) if (inside[c] || skirt[c]) vertexOf[c] = vertices++;
+  for (let c = 0; c < CELLS; c++) if (drawn[c] || skirt[c]) vertexOf[c] = vertices++;
 
   /* Клетка идёт в дело, если хотя бы один её угол внутри полости, а
      остальные — внутри или в каёмке. Так у обвода не остаётся ступеней:
@@ -441,10 +449,10 @@ function build(THREE) {
   for (let j = 0; j < GRID - 1; j++) {
     for (let i = 0; i < GRID - 1; i++) {
       const a = j * GRID + i, b = a + 1, d = a + GRID, e = d + 1;
-      const okA = inside[a] || skirt[a], okB = inside[b] || skirt[b];
-      const okD = inside[d] || skirt[d], okE = inside[e] || skirt[e];
+      const okA = drawn[a] || skirt[a], okB = drawn[b] || skirt[b];
+      const okD = drawn[d] || skirt[d], okE = drawn[e] || skirt[e];
       if (!okA || !okB || !okD || !okE) continue;
-      if (!inside[a] && !inside[b] && !inside[d] && !inside[e]) continue;
+      if (!drawn[a] && !drawn[b] && !drawn[d] && !drawn[e]) continue;
       quads.push(a, b, d, e);
     }
   }
@@ -820,7 +828,7 @@ function build(THREE) {
     const lowNor = low.attributes.normal.array;
 
     for (let c = 0; c < CELLS; c++) {
-      if (!inside[c]) continue;
+      if (!drawn[c]) continue;
       /* Толщина зажата вместимостью столбика. Это страховка: расчёт и
          так не даёт столбику перерасти колбу, но если однажды даст,
          пусть это будет ошибка в полмиллиметра, а не шип сквозь
@@ -843,19 +851,19 @@ function build(THREE) {
 
     for (let pass = 0; pass < SMOOTH; pass++) {
       for (let c = 0; c < CELLS; c++) {
-        if (!inside[c]) continue;
+        if (!drawn[c]) continue;
         const i = c % GRID;
-        const l = i > 0 && inside[c - 1] ? c - 1 : c;
-        const r = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
-        const b = c >= GRID && inside[c - GRID] ? c - GRID : c;
-        const f = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
+        const l = i > 0 && drawn[c - 1] ? c - 1 : c;
+        const r = i < GRID - 1 && drawn[c + 1] ? c + 1 : c;
+        const b = c >= GRID && drawn[c - GRID] ? c - GRID : c;
+        const f = c + GRID < CELLS && drawn[c + GRID] ? c + GRID : c;
         blur[c] = (2 * soft[c] + soft[l] + soft[r] + soft[b] + soft[f]) / 6;
       }
-      for (let c = 0; c < CELLS; c++) if (inside[c]) soft[c] = blur[c];
+      for (let c = 0; c < CELLS; c++) if (drawn[c]) soft[c] = blur[c];
     }
 
     for (let c = 0; c < CELLS; c++) {
-      if (!inside[c]) continue;
+      if (!drawn[c]) continue;
       // Толщина не больше, чем столбик может держать
       if (soft[c] > cCap[c]) soft[c] = cCap[c];
       surf[c] = draining ? cFloor[c] + soft[c] : HY - soft[c];
@@ -868,21 +876,25 @@ function build(THREE) {
        насыпи идёт гребёнка, из каждой клетки по волоску. Толщину так не
        сгладить: упирается она не в соседей, а в саму колбу.
 
-       После сглаживания высоту возвращаем в разрешённые пределы — от
-       стенки воронки до потолка полости, — чтобы песок не выглядывал
-       ни сквозь стекло, ни из-под донца. */
+       Сверху высота ограничена потолком полости — это ровная плоскость,
+       на клетки она не разбивается. А вот снизу ограничивать стенкой
+       воронки нельзя, хотя и хочется: у кромки стенка круто уходит
+       вниз, и такое ограничение само по себе рисует зубцы по клеткам —
+       ровно то, от чего сглаживание и заводилось. Песок при этом
+       заходит в стенку на считаные десятые доли миллиметра по сцене,
+       что вчетверо меньше толщины стекла: не видно. */
     for (let c = 0; c < CELLS; c++) {
-      if (!inside[c]) continue;
+      if (!drawn[c]) continue;
       const i = c % GRID;
-      const l = i > 0 && inside[c - 1] ? c - 1 : c;
-      const r = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
-      const b = c >= GRID && inside[c - GRID] ? c - GRID : c;
-      const f = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
+      const l = i > 0 && drawn[c - 1] ? c - 1 : c;
+      const r = i < GRID - 1 && drawn[c + 1] ? c + 1 : c;
+      const b = c >= GRID && drawn[c - GRID] ? c - GRID : c;
+      const f = c + GRID < CELLS && drawn[c + GRID] ? c + GRID : c;
       blur[c] = (2 * surf[c] + surf[l] + surf[r] + surf[b] + surf[f]) / 6;
     }
     for (let c = 0; c < CELLS; c++) {
-      if (!inside[c]) continue;
-      surf[c] = Math.min(HY, Math.max(cFloor[c], blur[c]));
+      if (!drawn[c]) continue;
+      surf[c] = Math.min(HY, blur[c]);
     }
 
     /* Каёмка берёт толщину и высоту у самого «мокрого» соседа внутри
@@ -897,7 +909,7 @@ function build(THREE) {
         if (k === 0 && i === GRID - 1) continue;
         if (k === 1 && i === 0) continue;
         const d = k === 0 ? c + 1 : k === 1 ? c - 1 : k === 2 ? c + GRID : c - GRID;
-        if (d < 0 || d >= CELLS || !inside[d]) continue;
+        if (d < 0 || d >= CELLS || !drawn[d]) continue;
         if (soft[d] > top) { top = soft[d]; best = d; }
       }
       from[c] = best;
@@ -906,12 +918,12 @@ function build(THREE) {
     }
 
     for (let c = 0; c < CELLS; c++) {
-      if (!inside[c]) continue;
+      if (!drawn[c]) continue;
       const i = c % GRID;
-      const left = i > 0 && inside[c - 1] ? c - 1 : c;
-      const right = i < GRID - 1 && inside[c + 1] ? c + 1 : c;
-      const back = c >= GRID && inside[c - GRID] ? c - GRID : c;
-      const front = c + GRID < CELLS && inside[c + GRID] ? c + GRID : c;
+      const left = i > 0 && drawn[c - 1] ? c - 1 : c;
+      const right = i < GRID - 1 && drawn[c + 1] ? c + 1 : c;
+      const back = c >= GRID && drawn[c - GRID] ? c - GRID : c;
+      const front = c + GRID < CELLS && drawn[c + GRID] ? c + GRID : c;
       const spanX = (right - left) * CELL || CELL;
       const spanZ = ((front - back) / GRID) * CELL || CELL;
       const dx = (surf[right] - surf[left]) / spanX;
