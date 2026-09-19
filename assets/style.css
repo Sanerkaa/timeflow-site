@@ -1168,8 +1168,8 @@ details[open]::details-content { block-size: auto; }
   height: 100%;
   opacity: 0;
   transition: opacity .8s ease;
-  /* Крутить часы можно мышью, но палец по ним должен листать страницу */
-  touch-action: pan-y;
+  /* Direct dragging rotates the clock; the page scrolls outside this canvas. */
+  touch-action: none;
   cursor: grab;
   /* Протяжка по часам — это вращение, а не выделение текста вокруг */
   user-select: none;
@@ -1277,4 +1277,15 @@ details[open]::details-content { block-size: auto; }
 @media (prefers-reduced-motion: reduce) {
   .theme-switch .rays,
   .theme-switch .bite { transition: none; }
+}
+
+/* Full rotation needs a square viewport and a camera fitted to its sphere. */
+.hero-stage { width: min(440px, 100%); aspect-ratio: 1; }
+.hero-glass { touch-action: none; }
+.hero-glass:focus-visible { outline: 2px solid var(--accent, #8752a3); outline-offset: 3px; border-radius: 24px; }
+@media (max-width: 900px) {
+  .hero-stage { width: min(300px, 85vw); margin: -20px 0 8px; }
+}
+@media (max-width: 380px) {
+  .hero-stage { width: min(260px, 84vw); }
 }
