@@ -184,7 +184,7 @@ function build(T) {
   const positions = new Float32Array(MAX_GRAINS * 3);
   const velocities = new Float32Array(MAX_GRAINS * 3);
   const ages = new Float32Array(MAX_GRAINS);
-  const grainVolume = total / 4200;
+  const grainVolume = total / 9000;
   let grains = 0;
   const pending = [0, 0];
   const grainGeo = new T.BufferGeometry();
@@ -197,7 +197,7 @@ function build(T) {
   gradient.addColorStop(0,'white'); gradient.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle = gradient; ctx.fillRect(0,0,32,32);
   const grainMat = new T.PointsMaterial({ color: COLORS.light.sand,
-    size: 0.012, map: new T.CanvasTexture(dotCanvas), transparent: true,
+    size: 0.018, map: new T.CanvasTexture(dotCanvas), transparent: true,
     alphaTest: 0.12, depthWrite: false });
   const stream = new T.Points(grainGeo, grainMat);
   stream.frustumCulled = false;
@@ -229,7 +229,9 @@ function build(T) {
       while (pending[ch] >= grainVolume && grains < MAX_GRAINS) {
         const i = grains * 3;
         positions[i] = (Math.random()-0.5) * 0.025;
-        positions[i+1] = ch === 0 ? -0.009 : 0.009;
+        // Spawn inside the opening so the stream overlaps the bulk, rather
+        // than adding an independent solid tip aligned to world gravity.
+        positions[i+1] = (ch === 0 ? 1 : -1) * 0.004 - realUp.y * Math.random() * 0.008;
         positions[i+2] = (Math.random()-0.5) * 0.016;
         const speed = 0.18 + Math.random()*0.16;
         velocities[i] = -realUp.x*speed + (Math.random()-0.5)*0.035;
