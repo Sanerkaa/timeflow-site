@@ -94,12 +94,6 @@ function build(T) {
     const rail = new T.TubeGeometry(new T.CatmullRomCurve3(points), 160, 0.042, 12, false);
     clock.add(new T.Mesh(rail, frameMat));
   }
-  const shineMat = new T.MeshBasicMaterial({ color: 0xf8f0ff, transparent: true, opacity: 0.65 });
-  const shine = new T.Mesh(new T.CapsuleGeometry(0.012, 0.14, 3, 8), shineMat);
-  shine.rotation.z = Math.PI / 2;
-  shine.position.set(-0.23, 0.84, 0.475);
-  clock.add(shine);
-
   const samples = createBulbSamples(coarse ? 1024 : 1536);
   const total = samples.volume * 0.47;
   const volumes = [total, 0];
@@ -143,11 +137,13 @@ function build(T) {
     float field(vec3 p) {
       float h = dot(p, uUp);
       float radial = sqrt(max(0.0, dot(p,p)-h*h) + 0.0009);
-      float level = p.y >= 0.0 ? uLevel.x : uLevel.y;
-      float slope = p.y >= 0.0 ? uSlope.x : uSlope.y;
-      float surface = (h + slope*radial - level) / 1.2;
-      float wall = (length(vec2(p.x, p.z / 1.0)) - radius(p.y)) * 0.45;
-      return max(max(wall, abs(p.y)-0.94), surface);
+      float wall = (length(p.xz) - radius(p.y)) * 0.45;
+      float envelope = max(wall, abs(p.y)-0.94);
+      // Union of two continuous chamber fields. Switching the distance at
+      // y=0 could step OVER the sand in the other bulb at oblique angles.
+      float upper = max(-p.y, (h + uSlope.x*radial - uLevel.x) / 1.2);
+      float lower = max( p.y, (h + uSlope.y*radial - uLevel.y) / 1.2);
+      return max(envelope, min(upper, lower));
     }
     float hash(vec3 p) {
       p = fract(p * 123.34);
@@ -158,10 +154,10 @@ function build(T) {
       vec3 ray = normalize(vLocal-uEye);
       vec3 p = vLocal;
       bool hit = false;
-      for (int i=0; i<110; i++) {
+      for (int i=0; i<180; i++) {
         float d = field(p);
-        if (d < 0.00065) { hit = true; break; }
-        p += ray * max(d * 0.85, 0.0005);
+        if (d < 0.00035) { hit = true; break; }
+        p += ray * max(d * 0.8, 0.0002);
         if (abs(p.x)>0.59 || abs(p.y)>1.01 || abs(p.z)>0.59) break;
       }
       if (!hit) discard;
@@ -222,7 +218,10 @@ function build(T) {
 
   function simulate(dt) {
     const source = realUp.y >= 0 ? 0 : 1;
-    const covered = levels[source] > surfacePotential(0,0,0,up,slopes[source]) + 0.008;
+    // The smoothed volume solver has a finite kernel near an empty neck.
+    // Upright bulbs must drain their final grains even below that kernel.
+    const aligned = Math.abs(realUp.y) > 0.96 && realUp.dot(up) > 0.99;
+    const covered = aligned || levels[source] > surfacePotential(0,0,0,up,slopes[source]) + 0.008;
     const take = Math.min(volumes[source], flowRate(realUp.y, covered, total) * dt);
     volumes[source] -= take;
     pending[source] += take;
@@ -238,6 +237,12 @@ function build(T) {
         velocities[i+2] = -realUp.z*speed;
         ages[grains++] = 0;
         pending[ch] -= grainVolume;
+      }
+      // A remainder smaller than one display particle still carries mass.
+      // Deposit it when the source is empty instead of leaving it in the neck.
+      if (volumes[ch] === 0 && pending[ch] > 0 && pending[ch] < grainVolume) {
+        volumes[1-ch] += pending[ch];
+        pending[ch] = 0;
       }
     }
     for (let n = grains-1; n >= 0; n--) {
@@ -273,14 +278,15 @@ function build(T) {
   const axis = new T.Vector3();
   const before = new T.Vector3(), after = new T.Vector3();
   const delta = new T.Quaternion();
+  let autoTurn = null, emptyTime = 0;
   let pointer = null, lastPointerTime = 0;
-  let hovered = false;
+  let hovered = false, returning = false;
   canvas.addEventListener('pointerenter', e => {
     if (e.pointerType === 'mouse') hovered = true;
   });
-  canvas.addEventListener('pointerleave', () => { hovered = false; });
+  canvas.addEventListener('pointerleave', () => { hovered = false; returning = true; });
   addEventListener('blur', () => {
-    hovered = false;
+    hovered = false; returning = true;
     const old = pointer;
     pointer = null;
     omega.set(0,0,0);
@@ -296,7 +302,7 @@ function build(T) {
   }
   canvas.addEventListener('pointerdown',e => {
     if (pointer !== null || (e.pointerType==='mouse' && e.button!==0)) return;
-    e.preventDefault(); pointer=e.pointerId;
+    e.preventDefault(); pointer=e.pointerId; autoTurn=null; emptyTime=0; returning=false;
     omega.set(0,0,0); lastPointerTime=e.timeStamp;
     project(e.clientX,e.clientY,before);
     canvas.setPointerCapture(pointer);
@@ -321,10 +327,11 @@ function build(T) {
     hovered = e.pointerType === 'mouse' && e.type === 'pointerup' &&
       e.clientX >= box.left && e.clientX <= box.right &&
       e.clientY >= box.top && e.clientY <= box.bottom;
+    if (!hovered) returning = true;
   }
   canvas.addEventListener('pointerup',release);
   canvas.addEventListener('pointercancel',release);
-  canvas.addEventListener('lostpointercapture',e=>{ if(e.pointerId===pointer){pointer=null;omega.set(0,0,0);} });
+  canvas.addEventListener('lostpointercapture',e=>{ if(e.pointerId===pointer){pointer=null;returning=true;omega.set(0,0,0);} });
   canvas.addEventListener('keydown',e=>{
     const arrows={ArrowLeft:[0,-1,0],ArrowRight:[0,1,0],ArrowUp:[-1,0,0],ArrowDown:[1,0,0]};
     if(!arrows[e.key])return;
@@ -358,11 +365,19 @@ function build(T) {
     if(coarse && previous && now-previous<30)return;
     const dt=previous?Math.min(0.05,(now-previous)/1000):1/60;
     previous=now;
-    if (pointer === null && !hovered) {
+    if (autoTurn) {
+      autoTurn.elapsed += dt;
+      const t = Math.min(1, autoTurn.elapsed / 1.35);
+      clock.quaternion.slerpQuaternions(autoTurn.from, front, t*t*(3-2*t));
+      if (t === 1) autoTurn = null;
+    } else if (pointer === null && (returning || !hovered)) {
       // Frame-rate independent shortest-arc return, without an end snap.
       omega.set(0,0,0);
       clock.quaternion.slerp(front, 1-Math.exp(-4*dt));
-      if (clock.quaternion.angleTo(front) < 0.0001) clock.quaternion.copy(front);
+      if (clock.quaternion.angleTo(front) < 0.0001) {
+        clock.quaternion.copy(front);
+        returning = false;
+      }
     } else if(pointer===null && omega.lengthSq()>0.00001) {
       const speed=omega.length();
       delta.setFromAxisAngle(axis.copy(omega).normalize(),speed*dt);
@@ -376,6 +391,19 @@ function build(T) {
     accumulator+=dt;
     while(accumulator>=1/90){simulate(1/90);accumulator-=1/90;}
     solveSurfaces();
+    const source = realUp.y >= 0 ? 0 : 1;
+    const empty = volumes[source] === 0 && pending[0] === 0 && pending[1] === 0 && grains === 0;
+    if (!autoTurn && pointer === null && Math.abs(realUp.y) > 0.96 &&
+        omega.lengthSq() < 0.001 && empty) emptyTime += dt;
+    else emptyTime = 0;
+    if (emptyTime > 0.9) {
+      // Alternating frontal poses preserve the automatic cycle when the
+      // pointer leaves: returning to the old pose would undo the flip.
+      front.setFromAxisAngle(axis.set(0,0,1), source === 0 ? Math.PI : 0);
+      autoTurn = { from: clock.quaternion.clone(), elapsed: 0 };
+      omega.set(0,0,0);
+      emptyTime = 0;
+    }
     clock.updateMatrixWorld(true);
     eye.copy(camera.position);clock.worldToLocal(eye);
     light.set(-0.4,0.75,0.8).normalize().applyQuaternion(inverse);
