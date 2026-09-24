@@ -204,6 +204,28 @@
     addEventListener('resize', onSpread);
   }
 
+  /* ── Часы под первым экраном ───────────────────────────────────────── */
+
+  /* --p — доля раздела позади: 0, когда его верх только показался снизу,
+     1, когда низ дошёл до низа экрана и сцена отлипает. Часы читают её
+     сами и по ней переворачиваются. --show — насколько они проявились:
+     до конца, когда сцена прилипла к экрану (верх раздела у верха экрана). */
+  var glassScroll = document.querySelector('.glass-scroll');
+  if (glassScroll) {
+    var glassMove = function () {
+      var box = glassScroll.getBoundingClientRect();
+      var p = Math.max(0, Math.min(1, (innerHeight - box.top) / box.height));
+      var stuck = innerHeight / box.height;
+      var s = Math.max(0, Math.min(1, (p - stuck * .15) / (stuck * .85)));
+      glassScroll.style.setProperty('--p', p.toFixed(4));
+      glassScroll.style.setProperty('--show', (s * s * (3 - 2 * s)).toFixed(3));
+    };
+    var onGlass = perFrame(glassMove);
+    glassMove();
+    addEventListener('scroll', onGlass, { passive: true });
+    addEventListener('resize', onGlass);
+  }
+
   /* ── Наклон карточек за курсором ───────────────────────────────────── */
 
   /* Наклон маленький нарочно: на пяти градусах это читается как отзыв

@@ -279,13 +279,10 @@ p { margin: 0 0 1em; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
 
 .hero-art { display: flex; justify-content: center; }
-.hero-art img { width: min(230px, 70%); filter: drop-shadow(var(--mark-drop)); }
 
 @media (max-width: 900px) {
   .hero { padding-top: 56px; }
   .hero .wrap { grid-template-columns: 1fr; gap: 34px; }
-  .hero-art { order: -1; }
-  .hero-art img { width: 150px; }
 }
 
 /* ── Секции ────────────────────────────────────────────────────────────── */
@@ -1025,8 +1022,7 @@ footer {
   to { opacity: 1; transform: none; }
 }
 
-/* Знак едва заметно покачивается — как настоящие часы на подставке */
-.hero-art img { animation: float 7s ease-in-out infinite; }
+/* Телефон на первом экране едва заметно покачивается */
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-9px) rotate(-1.2deg); }
@@ -1447,29 +1443,21 @@ details[open]::details-content { block-size: auto; }
 #tfBody stop:first-child { stop-color: var(--mark-glass-1); }
 #tfBody stop:last-child { stop-color: var(--mark-glass-2); }
 
-/* ── Часы на первом экране ─────────────────────────────────────────────
+/* ── Песочные часы ─────────────────────────────────────────────────────
 
    Знак-картинка и трёхмерная сцена лежат в одной коробке друг на друге:
    пока сцена не готова (или не завелась вовсе), виден знак; когда
    отрисовался первый кадр, они меняются местами растворением — без
    скачка раскладки, потому что коробка своего размера не меняет. */
 
+/* Сцена квадратная: камера вписана в сферу вокруг часов, и в квадрат
+   они помещаются при любом повороте */
 .hero-stage {
   position: relative;
-  width: min(330px, 88%);
-  aspect-ratio: .78;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.hero-stage .hero-art-in {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity .5s ease;
 }
 
 .hero-glass {
@@ -1488,12 +1476,6 @@ details[open]::details-content { block-size: auto; }
 }
 .hero-glass:active { cursor: grabbing; }
 
-.hero-art.is-3d .hero-glass { opacity: 1; }
-.hero-art.is-3d .hero-art-in { opacity: 0; pointer-events: none; }
-
-@media (max-width: 900px) {
-  .hero-stage { width: min(215px, 60%); }
-}
 
 /* ── Шапка на телефоне ─────────────────────────────────────────────────
 
@@ -1590,18 +1572,479 @@ details[open]::details-content { block-size: auto; }
   .theme-switch .bite { transition: none; }
 }
 
-/* Full rotation needs a square viewport and a camera fitted to its sphere. */
-.hero-stage { width: min(440px, 100%); aspect-ratio: 1; }
-.hero-glass { touch-action: none; }
 .hero-glass:focus-visible { outline: 2px solid var(--accent, #8752a3); outline-offset: 3px; border-radius: 24px; }
-@media (max-width: 900px) {
-  .hero-stage { width: min(300px, 85vw); margin: -20px 0 8px; }
-}
-@media (max-width: 380px) {
-  .hero-stage { width: min(260px, 84vw); }
-}
 
 @media (max-width: 560px) {
   .theme-switch { width: 34px; height: 34px; }
   .theme-switch svg { width: 18px; height: 18px; }
+}
+
+/* ── Телефон со сценкой на первом экране ───────────────────────────────
+
+   Интерфейс внутри повторяет приложение и всегда тёмный, как на
+   скриншотах: это экран телефона, а не часть сайта, и тема сайта его не
+   перекрашивает. Все размеры в em от ширины телефона (cqw), поэтому
+   сценка целиком масштабируется вместе с ним и ничего не переносится
+   по-разному на разных экранах. */
+
+.phone {
+  container-type: inline-size;
+  position: relative;
+  width: min(290px, 76vw);
+  aspect-ratio: 9 / 19.5;
+  padding: 9px;
+  border-radius: 46px;
+  background: #0c0a10;
+  box-shadow:
+    inset 0 0 0 1.5px #2c2635,
+    0 34px 70px rgba(63, 43, 82, .30),
+    0 10px 24px rgba(63, 43, 82, .18);
+  animation: float 7s ease-in-out infinite;
+}
+[data-theme="dark"] .phone {
+  box-shadow:
+    inset 0 0 0 1.5px #3a3246,
+    0 34px 70px rgba(0, 0, 0, .55),
+    0 0 90px rgba(140, 88, 196, .18);
+}
+
+.app {
+  --a-bg: #121117;
+  --a-card: #1c1b22;
+  --a-line: #2b2a34;
+  --a-text: #ecE9f5;
+  --a-muted: #9793a6;
+  --a-accent: #7465ff;
+  --a-soft: #c9c0ff;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 37px;
+  background:
+    radial-gradient(120% 40% at 50% 0%, #2a2346, transparent 70%),
+    var(--a-bg);
+  color: var(--a-text);
+  font-family: var(--body);
+  font-size: 12.5px;
+  font-size: 4.35cqw;
+  line-height: 1.35;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.app b { font-weight: 700; }
+.app small { display: block; color: var(--a-muted); font-size: .8em; }
+.app svg { display: block; }
+
+.app-status {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2.6em;
+  padding: 0 1.9em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: .8em;
+  font-weight: 700;
+  z-index: 2;
+}
+.app-bars { display: flex; align-items: flex-end; gap: 2px; height: .8em; }
+.app-bars i { width: 3px; border-radius: 1px; background: currentColor; }
+.app-bars i:nth-child(1) { height: 45%; }
+.app-bars i:nth-child(2) { height: 70%; }
+.app-bars i:nth-child(3) { height: 100%; }
+.app-bars b {
+  width: 1.7em;
+  height: 100%;
+  margin-left: 4px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, currentColor 55%, transparent 55%);
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+/* Два экрана лежат друг на друге. «Главная» левее ассистента в нижней
+   панели, поэтому при переходе на неё экран въезжает слева. */
+.app-view {
+  position: absolute;
+  inset: 2.8em 0 5.6em;
+  padding: 0 1em;
+  transition: transform .5s cubic-bezier(.3, .7, .2, 1), opacity .4s ease;
+}
+.view-chat { display: flex; flex-direction: column; }
+.app[data-scene="home"] .view-chat { transform: translateX(35%); opacity: 0; }
+.app[data-scene="chat"] .view-home { transform: translateX(-35%); opacity: 0; }
+
+/* Чат */
+.chat-head { display: flex; align-items: center; gap: .8em; padding: .7em .2em; }
+.chat-head small { display: flex; align-items: center; gap: .4em; }
+.chat-head small i { width: .5em; height: .5em; border-radius: 50%; background: #4cd07d; }
+.bot-ava {
+  flex: none;
+  width: 2.8em;
+  height: 2.8em;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #7465ff, #b03fcf);
+  box-shadow: 0 0 1.4em rgba(140, 90, 255, .45);
+}
+.bot-ava svg { width: 1.4em; height: 1.4em; }
+
+.chat-log {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: .6em;
+  padding-bottom: .8em;
+}
+.msg {
+  max-width: 84%;
+  padding: .7em .95em;
+  border-radius: 1.15em;
+  background: #26252e;
+  font-size: .92em;
+}
+.msg-bot { align-self: flex-start; border-bottom-left-radius: .35em; }
+.msg-me {
+  align-self: flex-end;
+  border-bottom-right-radius: .35em;
+  background: linear-gradient(100deg, #6c5cff, #a33bd0);
+  color: #fff;
+}
+
+/* Сообщения появляются по ходу сценки. display, а не прозрачность:
+   спрятанное не должно занимать место, лента прижата к низу. */
+.app:not(.is-sent) .msg-me,
+.app:not(.is-dots) .msg-dots,
+.app.is-reply .msg-dots,
+.app:not(.is-reply) .msg-reply { display: none; }
+.app.is-sent .msg-me,
+.app.is-dots .msg-dots,
+.app.is-reply .msg-reply { animation: msgIn .38s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(.8em) scale(.96); }
+}
+
+.msg-dots { display: flex; gap: .3em; padding: .95em 1em; }
+.msg-dots i {
+  width: .45em;
+  height: .45em;
+  border-radius: 50%;
+  background: var(--a-muted);
+  animation: dot 1s ease-in-out infinite;
+}
+.msg-dots i:nth-child(2) { animation-delay: .15s; }
+.msg-dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes dot {
+  0%, 60%, 100% { transform: none; opacity: .5; }
+  30% { transform: translateY(-.3em); opacity: 1; }
+}
+
+.mini-task {
+  display: block;
+  margin-top: .55em;
+  padding: .6em .7em;
+  border-radius: .8em;
+  background: #1a1920;
+  border: 1px solid var(--a-line);
+  box-shadow: inset 3px 0 0 #e8b73a;
+}
+.mini-task b { display: block; margin-bottom: .35em; }
+.app-chips { display: flex; flex-wrap: wrap; gap: .3em; }
+.app-chips i {
+  font-style: normal;
+  font-size: .82em;
+  padding: .1em .55em;
+  border-radius: 99px;
+  background: #2d2a45;
+  color: var(--a-soft);
+}
+.app .hot { background: #45202a; color: #ff7a7a; }
+
+.chat-input {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  padding: .35em;
+  border-radius: 2em;
+  border: 1px solid var(--a-line);
+  background: #17161c;
+}
+.chat-mic, .chat-send {
+  flex: none;
+  width: 2.3em;
+  height: 2.3em;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #25242c;
+  color: #c8c4d6;
+  transition: background .25s ease, color .25s ease;
+}
+.chat-mic svg, .chat-send svg { width: 1.15em; height: 1.15em; }
+.app.is-typing .chat-send { background: var(--a-accent); color: #fff; }
+.chat-field {
+  flex: 1;
+  min-width: 0;
+  font-size: .92em;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+}
+/* Набранное прижато влево, а когда перестаёт влезать, уезжает влево и
+   видно его окончание, как в настоящем поле. Это делает rtl у обёртки;
+   чтобы пробел в конце не прыгал в начало, скрипт дописывает за текстом
+   невидимую метку направления. */
+.chat-field > span:first-child { min-width: 0; overflow: hidden; direction: rtl; }
+.chat-ph { color: #6f6b7e; }
+.caret {
+  width: 1.5px;
+  background: var(--a-accent);
+  animation: caret 1s steps(1) infinite;
+}
+.app:not(.is-typing) .caret,
+.app.is-typing .chat-ph { display: none; }
+@keyframes caret { 50% { opacity: 0; } }
+
+/* Главная */
+.home-title { padding: .5em .1em .9em; }
+.home-title b { display: block; font-size: 1.75em; line-height: 1.15; letter-spacing: -.01em; }
+.home-progress {
+  display: grid;
+  grid-template-columns: 3.6em 1fr;
+  align-items: center;
+  gap: .9em;
+  padding: .9em;
+  border-radius: 1.2em;
+  background: linear-gradient(120deg, #3a2d6b, #57306e);
+  border: 1px solid #5b4a9a;
+  margin-bottom: 1.1em;
+}
+.ring, .ring-count { grid-area: 1 / 1; }
+.ring { width: 3.6em; height: 3.6em; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke: rgba(255, 255, 255, .14); stroke-width: 3.4; }
+.ring .ring-fill {
+  stroke: var(--a-soft);
+  stroke-linecap: round;
+  stroke-dasharray: 0 100;
+  transition: stroke-dasharray .8s cubic-bezier(.3, .7, .2, 1);
+}
+.app.is-done .ring-fill { stroke-dasharray: 50 100; }
+.ring-count { text-align: center; font-weight: 700; font-size: .9em; }
+.home-progress small { margin-top: .2em; }
+
+.home-label {
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  margin: .2em 0 .5em;
+  color: #cfcbe0;
+  font-weight: 700;
+  font-size: .85em;
+}
+.home-label::before { content: ""; width: .4em; height: .4em; border-radius: 50%; background: #6f6b7e; }
+
+.home-task {
+  display: flex;
+  align-items: center;
+  gap: .75em;
+  padding: .8em .9em;
+  margin-bottom: .9em;
+  border-radius: 1.1em;
+  background: var(--a-card);
+  border: 1px solid var(--a-line);
+}
+.task-bar { flex: none; width: 3px; height: 2.4em; border-radius: 3px; background: #e8b73a; }
+.task-bar.is-blue { background: #2f86f0; }
+.task-body { flex: 1; min-width: 0; }
+.task-body b { display: block; font-size: .95em; transition: color .3s ease; }
+.task-body small { margin-top: .2em; }
+.task-body em { font-style: normal; color: #e8b73a; }
+.task-body em.is-blue { color: #2f86f0; }
+.task-body em.hot { padding: 0 .4em; border-radius: .35em; }
+.task-check {
+  position: relative;
+  flex: none;
+  width: 1.45em;
+  height: 1.45em;
+  border-radius: 50%;
+  border: 2px solid #5a566a;
+  transition: background .25s ease, border-color .25s ease;
+}
+.app.is-done .home-task.is-new .task-check { background: #4cd07d; border-color: #4cd07d; }
+.app.is-done .home-task.is-new .task-check::after {
+  content: "";
+  position: absolute;
+  left: .38em;
+  top: .15em;
+  width: .3em;
+  height: .6em;
+  border: solid #0f2a18;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: msgIn .3s ease both;
+}
+.app.is-done .home-task.is-new .task-body b {
+  color: var(--a-muted);
+  text-decoration: line-through;
+}
+
+/* Новая задача въезжает в список и коротко подсвечивается */
+.app:not(.is-task) .is-new { display: none; }
+.app.is-task .home-task.is-new { animation: taskIn .6s cubic-bezier(.2, .8, .3, 1) both, taskGlow 1.6s ease .3s both; }
+.app.is-task .home-label.is-new { animation: msgIn .4s ease both; }
+@keyframes taskIn {
+  from { opacity: 0; transform: translateY(-1em) scale(.95); }
+}
+@keyframes taskGlow {
+  0% { box-shadow: 0 0 0 0 rgba(116, 101, 255, 0); border-color: var(--a-line); }
+  30% { box-shadow: 0 0 0 3px rgba(116, 101, 255, .45); border-color: var(--a-accent); }
+  100% { box-shadow: 0 0 0 0 rgba(116, 101, 255, 0); border-color: var(--a-line); }
+}
+
+/* Нижняя панель */
+.app-tabs {
+  position: absolute;
+  left: .7em;
+  right: .7em;
+  bottom: 1.2em;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: .35em;
+  border-radius: 1.5em;
+  background: #1b1a21;
+  border: 1px solid var(--a-line);
+}
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2em;
+  padding: .45em 0 .35em;
+  border-radius: 1.1em;
+  font-size: .7em;
+  color: #8f8b9f;
+  transition: background .3s ease, color .3s ease;
+}
+.tab svg { width: 1.9em; height: 1.9em; }
+.app[data-scene="chat"] [data-el="tab-ai"],
+.app[data-scene="home"] [data-el="tab-home"] {
+  background: #2d2656;
+  color: #8f80ff;
+  box-shadow: inset 0 0 0 1px #4b3f95;
+}
+
+/* Палец: едет к цели, при нажатии проседает */
+.finger {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2.6em;
+  height: 2.6em;
+  margin: -1.3em 0 0 -1.3em;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .26);
+  border: 2px solid rgba(255, 255, 255, .75);
+  box-shadow: 0 .3em 1em rgba(0, 0, 0, .35);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  transition:
+    transform .5s cubic-bezier(.4, 0, .2, 1),
+    opacity .25s ease,
+    scale .15s ease;
+}
+.app.is-finger .finger { opacity: 1; }
+.app.is-press .finger { scale: .78; background: rgba(255, 255, 255, .45); }
+
+/* Конец круга: всё гаснет. Во время сброса переходы выключены, чтобы
+   экраны не проезжали обратно у всех на глазах. */
+.app > * { transition: opacity .4s ease; }
+.app.is-out > * { opacity: 0; }
+.app.is-snap, .app.is-snap * { transition: none !important; }
+
+@media (max-width: 900px) {
+  .phone { width: min(250px, 66vw); border-radius: 40px; }
+  .app { border-radius: 32px; }
+}
+
+/* ── Часы, которые листаются ───────────────────────────────────────────
+
+   Раздел в два с половиной экрана высотой, сцена внутри прилипает к
+   экрану. --p (0…1) — сколько раздела пролистано, считает site.js.
+   --show — насколько часы проявились: они выходят из дымки, пока раздел
+   въезжает снизу, и дальше только вращаются. */
+
+.glass-scroll {
+  --p: 0;
+  --show: 1;
+  padding: 0;
+  position: relative;
+}
+/* Высокий раздел и проявление — только при живом скрипте: без него
+   прокрутку считать некому, и остались бы полтора пустых экрана */
+.js .glass-scroll { --show: 0; height: 250vh; }
+.glass-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+/* Сиреневое сияние за часами разгорается вместе с ними */
+.glass-sticky::before {
+  content: "";
+  position: absolute;
+  width: min(760px, 120vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--halo), transparent 62%);
+  opacity: var(--show);
+  transform: scale(calc(.6 + .4 * var(--show)));
+}
+.glass-host {
+  position: relative;
+  opacity: var(--show);
+  transform: scale(calc(.55 + .45 * var(--show)));
+  filter: blur(calc((1 - var(--show)) * 14px));
+  will-change: transform, opacity;
+}
+.glass-host .hero-stage { width: min(520px, 86vw, 70vh); }
+
+.glass-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .5s ease;
+}
+.glass-fallback img {
+  width: 46%;
+  filter: drop-shadow(var(--mark-drop));
+  /* Без трёхмерной сцены переворачивается сам знак */
+  transform: rotate(calc(var(--p) * 360deg));
+}
+
+/* В этом разделе часами не крутят руками — их крутит прокрутка. Поэтому
+   холст пропускает жесты насквозь: палец на часах листает страницу. */
+.glass-host .hero-glass {
+  touch-action: auto;
+  cursor: default;
+  pointer-events: none;
+}
+.glass-host.is-3d .hero-glass { opacity: 1; }
+.glass-host.is-3d .glass-fallback { opacity: 0; }
+
+/* Кому движение мешает — обычный раздел в экран высотой с неподвижным
+   знаком, без прилипания и дымки */
+@media (prefers-reduced-motion: reduce) {
+  .js .glass-scroll { height: auto; }
+  .glass-sticky { position: static; height: auto; padding: 60px 0; }
+  .glass-host { opacity: 1; transform: none; filter: none; }
+  .glass-sticky::before { opacity: 1; transform: none; }
+  .glass-fallback img { transform: none; }
+  .phone { animation: none; }
 }

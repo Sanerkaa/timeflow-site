@@ -3,7 +3,10 @@ import { HEIGHT, RADIUS, DEPTH, REPOSE, radiusAt, createBulbSamples,
 
 // The glass is continuous, not a stack of cells. Sand is a closed implicit
 // solid cut by a gravity-aligned granular surface, with a conserved volume.
-const host = document.querySelector('.hero-art');
+const host = document.querySelector('[data-hourglass]');
+// In the scroll section the page scroll turns the clock, not the pointer.
+const scrollMode = !!(host && host.dataset && 'scroll' in host.dataset);
+const section = scrollMode ? host.closest('.glass-scroll') : null;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const COLORS = {
   light: { frame: 0x75458f, sand: 0xc0a0d3, glass: 0xeaddf2, ambient: 0.95 },
@@ -32,9 +35,13 @@ function build(T) {
   const coarse = matchMedia('(pointer: coarse), (max-width: 760px)').matches;
   const canvas = document.createElement('canvas');
   canvas.className = 'hero-glass';
-  canvas.tabIndex = 0;
   canvas.setAttribute('role', 'img');
-  canvas.setAttribute('aria-label', 'Песочные часы. Вращайте перетаскиванием или стрелками. После отпускания часы возвращаются лицевой стороной.');
+  if (scrollMode) {
+    canvas.setAttribute('aria-label', 'Песочные часы TimeFlow переворачиваются при прокрутке страницы.');
+  } else {
+    canvas.tabIndex = 0;
+    canvas.setAttribute('aria-label', 'Песочные часы. Вращайте перетаскиванием или стрелками. После отпускания часы возвращаются лицевой стороной.');
+  }
   stage.appendChild(canvas);
   const renderer = new T.WebGLRenderer({ canvas, alpha: true, antialias: true,
     powerPreference: 'low-power' });
@@ -294,6 +301,20 @@ function build(T) {
     omega.set(0,0,0);
     if (old !== null && canvas.hasPointerCapture(old)) canvas.releasePointerCapture(old);
   });
+  // Scroll pose: one full roll (a flip and back upright) plus a turn and a
+  // slight tilt, so the rails show depth. Sand physics follows gravity.
+  const scrollPose = new T.Quaternion();
+  const poseRoll = new T.Quaternion(), poseYaw = new T.Quaternion(), poseTilt = new T.Quaternion();
+  const AXIS_X = new T.Vector3(1,0,0), AXIS_Y = new T.Vector3(0,1,0), AXIS_Z = new T.Vector3(0,0,1);
+  function readScroll() {
+    const p = parseFloat(section?.style.getPropertyValue('--p')) || 0;
+    const r = Math.max(0, Math.min(1, (p - 0.22) / 0.7));
+    const k = r*r*(3-2*r);
+    poseRoll.setFromAxisAngle(AXIS_Z, -k * Math.PI * 2);
+    poseYaw.setFromAxisAngle(AXIS_Y, k * Math.PI * 2);
+    poseTilt.setFromAxisAngle(AXIS_X, Math.sin(k * Math.PI) * 0.35);
+    return scrollPose.copy(poseTilt).multiply(poseRoll).multiply(poseYaw);
+  }
   function project(x,y,out) {
     const box = canvas.getBoundingClientRect();
     const scale = Math.min(box.width,box.height)*0.45;
@@ -303,6 +324,7 @@ function build(T) {
     return out.normalize();
   }
   canvas.addEventListener('pointerdown',e => {
+    if (scrollMode) return;
     if (pointer !== null || (e.pointerType==='mouse' && e.button!==0)) return;
     e.preventDefault(); pointer=e.pointerId; autoTurn=null; emptyTime=0; returning=false;
     omega.set(0,0,0); lastPointerTime=e.timeStamp;
@@ -336,7 +358,7 @@ function build(T) {
   canvas.addEventListener('lostpointercapture',e=>{ if(e.pointerId===pointer){pointer=null;returning=true;omega.set(0,0,0);} });
   canvas.addEventListener('keydown',e=>{
     const arrows={ArrowLeft:[0,-1,0],ArrowRight:[0,1,0],ArrowUp:[-1,0,0],ArrowDown:[1,0,0]};
-    if(!arrows[e.key])return;
+    if(scrollMode || !arrows[e.key])return;
     e.preventDefault();
     delta.setFromAxisAngle(axis.fromArray(arrows[e.key]),0.18);
     clock.quaternion.premultiply(delta);
@@ -367,7 +389,10 @@ function build(T) {
     if(coarse && previous && now-previous<30)return;
     const dt=previous?Math.min(0.05,(now-previous)/1000):1/60;
     previous=now;
-    if (autoTurn) {
+    if (scrollMode) {
+      // Smoothed chase of the scroll pose: steady even with coarse wheel steps.
+      clock.quaternion.slerp(readScroll(), 1-Math.exp(-9*dt));
+    } else if (autoTurn) {
       autoTurn.elapsed += dt;
       const t = Math.min(1, autoTurn.elapsed / 1.35);
       clock.quaternion.slerpQuaternions(autoTurn.from, front, t*t*(3-2*t));
@@ -395,7 +420,7 @@ function build(T) {
     solveSurfaces();
     const source = realUp.y >= 0 ? 0 : 1;
     const empty = volumes[source] === 0 && pending[0] === 0 && pending[1] === 0 && grains === 0;
-    if (!autoTurn && pointer === null && Math.abs(realUp.y) > 0.96 &&
+    if (!scrollMode && !autoTurn && pointer === null && Math.abs(realUp.y) > 0.96 &&
         omega.lengthSq() < 0.001 && empty) emptyTime += dt;
     else emptyTime = 0;
     if (emptyTime > 0.9) {
