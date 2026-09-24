@@ -804,6 +804,8 @@ footer {
 .foot-grid a { color: var(--ink); }
 
 .requisites { line-height: 1.9; }
+/* В подвале главной реквизиты чуть отодвинуты от колонок со ссылками */
+.foot-grid + .requisites { margin-top: 58px; }
 .fill { background: var(--fill-bg); padding: 0 6px; border-radius: 4px; color: var(--fill-ink); }
 
 /* ── Юридические страницы ──────────────────────────────────────────────── */
