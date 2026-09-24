@@ -630,11 +630,14 @@ section { padding: 72px 0; }
    из-под шапки выглядывала полоса фона. */
 .shots {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 26px;
 }
 @media (max-width: 900px) {
   .shots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Две колонки на планшете широкие, и снимок во всю колонку вышел бы
+     выше экрана */
+  .shots .shot { max-width: 300px; margin-inline: auto; }
 }
 
 /* На телефоне две колонки давали снимки шириной с ноготь: разобрать на них
@@ -662,7 +665,10 @@ section { padding: 72px 0; }
   }
 }
 
+/* margin: 0 — у figure по умолчанию поля по 40 пикселей с боков, и
+   снимки выходили заметно уже своих колонок */
 .shot {
+  margin: 0;
   border-radius: 26px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1171,19 +1177,22 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
 
 /* ── Снимки разъезжаются по прокрутке ──────────────────────────────────── */
 
-/* Пока блок подъезжает снизу, боковые снимки лежат стопкой под средним и
+/* Пока блок подъезжает снизу, снимки лежат веером у середины и
    расходятся в стороны по мере прокрутки. Долю пройденного (0…1) считает
    скрипт и кладёт в --p на .shots.
 
    По умолчанию --p: 1 — то есть «уже разъехались». Это важно: без скрипта
-   и при выключенном движении раздел должен выглядеть обычной тройкой
+   и при выключенном движении раздел должен выглядеть обычным рядом
    снимков, а не кучей друг на друге. */
 .shots { --p: 1; }
 
+/* Снимков четыре: крайние едут от середины вдвое с лишним дальше
+   внутренних, а внутренние лежат поверх крайних */
 .shot-slot { --dir: 0; }
-.shots > .shot-slot:first-child { --dir: 1; z-index: 1; }
-.shots > .shot-slot:last-child { --dir: -1; z-index: 1; }
-.shots > .shot-slot:nth-child(2) { z-index: 2; }
+.shots > .shot-slot:nth-child(1) { --dir: 1.5; z-index: 1; }
+.shots > .shot-slot:nth-child(2) { --dir: .5; z-index: 2; }
+.shots > .shot-slot:nth-child(3) { --dir: -.5; z-index: 2; }
+.shots > .shot-slot:nth-child(4) { --dir: -1.5; z-index: 1; }
 
 @media (min-width: 901px) {
   .shot-slot {
@@ -1194,12 +1203,6 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
       rotate(calc(var(--dir) * (1 - var(--p)) * -5deg))
       scale(calc(1 - (1 - var(--p)) * 0.13));
     opacity: calc(.34 + .66 * var(--p));
-  }
-  /* Средний не уезжает, только чуть подрастает — он остаётся точкой,
-     из которой всё расходится */
-  .shots > .shot-slot:nth-child(2) {
-    transform: scale(calc(.94 + .06 * var(--p)));
-    opacity: calc(.55 + .45 * var(--p));
   }
 }
 
