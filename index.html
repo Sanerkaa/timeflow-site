@@ -158,76 +158,124 @@
   <div class="wrap">
     <div class="section-head reveal">
       <h2>Что умеет приложение</h2>
-      <p>Шесть вещей, ради которых его открывают каждый день.</p>
     </div>
 
-    <div class="cards">
-      <article class="card reveal">
-        <div class="card-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9.5 8h5"/><path d="M9.5 12H16"/><path d="M9.5 16H14"/></svg>
+    <!-- Сетка «бенто»: ассистент — главное отличие от обычного списка дел,
+         поэтому он крупный, остальное вокруг. В каждой карточке маленькая
+         сценка из приложения, свёрстанная html, а не картинкой: так она
+         красится темой и остаётся чёткой. Сценки только для глаз,
+         смысл целиком в заголовке и тексте. -->
+    <div class="bento">
+      <article class="card feat reveal" data-f="ai">
+        <div class="feat-text">
+          <div class="card-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          </div>
+          <h3>Ассистент</h3>
+          <p>
+            Скажите или напишите, что нужно сделать, и задача создастся сама,
+            со сроком и категорией. Сфотографируйте силлабус, приложение
+            вытащит из него дедлайны на весь семестр.
+          </p>
         </div>
-        <h3>Задачи</h3>
-        <p>
-          Сроки, приоритеты, категории и повторы. К задаче можно приложить
-          фотографию или наговорить голосовую заметку.
-        </p>
+        <div class="demo demo-ai" aria-hidden="true">
+          <div class="bubble bubble-me">Сдать реферат по истории к пятнице</div>
+          <div class="made">
+            <span class="made-check"></span>
+            <div>
+              <b>Реферат по истории</b>
+              <span class="chips"><i>Пт, 23:59</i><i>Учёба</i><i class="hot">Важно</i></span>
+            </div>
+          </div>
+          <div class="syllabus">
+            <span class="syl-page"><i></i><i></i><i></i><i></i></span>
+            <span class="syl-arrow"></span>
+            <span class="syl-out"><b>14</b> дедлайнов на семестр</span>
+          </div>
+        </div>
       </article>
 
-      <article class="card reveal">
-        <div class="card-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+      <article class="card feat reveal" data-f="schedule">
+        <div class="feat-text">
+          <div class="card-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
+          </div>
+          <h3>Расписание вуза</h3>
+          <p>
+            Работает без интернета, идущая сейчас пара подсвечивается,
+            к любой можно поставить напоминание и оставить заметку.
+          </p>
         </div>
-        <h3>Расписание вуза</h3>
-        <p>
-          Расписание работает без интернета, идущая сейчас
-          пара подсвечивается, к любой можно поставить напоминание и
-          оставить заметку.
-        </p>
+        <div class="demo demo-pairs" aria-hidden="true">
+          <div class="pair"><time>9:00</time><span>Матанализ</span></div>
+          <div class="pair now"><time>10:40</time><span>История</span><em>сейчас</em></div>
+          <div class="pair"><time>12:40</time><span>Английский</span></div>
+        </div>
       </article>
 
-      <article class="card reveal">
-        <div class="card-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+      <article class="card feat reveal" data-f="tasks">
+        <div class="feat-text">
+          <div class="card-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9.5 8h5"/><path d="M9.5 12H16"/><path d="M9.5 16H14"/></svg>
+          </div>
+          <h3>Задачи</h3>
+          <p>
+            Сроки, приоритеты, категории и повторы. К задаче можно приложить
+            фото или голосовую заметку.
+          </p>
         </div>
-        <h3>Ассистент</h3>
-        <p>
-          Скажите или напишите, что нужно сделать, и задача создастся сама,
-          со сроком и категорией. Сфотографируйте силлабус, приложение
-          вытащит из него дедлайны на весь семестр.
-        </p>
+        <div class="demo demo-todo" aria-hidden="true">
+          <div class="todo is-done"><span class="box"></span><span>Лабораторная №3</span></div>
+          <div class="todo"><span class="box"></span><span>Эссе по философии</span><i class="wave"><b></b><b></b><b></b><b></b><b></b></i></div>
+        </div>
       </article>
 
-      <article class="card reveal">
+      <article class="card feat reveal" data-f="rooms">
         <div class="card-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>
         </div>
         <h3>Совместные задачи</h3>
         <p>
-          Комната по коду для группы или проекта: общий список, разделы,
-          исполнители, комментарии, реакции и файлы.
+          Комната по коду для группы или проекта: общий список, исполнители,
+          комментарии и файлы.
         </p>
+        <div class="demo demo-room" aria-hidden="true">
+          <span class="faces"><i>А</i><i>М</i><i>К</i><i>+5</i></span>
+          <code>K7F-29</code>
+        </div>
       </article>
 
-      <article class="card reveal">
+      <article class="card feat reveal" data-f="widget">
         <div class="card-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
         </div>
         <h3>Виджет на экране</h3>
         <p>
-          Виджет подстраивается под обои, фон,
-          карточки, текст и знак красятся по отдельности.
+          Подстраивается под обои: фон, карточки, текст и знак красятся
+          по отдельности.
         </p>
+        <div class="demo demo-widget" aria-hidden="true">
+          <span class="mini"><i></i><i></i></span>
+          <span class="swatch" style="--c:#704090"></span>
+          <span class="swatch" style="--c:#d98fb0"></span>
+          <span class="swatch" style="--c:#6fa8a0"></span>
+          <span class="swatch" style="--c:#e7b75b"></span>
+        </div>
       </article>
 
-      <article class="card reveal">
+      <article class="card feat reveal" data-f="tg">
         <div class="card-mark">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
         </div>
         <h3>Телеграм</h3>
         <p>
-          Задачи можно ставить прямо из переписки. Бот привязывается к
-          аккаунту по коду, и всё созданное сразу появляется в приложении.
+          Задачи можно ставить прямо из переписки: бот привязывается по коду,
+          и всё созданное сразу появляется в приложении.
         </p>
+        <div class="demo demo-tg" aria-hidden="true">
+          <span class="bubble bubble-me">купить ватман к среде</span>
+          <span class="bubble bubble-bot">Готово, задача в TimeFlow</span>
+        </div>
       </article>
     </div>
   </div>

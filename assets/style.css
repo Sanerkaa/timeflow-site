@@ -328,6 +328,300 @@ section { padding: 72px 0; }
    рисует система — на Windows, Android и айфоне они выходили разными. */
 .card-mark svg { width: 22px; height: 22px; }
 
+/* ── Возможности: сетка «бенто» ────────────────────────────────────────── */
+
+/* Шесть колонок, чтобы крупная карточка ассистента заняла две трети
+   ширины и две строки, а остальные легли вокруг неё по трети. */
+.bento {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.feat { grid-column: span 2; display: flex; flex-direction: column; }
+.feat[data-f="ai"] { grid-column: span 4; grid-row: span 2; }
+
+@media (max-width: 900px) {
+  .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .feat { grid-column: span 1; }
+  .feat[data-f="ai"], .feat[data-f="tg"] { grid-column: span 2; grid-row: auto; }
+}
+@media (max-width: 620px) {
+  .bento { grid-template-columns: 1fr; }
+  .feat, .feat[data-f="ai"], .feat[data-f="tg"] { grid-column: auto; }
+}
+
+/* Ассистент выделен фоном: это то, чего нет в обычном списке дел */
+.feat[data-f="ai"] {
+  background:
+    radial-gradient(120% 90% at 100% 100%, var(--lilac-soft), transparent 60%),
+    var(--surface);
+  padding: 34px;
+}
+.feat[data-f="ai"] h3 { font-size: 1.5rem; }
+.feat[data-f="ai"] p { font-size: 1.02rem; max-width: 30em; }
+
+/* Без этого значок внутри обёртки не приподнимался бы над карточкой */
+.feat-text { transform-style: preserve-3d; }
+
+/* Сценка прижата к низу карточки: в одном ряду тексты разной длины, а
+   сценки всё равно стоят на одной линии */
+.demo {
+  margin-top: auto;
+  padding-top: 22px;
+  font-size: .9rem;
+  line-height: 1.35;
+  color: var(--plum);
+}
+
+.bubble {
+  display: inline-block;
+  max-width: 100%;
+  padding: 9px 14px;
+  border-radius: 16px;
+  font-weight: 600;
+}
+.bubble-me {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-bottom-right-radius: 5px;
+}
+.bubble-bot {
+  align-self: flex-start;
+  background: var(--lilac-soft);
+  border-bottom-left-radius: 5px;
+}
+
+/* Ассистент: фраза → готовая задача → силлабус */
+.demo-ai { display: flex; flex-direction: column; gap: 14px; }
+
+.made {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.made b { display: block; margin-bottom: 6px; }
+.made-check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips i {
+  font-style: normal;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 99px;
+  background: var(--lilac-soft);
+  color: var(--accent);
+}
+.chips .hot { background: var(--fill-bg); color: var(--fill-ink); }
+
+.syllabus { display: flex; align-items: center; gap: 14px; }
+.syl-page {
+  flex: none;
+  width: 34px;
+  height: 42px;
+  padding: 7px 6px;
+  border-radius: 6px;
+  border: 1.5px solid var(--lilac);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.syl-page i { height: 3px; border-radius: 2px; background: var(--lilac); }
+.syl-page i:nth-child(2) { width: 70%; }
+.syl-page i:nth-child(4) { width: 50%; }
+.syl-arrow {
+  position: relative;
+  width: 34px;
+  height: 2px;
+  background: var(--accent-half);
+}
+.syl-arrow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--accent-half);
+  border-right: 2px solid var(--accent-half);
+  transform: rotate(45deg);
+}
+.syl-out { color: var(--muted); }
+.syl-out b { color: var(--accent); font-size: 1.15rem; }
+
+/* Расписание: три пары, идущая подсвечена */
+.demo-pairs { display: flex; flex-direction: column; gap: 6px; }
+.pair {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+.pair time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.pair.now {
+  background: var(--lilac-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
+  font-weight: 700;
+}
+.pair em {
+  font-style: normal;
+  font-size: .74rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.pair em::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: nowPulse 1.8s ease-in-out infinite;
+}
+@keyframes nowPulse {
+  50% { opacity: .3; }
+}
+
+/* Задачи: одна сделана, у другой голосовая заметка */
+.demo-todo { display: flex; flex-direction: column; gap: 10px; }
+.todo { display: flex; align-items: center; gap: 10px; }
+.todo .box {
+  flex: none;
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 2px solid var(--lilac);
+}
+.todo.is-done .box { background: var(--accent); border-color: var(--accent); }
+.todo.is-done .box::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid var(--on-accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.todo.is-done span:last-child { color: var(--muted); text-decoration: line-through; }
+.wave { display: flex; align-items: center; gap: 2px; margin-left: auto; height: 16px; }
+.wave b {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent-half);
+  animation: wave 1.1s ease-in-out infinite;
+}
+.wave b:nth-child(2) { animation-delay: -.2s; }
+.wave b:nth-child(3) { animation-delay: -.45s; }
+.wave b:nth-child(4) { animation-delay: -.7s; }
+.wave b:nth-child(5) { animation-delay: -.9s; }
+@keyframes wave {
+  0%, 100% { transform: scaleY(.35); }
+  50% { transform: scaleY(1); }
+}
+
+/* Комната: участники и код входа */
+.demo-room { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.faces { display: flex; }
+.faces i {
+  width: 32px;
+  height: 32px;
+  margin-left: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+.faces i:first-child { margin-left: 0; }
+.faces i:nth-child(2) { background: #d98fb0; color: #fff; }
+.faces i:nth-child(3) { background: #6fa8a0; color: #fff; }
+.faces i:nth-child(4) { background: var(--lilac-soft); color: var(--accent); }
+.demo-room code {
+  font: 700 .95rem/1 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  letter-spacing: .08em;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px dashed var(--lilac);
+  color: var(--accent);
+}
+
+/* Виджет: плитка перекрашивается по кругу из четырёх цветов */
+.demo-widget { display: flex; align-items: center; gap: 10px; }
+.mini {
+  flex: none;
+  width: 64px;
+  height: 44px;
+  margin-right: 6px;
+  padding: 9px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  background: #704090;
+  animation: miniTint 8s steps(1) infinite;
+}
+.mini i { height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .85); }
+.mini i:last-child { width: 60%; background: rgba(255, 255, 255, .55); }
+@keyframes miniTint {
+  0% { background: #704090; }
+  25% { background: #d98fb0; }
+  50% { background: #6fa8a0; }
+  75% { background: #e7b75b; }
+}
+.swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--line);
+}
+
+/* Телеграм: сообщение и ответ бота */
+.demo-tg { display: flex; flex-direction: column; gap: 8px; }
+
+/* Сценка ассистента разыгрывается, когда до карточки долистали: сначала
+   фраза, потом из неё задача, потом силлабус. Прячем только при живом
+   скрипте — иначе класса is-in не будет и сценка не появится. */
+.js .feat.reveal .demo-ai > * { opacity: 0; transform: translateY(10px); }
+.js .feat.reveal.is-in .demo-ai > * { animation: demoIn .5s cubic-bezier(.2, .7, .3, 1) both; }
+.js .feat.reveal.is-in .demo-ai > :nth-child(1) { animation-delay: .25s; }
+.js .feat.reveal.is-in .demo-ai > :nth-child(2) { animation-delay: .75s; }
+.js .feat.reveal.is-in .demo-ai > :nth-child(3) { animation-delay: 1.15s; }
+@keyframes demoIn {
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .feat.reveal .demo-ai > * { opacity: 1; transform: none; }
+  .pair em::before, .wave b, .mini { animation: none; }
+}
+
 /* ── Снимки экрана ─────────────────────────────────────────────────────── */
 
 /* minmax(0, 1fr), а не просто 1fr: снимок лежит в обёртке, и колонка
