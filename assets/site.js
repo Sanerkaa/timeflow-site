@@ -270,10 +270,10 @@
       });
 
       card.addEventListener('mousemove', function (e) {
-        // Над кнопкой карточку не наклоняем. Наклон смещает её края, и у
-        // кнопки под курсором край уезжает то под него, то из-под него —
-        // курсор начинает мигать между рукой и стрелкой.
-        flat = !!e.target.closest('a, button');
+        // Над кнопкой и полем ввода карточку не наклоняем. Наклон смещает
+        // её края, и у кнопки под курсором край уезжает то под него, то
+        // из-под него — курсор начинает мигать между рукой и стрелкой.
+        flat = !!e.target.closest('a, button, input');
         var box = card.getBoundingClientRect();
         x = (e.clientX - box.left) / box.width - .5;
         y = (e.clientY - box.top) / box.height - .5;
