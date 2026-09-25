@@ -129,6 +129,29 @@
     addEventListener('scroll', onScroll, { passive: true });
   }
 
+  /* ── Видео в телефоне на первом экране ─────────────────────────────── */
+
+  /* За экраном ролик стоит — незачем декодировать то, чего не видно.
+     Кому движение мешает, тому он не запускается вовсе: остаётся первый
+     кадр, а посмотреть можно, нажав на него. */
+  var clip = document.querySelector('.phone-screen');
+  if (clip) {
+    if (reduced) {
+      clip.removeAttribute('autoplay');
+      clip.pause();
+      clip.controls = true;
+    } else if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) {
+          var go = clip.play();
+          if (go && go.catch) go.catch(function () {});
+        } else {
+          clip.pause();
+        }
+      }).observe(clip);
+    }
+  }
+
   /* ── Блоки всплывают при прокрутке ─────────────────────────────────── */
 
   var items = [].slice.call(document.querySelectorAll('.reveal'));
