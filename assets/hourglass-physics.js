@@ -13,6 +13,16 @@ export function radiusAt(y) {
   return shoulder - 0.055 * cap * cap;
 }
 
+// Like real hourglasses, the neck is thick glass around a narrow bore: the
+// outer outline keeps the logo's shape, the sand runs through the bore.
+export const BORE = 0.010;
+export const COLLAR = 0.2; // Half-height of the thickened neck.
+
+export function channelAt(y) {
+  const t = Math.min(1, Math.abs(y) / COLLAR);
+  return radiusAt(y) - (NECK - BORE) * (1 - t * t * (3 - 2 * t));
+}
+
 function radicalInverse(n, base) {
   let value = 0, f = 1 / base;
   while (n > 0) { value += (n % base) * f; n = Math.floor(n / base); f /= base; }

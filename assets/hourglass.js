@@ -1,4 +1,4 @@
-import { HEIGHT, RADIUS, DEPTH, REPOSE, radiusAt, createBulbSamples,
+import { HEIGHT, RADIUS, DEPTH, REPOSE, radiusAt, channelAt, COLLAR, createBulbSamples,
   solveLevel, surfacePotential, flowRate } from './hourglass-physics.js';
 
 // The glass is continuous, not a stack of cells. Sand is a closed implicit
@@ -9,8 +9,8 @@ const scrollMode = !!(host && host.dataset && 'scroll' in host.dataset);
 const section = scrollMode ? host.closest('.glass-scroll') : null;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const COLORS = {
-  light: { frame: 0x75458f, sand: 0xc0a0d3, glass: 0xeaddf2, ambient: 0.95 },
-  dark: { frame: 0x9d71be, sand: 0xd0b0e6, glass: 0xc5abdf, ambient: 1.15 },
+  light: { frame: 0x75458f, sand: 0xc0a0d3, glass: 0xeaddf2, thick: 0xb99bd0, ambient: 0.95 },
+  dark: { frame: 0x9d71be, sand: 0xd0b0e6, glass: 0xc5abdf, thick: 0x8d6aaf, ambient: 1.15 },
 };
 
 if (host && !reduced.matches) {
@@ -79,6 +79,53 @@ function build(T) {
   glass.renderOrder = 3;
   clock.add(glass);
 
+  // Solid glass around the bore: a closed ring between the outer wall and
+  // the narrow channel. Instead of a costly transmission pass, the glass is
+  // shaded by its thickness and a Fresnel rim, fading out where it thins.
+  const collarMat = new T.ShaderMaterial({ transparent: true, depthWrite: false,
+    uniforms: { uColor: { value: new T.Color(COLORS.light.thick) } },
+    vertexShader: `
+    varying vec3 vNormal, vView;
+    varying float vY;
+    void main() {
+      vY = position.y;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      vNormal = normalize(normalMatrix * normal);
+      vView = normalize(-mv.xyz);
+      gl_Position = projectionMatrix * mv;
+    }`, fragmentShader: `
+    uniform vec3 uColor;
+    varying vec3 vNormal, vView;
+    varying float vY;
+    void main() {
+      float t = clamp(abs(vY) / ${COLLAR.toFixed(3)}, 0.0, 1.0);
+      float thick = 1.0 - t*t*(3.0-2.0*t);
+      float facing = abs(dot(normalize(vNormal), normalize(vView)));
+      float rim = pow(1.0 - facing, 1.6);
+      // Thick glass reads by contrast: a lilac body, a dark refraction band
+      // towards the edge and a bright glint right at it, as in a real neck.
+      float band = smoothstep(0.18, 0.4, rim) * (1.0 - smoothstep(0.5, 0.7, rim));
+      float glint = smoothstep(0.6, 0.85, rim);
+      vec3 color = mix(uColor, uColor * vec3(0.62, 0.52, 0.7), band);
+      color = mix(color, vec3(1.0), glint);
+      gl_FragColor = vec4(color, min(0.95, thick * (0.6 + 0.3*band + 0.4*glint)));
+      #include <colorspace_fragment>
+    }` });
+  const collarProfile = [];
+  for (let i = 0; i <= 60; i++) {
+    const y = -COLLAR + 2 * COLLAR * i / 60;
+    collarProfile.push(new T.Vector2(radiusAt(y) + 0.013, y));
+  }
+  for (let i = 60; i >= 0; i--) {
+    const y = -COLLAR + 2 * COLLAR * i / 60;
+    collarProfile.push(new T.Vector2(channelAt(y) + 0.008, y));
+  }
+  collarProfile.push(collarProfile[0].clone());
+  const collar = new T.Mesh(new T.LatheGeometry(collarProfile, coarse ? 48 : 72), collarMat);
+  collar.scale.z = DEPTH;
+  collar.renderOrder = 4;
+  clock.add(collar);
+
   // Round end caps and rounded meridian rails, rather than a deep
   // extruded silhouette: the glass remains circular from every direction.
   const capProfile = [
@@ -119,6 +166,7 @@ function build(T) {
   const uniforms = {
     uEye: { value: eye }, uUp: { value: up },
     uLevel: { value: new T.Vector2(0, -2) },
+    uFlow: { value: new T.Vector2(0, 0) },
     uSlope: { value: new T.Vector2(-0.1, REPOSE) },
     uColor: { value: new T.Color(COLORS.light.sand) },
     uLight: { value: light },
@@ -135,21 +183,47 @@ function build(T) {
     varying vec3 vLocal;
     uniform mat4 projectionMatrix, modelViewMatrix;
     uniform vec3 uEye, uUp, uColor, uLight;
-    uniform vec2 uLevel, uSlope;
+    uniform vec2 uLevel, uSlope, uFlow;
     float radius(float y) {
       float t = clamp(abs(y) / 0.73, 0.0, 1.0);
       float cap = max(0.0, (abs(y) - 0.86) / 0.08);
       return 0.045 + 0.475 * t*t*(3.0-2.0*t) - 0.055*cap*cap;
     }
+    float smin(float a, float b, float k) {
+      float m = clamp(0.5 + 0.5*(b-a)/k, 0.0, 1.0);
+      return mix(b, a, m) - k*m*(1.0-m);
+    }
+    // Narrow bore through the thick glass of the neck (channelAt in physics).
+    float channel(float y) {
+      float t = clamp(abs(y) / 0.2, 0.0, 1.0);
+      return radius(y) - 0.035 * (1.0 - t*t*(3.0-2.0*t));
+    }
     float field(vec3 p) {
       float h = dot(p, uUp);
       float radial = sqrt(max(0.0, dot(p,p)-h*h) + 0.0009);
-      float wall = (length(p.xz) - radius(p.y)) * 0.45;
+      float r = length(p.xz);
+      // Sand touches the glass (the bore in the neck, the rails elsewhere);
+      // without the offset a gap showed between sand and frame.
+      float wall = (r - channel(p.y) - 0.008) * 0.45;
       float envelope = max(wall, abs(p.y)-0.94);
       // Union of two continuous chamber fields. Switching the distance at
       // y=0 could step OVER the sand in the other bulb at oblique angles.
-      float upper = max(-p.y, (h + uSlope.x*radial - uLevel.x) / 1.2);
-      float lower = max( p.y, (h + uSlope.y*radial - uLevel.y) / 1.2);
+      // While sand runs, the draining bulb stays full down through the neck
+      // and leaves it as one thin solid thread along gravity, as in a real
+      // hourglass: no flat cut at the neck and no drop hanging out of it.
+      float plugU = -p.y - 0.008*uFlow.x;
+      float plugL =  p.y - 0.008*uFlow.y;
+      float upper = max(min(-p.y, plugU), (h + uSlope.x*radial - uLevel.x) / 1.2);
+      float lower = max(min( p.y, plugL), (h + uSlope.y*radial - uLevel.y) / 1.2);
+      float axis = sqrt(max(0.0, dot(p,p) - h*h));
+      // Leaves the bore at its full width and thins out gradually below it.
+      float thinU = mix(0.017, 0.0055, smoothstep(0.0, 0.16, -h));
+      float thinL = mix(0.017, 0.0055, smoothstep(0.0, 0.16, h));
+      float threadU = max((axis - thinU*uFlow.x + 0.0008) * 0.9, max(h, p.y));
+      float threadL = max((axis - thinL*uFlow.y + 0.0008) * 0.9, max(-h, -p.y));
+      // The thread narrows out of the neck in a short fillet.
+      upper = smin(upper, threadU, 0.03);
+      lower = smin(lower, threadL, 0.03);
       return max(envelope, min(upper, lower));
     }
     float hash(vec3 p) {
@@ -194,6 +268,7 @@ function build(T) {
   const grainVolume = total / 9000;
   let grains = 0;
   const pending = [0, 0];
+  const flowing = [0, 0]; // Current neck flow per chamber, 0..1 of upright rate.
   const grainGeo = new T.BufferGeometry();
   grainGeo.setAttribute('position', new T.BufferAttribute(positions, 3));
   grainGeo.setDrawRange(0, 0);
@@ -229,17 +304,20 @@ function build(T) {
     // Upright bulbs must drain their final grains even below that kernel.
     const aligned = Math.abs(realUp.y) > 0.96 && realUp.dot(up) > 0.99;
     const covered = aligned || levels[source] > surfacePotential(0,0,0,up,slopes[source]) + 0.008;
-    const take = Math.min(volumes[source], flowRate(realUp.y, covered, total) * dt);
+    const rate = flowRate(realUp.y, covered, total);
+    const take = Math.min(volumes[source], rate * dt);
+    flowing[source] = volumes[source] > 0 ? Math.min(1, rate / (total / 18)) : 0;
+    flowing[1 - source] = 0;
     volumes[source] -= take;
     pending[source] += take;
     for (let ch = 0; ch < 2; ch++) {
       while (pending[ch] >= grainVolume && grains < MAX_GRAINS) {
         const i = grains * 3;
-        positions[i] = (Math.random()-0.5) * 0.025;
+        positions[i] = (Math.random()-0.5) * 0.014;
         // Spawn inside the opening so the stream overlaps the bulk, rather
         // than adding an independent solid tip aligned to world gravity.
         positions[i+1] = (ch === 0 ? 1 : -1) * 0.004 - realUp.y * Math.random() * 0.008;
-        positions[i+2] = (Math.random()-0.5) * 0.016;
+        positions[i+2] = (Math.random()-0.5) * 0.010;
         const speed = 0.18 + Math.random()*0.16;
         velocities[i] = -realUp.x*speed + (Math.random()-0.5)*0.035;
         velocities[i+1] = -realUp.y*speed;
@@ -264,7 +342,7 @@ function build(T) {
       const y = positions[i+1];
       const ch = y >= 0 ? 0 : 1;
       const radial = Math.hypot(positions[i],positions[i+2]/DEPTH);
-      const wall = radiusAt(Math.min(HEIGHT,Math.abs(y))) - 0.006;
+      const wall = channelAt(Math.min(HEIGHT,Math.abs(y))) - 0.004;
       if (radial > wall) {
         positions[i] *= wall/radial; positions[i+2] *= wall/radial;
         velocities[i] *= 0.2; velocities[i+2] *= 0.2;
@@ -366,7 +444,7 @@ function build(T) {
 
   function paint() {
     const theme=COLORS[document.documentElement.dataset.theme==='dark'?'dark':'light'];
-    frameMat.color.set(theme.frame);glassMat.color.set(theme.glass);
+    frameMat.color.set(theme.frame);glassMat.color.set(theme.glass);collarMat.uniforms.uColor.value.set(theme.thick);
     uniforms.uColor.value.set(theme.sand);grainMat.color.set(theme.sand);
     ambient.intensity=theme.ambient;
   }
@@ -418,6 +496,10 @@ function build(T) {
     accumulator+=dt;
     while(accumulator>=1/90){simulate(1/90);accumulator-=1/90;}
     solveSurfaces();
+    const ease = 1 - Math.exp(-8*dt);
+    const flow = uniforms.uFlow.value;
+    flow.x += (flowing[0] - flow.x) * ease;
+    flow.y += (flowing[1] - flow.y) * ease;
     const source = realUp.y >= 0 ? 0 : 1;
     const empty = volumes[source] === 0 && pending[0] === 0 && pending[1] === 0 && grains === 0;
     if (!scrollMode && !autoTurn && pointer === null && Math.abs(realUp.y) > 0.96 &&
