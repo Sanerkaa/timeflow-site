@@ -102,13 +102,14 @@ function build(T) {
       float thick = 1.0 - t*t*(3.0-2.0*t);
       float facing = abs(dot(normalize(vNormal), normalize(vView)));
       float rim = pow(1.0 - facing, 1.6);
-      // Thick glass reads by contrast: a lilac body, a dark refraction band
-      // towards the edge and a bright glint right at it, as in a real neck.
-      float band = smoothstep(0.18, 0.4, rim) * (1.0 - smoothstep(0.5, 0.7, rim));
-      float glint = smoothstep(0.6, 0.85, rim);
-      vec3 color = mix(uColor, uColor * vec3(0.62, 0.52, 0.7), band);
+      // Glass, not sand: a nearly clear body. The thickness shows only in a
+      // thin dark refraction line and a bright glint along the edges; a
+      // tinted fill read as a sand bulge when seen from the side.
+      float band = smoothstep(0.35, 0.5, rim) * (1.0 - smoothstep(0.55, 0.68, rim));
+      float glint = smoothstep(0.72, 0.9, rim);
+      vec3 color = mix(uColor, uColor * vec3(0.5, 0.42, 0.6), band);
       color = mix(color, vec3(1.0), glint);
-      gl_FragColor = vec4(color, min(0.95, thick * (0.6 + 0.3*band + 0.4*glint)));
+      gl_FragColor = vec4(color, min(0.9, thick * (0.1 + 0.45*band + 0.7*glint)));
       #include <colorspace_fragment>
     }` });
   const collarProfile = [];
