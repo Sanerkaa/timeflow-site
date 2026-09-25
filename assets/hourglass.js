@@ -9,8 +9,8 @@ const scrollMode = !!(host && host.dataset && 'scroll' in host.dataset);
 const section = scrollMode ? host.closest('.glass-scroll') : null;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const COLORS = {
-  light: { frame: 0x75458f, sand: 0xc0a0d3, glass: 0xeaddf2, thick: 0xb99bd0, ambient: 0.95 },
-  dark: { frame: 0x9d71be, sand: 0xd0b0e6, glass: 0xc5abdf, thick: 0x8d6aaf, ambient: 1.15 },
+  light: { frame: 0x75458f, sand: 0xc0a0d3, glass: 0xeaddf2, thick: 0xb99bd0, clear: 0, ambient: 0.95 },
+  dark: { frame: 0x9d71be, sand: 0xd0b0e6, glass: 0xc5abdf, thick: 0x8d6aaf, clear: 1, ambient: 1.15 },
 };
 
 if (host && !reduced.matches) {
@@ -83,7 +83,7 @@ function build(T) {
   // the narrow channel. Instead of a costly transmission pass, the glass is
   // shaded by its thickness and a Fresnel rim, fading out where it thins.
   const collarMat = new T.ShaderMaterial({ transparent: true, depthWrite: false,
-    uniforms: { uColor: { value: new T.Color(COLORS.light.thick) } },
+    uniforms: { uColor: { value: new T.Color(COLORS.light.thick) }, uClear: { value: 0 } },
     vertexShader: `
     varying vec3 vNormal, vView;
     varying float vY;
@@ -95,6 +95,7 @@ function build(T) {
       gl_Position = projectionMatrix * mv;
     }`, fragmentShader: `
     uniform vec3 uColor;
+    uniform float uClear;
     varying vec3 vNormal, vView;
     varying float vY;
     void main() {
@@ -102,14 +103,18 @@ function build(T) {
       float thick = 1.0 - t*t*(3.0-2.0*t);
       float facing = abs(dot(normalize(vNormal), normalize(vView)));
       float rim = pow(1.0 - facing, 1.6);
-      // Glass, not sand: a nearly clear body. The thickness shows only in a
-      // thin dark refraction line and a bright glint along the edges; a
-      // tinted fill read as a sand bulge when seen from the side.
-      float band = smoothstep(0.35, 0.5, rim) * (1.0 - smoothstep(0.55, 0.68, rim));
-      float glint = smoothstep(0.72, 0.9, rim);
-      vec3 color = mix(uColor, uColor * vec3(0.5, 0.42, 0.6), band);
-      color = mix(color, vec3(1.0), glint);
-      gl_FragColor = vec4(color, min(0.9, thick * (0.1 + 0.45*band + 0.7*glint)));
+      // Light theme: a lilac body, a dark refraction band and a glint.
+      float band = smoothstep(0.18, 0.4, rim) * (1.0 - smoothstep(0.5, 0.7, rim));
+      float glint = smoothstep(0.6, 0.85, rim);
+      vec3 tinted = mix(mix(uColor, uColor * vec3(0.62, 0.52, 0.7), band), vec3(1.0), glint);
+      float tintedA = min(0.95, thick * (0.6 + 0.3*band + 0.4*glint));
+      // Dark theme: on a dark page that fill read as a sand bulge from the
+      // side, so the body stays nearly clear and only the edges show.
+      float band2 = smoothstep(0.35, 0.5, rim) * (1.0 - smoothstep(0.55, 0.68, rim));
+      float glint2 = smoothstep(0.72, 0.9, rim);
+      vec3 clear = mix(mix(uColor, uColor * vec3(0.5, 0.42, 0.6), band2), vec3(1.0), glint2);
+      float clearA = min(0.9, thick * (0.1 + 0.45*band2 + 0.7*glint2));
+      gl_FragColor = vec4(mix(tinted, clear, uClear), mix(tintedA, clearA, uClear));
       #include <colorspace_fragment>
     }` });
   const collarProfile = [];
@@ -449,7 +454,7 @@ function build(T) {
 
   function paint() {
     const theme=COLORS[document.documentElement.dataset.theme==='dark'?'dark':'light'];
-    frameMat.color.set(theme.frame);glassMat.color.set(theme.glass);collarMat.uniforms.uColor.value.set(theme.thick);
+    frameMat.color.set(theme.frame);glassMat.color.set(theme.glass);collarMat.uniforms.uColor.value.set(theme.thick);collarMat.uniforms.uClear.value=theme.clear;
     uniforms.uColor.value.set(theme.sand);grainMat.color.set(theme.sand);
     ambient.intensity=theme.ambient;
   }
