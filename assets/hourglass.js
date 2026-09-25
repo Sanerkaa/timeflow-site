@@ -118,7 +118,8 @@ function build(T) {
   }
   for (let i = 60; i >= 0; i--) {
     const y = -COLLAR + 2 * COLLAR * i / 60;
-    collarProfile.push(new T.Vector2(channelAt(y) + 0.008, y));
+    // Just outside the sand's bore wall: a shared surface z-fought in stripes.
+    collarProfile.push(new T.Vector2(Math.min(channelAt(y) + 0.011, radiusAt(y) + 0.012), y));
   }
   collarProfile.push(collarProfile[0].clone());
   const collar = new T.Mesh(new T.LatheGeometry(collarProfile, coarse ? 48 : 72), collarMat);
@@ -189,14 +190,24 @@ function build(T) {
       float cap = max(0.0, (abs(y) - 0.86) / 0.08);
       return 0.045 + 0.475 * t*t*(3.0-2.0*t) - 0.055*cap*cap;
     }
-    float smin(float a, float b, float k) {
-      float m = clamp(0.5 + 0.5*(b-a)/k, 0.0, 1.0);
-      return mix(b, a, m) - k*m*(1.0-m);
-    }
     // Narrow bore through the thick glass of the neck (channelAt in physics).
     float channel(float y) {
       float t = clamp(abs(y) / 0.2, 0.0, 1.0);
       return radius(y) - 0.035 * (1.0 - t*t*(3.0-2.0*t));
+    }
+    // Thread radius: the full bore at the neck, never wider below it.
+    float thin(float s) {
+      return mix(0.018, 0.0055, smoothstep(0.0, 0.16, s));
+    }
+    // Two capsules joined at the bore exit, so the bend adds no thickness.
+    float thread(vec3 p, float side, float flow) {
+      const float BORE_LEN = 0.04;
+      vec3 c1 = vec3(0.0, -side * clamp(-side * p.y, 0.0, BORE_LEN), 0.0);
+      float d1 = length(p - c1) - thin(abs(c1.y)) * flow;
+      vec3 exit = vec3(0.0, -side * BORE_LEN, 0.0);
+      float t = max(0.0, dot(p - exit, -uUp));
+      float d2 = length(p - exit + uUp * t) - thin(BORE_LEN + t) * flow;
+      return (min(d1, d2) + 0.0008) * 0.9;
     }
     float field(vec3 p) {
       float h = dot(p, uUp);
@@ -208,22 +219,14 @@ function build(T) {
       float envelope = max(wall, abs(p.y)-0.94);
       // Union of two continuous chamber fields. Switching the distance at
       // y=0 could step OVER the sand in the other bulb at oblique angles.
-      // While sand runs, the draining bulb stays full down through the neck
-      // and leaves it as one thin solid thread along gravity, as in a real
-      // hourglass: no flat cut at the neck and no drop hanging out of it.
-      float plugU = -p.y - 0.008*uFlow.x;
-      float plugL =  p.y - 0.008*uFlow.y;
-      float upper = max(min(-p.y, plugU), (h + uSlope.x*radial - uLevel.x) / 1.2);
-      float lower = max(min( p.y, plugL), (h + uSlope.y*radial - uLevel.y) / 1.2);
-      float axis = sqrt(max(0.0, dot(p,p) - h*h));
-      // Leaves the bore at its full width and thins out gradually below it.
-      float thinU = mix(0.017, 0.0055, smoothstep(0.0, 0.16, -h));
-      float thinL = mix(0.017, 0.0055, smoothstep(0.0, 0.16, h));
-      float threadU = max((axis - thinU*uFlow.x + 0.0008) * 0.9, max(h, p.y));
-      float threadL = max((axis - thinL*uFlow.y + 0.0008) * 0.9, max(-h, -p.y));
-      // The thread narrows out of the neck in a short fillet.
-      upper = smin(upper, threadU, 0.03);
-      lower = smin(lower, threadL, 0.03);
+      float upper = max(-p.y, (h + uSlope.x*radial - uLevel.x) / 1.2);
+      float lower = max( p.y, (h + uSlope.y*radial - uLevel.y) / 1.2);
+      // While sand runs, it leaves the neck as one thin solid thread, as in a
+      // real hourglass: along the bore first, then straight down with gravity.
+      float threadU = thread(p, 1.0, uFlow.x);
+      float threadL = thread(p, -1.0, uFlow.y);
+      upper = min(upper, threadU);
+      lower = min(lower, threadL);
       return max(envelope, min(upper, lower));
     }
     float hash(vec3 p) {
@@ -319,9 +322,10 @@ function build(T) {
         positions[i+1] = (ch === 0 ? 1 : -1) * 0.004 - realUp.y * Math.random() * 0.008;
         positions[i+2] = (Math.random()-0.5) * 0.010;
         const speed = 0.18 + Math.random()*0.16;
-        velocities[i] = -realUp.x*speed + (Math.random()-0.5)*0.035;
-        velocities[i+1] = -realUp.y*speed;
-        velocities[i+2] = -realUp.z*speed;
+        // Grains leave along the bore, as the thread does; gravity bends them.
+        velocities[i] = (Math.random()-0.5)*0.02;
+        velocities[i+1] = (ch === 0 ? -1 : 1) * speed;
+        velocities[i+2] = 0;
         ages[grains++] = 0;
         pending[ch] -= grainVolume;
       }
