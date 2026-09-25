@@ -1144,10 +1144,15 @@ footer {
 
 /* Песочные часы с фирменного знака: та же рамка со скруглёнными углами, те
    же колбы с узкой перемычкой. Песок пересыпается сверху вниз, потом часы
-   переворачиваются и всё повторяется. Переворот ровно на 180°, а колбы
-   симметричны — поэтому в конце цикла картинка совпадает с началом и стык
-   не виден. Блик на стекле в переворот не входит: он нарисован вне
-   вращающейся группы и всегда остаётся сверху.
+   переворачиваются и всё повторяется.
+
+   Стык цикла не виден потому, что песка ровно на одну колбу: в начале
+   верхняя полна до крышки, в конце нижняя полна до перемычки. Переворот
+   на 180° ставит полную колбу наверх — ровно ту картинку, с которой цикл
+   начинается. Сверху песок уходит воронкой, снизу растёт горкой: их
+   поверхности нарисованы с запасом за краями колб, поэтому в начале и в
+   конце не видны. Блик на стекле нарисован вне вращающейся группы и на
+   время переворота гаснет.
 
    Заставка обязана исчезнуть даже без JavaScript, иначе сайт превратится в
    один сиреневый экран. Поэтому у неё два независимых выключателя: скрипт
@@ -1223,16 +1228,20 @@ footer {
    место под знак было занято до того, как доедет css, и заставка не дёрнулась */
 .loader-glass {
   display: block;
-  margin: 0 auto;
-  width: 112px;
-  height: 183px;
+  margin: -12px auto;
+  width: 208px;
+  height: 208px;
   filter: drop-shadow(var(--loader-drop));
 }
 
 .tf-frame { fill: var(--mark-frame); }
 .tf-body { fill: url(#tfBody); }
 .tf-sand-top, .tf-sand-bottom, .tf-grain { fill: var(--mark-sand); }
-.tf-glare { fill: var(--mark-glare); opacity: var(--mark-glare-a); }
+.tf-glare {
+  fill: var(--mark-glare);
+  opacity: var(--mark-glare-a);
+  animation: tfGlare 3.6s linear infinite;
+}
 
 /* transform-box: view-box — иначе сдвиг считался бы от рамки самой фигуры,
    а не от системы координат svg, и песок уехал бы мимо колбы */
@@ -1257,11 +1266,16 @@ footer {
 
 @keyframes tfDrain {
   0%, 4% { transform: translateY(0); }
-  74%, 100% { transform: translateY(66px); }
+  72%, 100% { transform: translateY(112px); }
 }
 @keyframes tfFill {
-  0%, 4% { transform: translateY(58px); }
-  74%, 100% { transform: translateY(0); }
+  0%, 8% { transform: translateY(100px); }
+  76%, 100% { transform: translateY(0); }
+}
+@keyframes tfGlare {
+  0%, 76% { opacity: var(--mark-glare-a); }
+  80%, 96% { opacity: 0; }
+  100% { opacity: var(--mark-glare-a); }
 }
 @keyframes tfFlip {
   0%, 80% { transform: rotate(0deg); }
@@ -1440,8 +1454,8 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
   }
 
   .loader { animation-delay: 1.2s; }
-  .tf-sand-top { transform: translateY(33px); }
-  .tf-sand-bottom { transform: translateY(29px); }
+  .tf-sand-top { transform: translateY(56px); }
+  .tf-sand-bottom { transform: translateY(50px); }
   .tf-fall { opacity: 0; }
   .loader-track span { width: 100%; }
 
