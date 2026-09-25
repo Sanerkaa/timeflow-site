@@ -479,10 +479,22 @@ section { padding: 72px 0; }
   border-radius: 12px;
 }
 .pair time { color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Идущая пара отмечена прямой полоской слева. Раньше это была внутренняя
+   тень, и на скруглённом углу она загибалась полумесяцем. */
 .pair.now {
+  position: relative;
   background: var(--lilac-soft);
-  box-shadow: inset 3px 0 0 var(--accent);
   font-weight: 700;
+}
+.pair.now::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--accent);
 }
 .pair em {
   font-style: normal;
@@ -659,17 +671,6 @@ section { padding: 72px 0; }
 @keyframes pop {
   from { opacity: 0; transform: translateY(8px) scale(.97); }
 }
-
-/* Подсказка, что со сценкой можно играть */
-.try {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 4px;
-  font-size: .78rem;
-  color: var(--muted);
-}
-.try svg { width: 15px; height: 15px; flex: none; }
 
 /* Ассистент */
 .ai-log { display: flex; flex-direction: column; gap: 12px; }
@@ -885,7 +886,6 @@ section { padding: 72px 0; }
 .demo .swatch { transition: transform .15s ease, box-shadow .2s ease; }
 .demo .swatch:hover { transform: scale(1.12); }
 .demo .swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--c); }
-.demo-widget .try { flex-basis: 100%; }
 
 /* На телефоне строке силлабуса тесно — стрелка уходит */
 @media (max-width: 620px) {
@@ -1513,6 +1513,17 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
 /* Значок в карточке приподнимается над ней — ради этого и включён 3d */
 .card-mark { transform: translateZ(18px); }
 
+/* На сенсорном экране наклона нет (скрипт его там не включает), а
+   трёхмерные слои остаются — и на части телефонов при прокрутке такие
+   карточки подёргиваются. Там они плоские: подъём сохраняем, 3d нет. */
+@media (hover: none), (pointer: coarse) {
+  .card, .plan {
+    transform: translateY(var(--lift));
+    transform-style: flat;
+  }
+  .card-mark, .feat-text { transform: none; transform-style: flat; }
+}
+
 /* ── Бегущий блик на главной кнопке ────────────────────────────────────── */
 
 .btn-main { position: relative; overflow: hidden; }
@@ -1920,11 +1931,16 @@ details[open]::details-content { block-size: auto; }
 }
 /* Высокий раздел и проявление — только при живом скрипте: без него
    прокрутку считать некому, и остались бы полтора пустых экрана */
-.js .glass-scroll { --show: 0; height: 250vh; }
+.js .glass-scroll { --show: 0; height: 250vh; height: 250svh; }
+/* svh — высота экрана с видимой адресной строкой, и она не меняется при
+   прокрутке. Обычный vh в части мобильных браузеров растёт, когда строка
+   прячется: раздел в два с половиной экрана тогда разом удлинялся на
+   полторы сотни пикселей, и всё, что ниже, дёргалось посреди прокрутки. */
 .glass-sticky {
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100svh;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -1947,7 +1963,7 @@ details[open]::details-content { block-size: auto; }
   filter: blur(calc((1 - var(--show)) * 14px));
   will-change: transform, opacity;
 }
-.glass-host .hero-stage { width: min(520px, 86vw, 70vh); }
+.glass-host .hero-stage { width: min(520px, 86vw, 70vh); width: min(520px, 86vw, 70svh); }
 
 .glass-fallback {
   position: absolute;
