@@ -43,10 +43,8 @@
 </script>
 <script src="assets/site.js" defer></script>
 <!-- Часы под первым экраном. Модуль отложен по умолчанию, а три.js
-     тянет сам и только если часы правда будут показаны. Сценку в
-     телефоне на первом экране двигает hero-demo.js. -->
+     тянет сам и только если часы правда будут показаны. -->
 <script type="module" src="assets/hourglass.js"></script>
-<script src="assets/hero-demo.js" defer></script>
 </head>
 <body>
 
@@ -138,71 +136,19 @@
       </div>
     </div>
     <div class="hero-art">
-      <!-- Телефон с живой сценкой из приложения: человек пишет ассистенту,
-           задача появляется в списке, её отмечают выполненной — и по кругу.
-           Это не видео, а разметка, которую двигает hero-demo.js: так она
-           чёткая на любом экране и почти ничего не весит. Для экранных
-           чтецов вся сценка — одна картинка с описанием. -->
+      <!-- Телефон с записью экрана: человек просит ассистента поставить
+           задачу, и она появляется на главной. Звука нет, поэтому muted —
+           без него телефоны не запускают видео сами. Пока ролик грузится,
+           виден его первый кадр. За экраном ролик ставит на паузу site.js. -->
       <div class="hero-art-in">
-        <div class="phone" role="img"
-             aria-label="Демонстрация приложения: ассистент по одной фразе создаёт задачу, она появляется в списке и отмечается выполненной">
-          <div class="app" id="demo" data-scene="chat" aria-hidden="true">
-            <div class="app-status"><span>23:09</span><span class="app-bars"><i></i><i></i><i></i><b></b></span></div>
-
-            <div class="app-view view-chat">
-              <div class="chat-head">
-                <span class="bot-ava"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>
-                <span><b>TimeFlow AI</b><small><i></i>Готов помочь</small></span>
-              </div>
-              <div class="chat-log">
-                <div class="msg msg-bot">Привет! Расскажи, что нужно сделать?</div>
-                <div class="msg msg-me" data-el="me">Сдать реферат по истории к пятнице</div>
-                <div class="msg msg-bot msg-dots" data-el="dots"><i></i><i></i><i></i></div>
-                <div class="msg msg-bot msg-reply" data-el="reply">
-                  Готово, задача создана:
-                  <span class="mini-task">
-                    <b>Сдать реферат по истории</b>
-                    <span class="app-chips"><i>Пт, 23:59</i><i>учёба</i><i class="hot">Важно</i></span>
-                  </span>
-                </div>
-              </div>
-              <div class="chat-input">
-                <span class="chat-mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></span>
-                <span class="chat-field"><span data-el="typed"></span><span class="caret"></span><span class="chat-ph">Сообщение...</span></span>
-                <span class="chat-send" data-el="send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></span>
-              </div>
-            </div>
-
-            <div class="app-view view-home">
-              <div class="home-title"><b>Мои задачи</b><small>Четверг, 24 сентября</small></div>
-              <div class="home-progress">
-                <svg class="ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16"/><circle class="ring-fill" cx="20" cy="20" r="16" pathLength="100"/></svg>
-                <span class="ring-count" data-el="count">0/2</span>
-                <span><b data-el="left">Осталось 2 задачи</b><small data-el="made">Сделано 0 из 2</small></span>
-              </div>
-              <div class="home-label is-new">Завтра</div>
-              <div class="home-task is-new" data-el="task">
-                <span class="task-bar"></span>
-                <span class="task-body"><b>Сдать реферат по истории</b><small><em>учёба</em> · 25.09.2026 <em class="hot">Важно</em></small></span>
-                <span class="task-check" data-el="check"></span>
-              </div>
-              <div class="home-label">Позже</div>
-              <div class="home-task">
-                <span class="task-bar is-blue"></span>
-                <span class="task-body"><b>Английский</b><small><em class="is-blue">учёба</em> · 30.09.2026</small></span>
-                <span class="task-check"></span>
-              </div>
-            </div>
-
-            <div class="app-tabs">
-              <span class="tab" data-el="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Главная</span>
-              <span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>Пары</span>
-              <span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>План</span>
-              <span class="tab" data-el="tab-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>AI</span>
-            </div>
-
-            <span class="finger" data-el="finger"></span>
-          </div>
+        <div class="phone">
+          <video class="phone-screen" poster="assets/hero-poster.webp"
+                 width="600" height="1340" autoplay muted loop playsinline preload="auto"
+                 aria-label="Запись экрана: ассистент по одной фразе ставит задачу по информатике на завтра, и она появляется на главной">
+            <!-- mp4 понимают все, webm — запасной для сборок без H.264 -->
+            <source src="assets/hero.mp4" type="video/mp4">
+            <source src="assets/hero.webm" type="video/webm">
+          </video>
         </div>
       </div>
     </div>
