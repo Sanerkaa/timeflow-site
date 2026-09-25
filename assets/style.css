@@ -479,22 +479,9 @@ section { padding: 72px 0; }
   border-radius: 12px;
 }
 .pair time { color: var(--muted); font-variant-numeric: tabular-nums; }
-/* Идущая пара отмечена прямой полоской слева. Раньше это была внутренняя
-   тень, и на скруглённом углу она загибалась полумесяцем. */
 .pair.now {
-  position: relative;
   background: var(--lilac-soft);
   font-weight: 700;
-}
-.pair.now::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 9px;
-  bottom: 9px;
-  width: 3px;
-  border-radius: 3px;
-  background: var(--accent);
 }
 .pair em {
   font-style: normal;
@@ -768,7 +755,29 @@ section { padding: 72px 0; }
 .syl-out b { font-variant-numeric: tabular-nums; display: inline-block; min-width: 1.3em; }
 
 /* Расписание: пары раскрываются по нажатию */
-.pair-item { border-radius: 12px; transition: background .25s ease; }
+/* Полоска слева — у каждой пары, и тянется на всю её высоту: раскрыл
+   пару — полоска выросла вместе с аудиторией и напоминанием. Идущая
+   сейчас пара — яркая полоска, раскрытая — полупрозрачная, остальные
+   бледные. Прямая полоска, а не внутренняя тень: тень на скруглённом
+   углу загибалась полумесяцем. */
+.pair-item {
+  position: relative;
+  border-radius: 12px;
+  transition: background .25s ease;
+}
+.pair-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--lilac);
+  transition: background .25s ease;
+}
+.pair-item.is-open::before { background: var(--accent-half); }
+.pair-item.is-now::before { background: var(--accent); }
 .demo .pair { width: 100%; transition: background .2s ease; }
 .demo .pair:hover { background: var(--lilac-soft); }
 .pair-item.is-open { background: var(--lilac-soft); }
