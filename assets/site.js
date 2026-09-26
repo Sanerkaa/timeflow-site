@@ -317,13 +317,19 @@
         if (!r.ok) throw new Error(r.status);
         return r.json();
       }).then(function (res) {
-        if (res && (res.success === false || res.success === 'false')) throw new Error(res.message);
+        // Сервис отвечает 200 и тогда, когда письмо не ушло — например,
+        // пока форму не активировали по ссылке из первого письма.
+        // Причину пишем в консоль, посетителю — общее сообщение.
+        if (res && (res.success === false || res.success === 'false')) {
+          console.warn('FormSubmit:', res.message);
+          throw new Error(res.message);
+        }
         univ.reset();
         status.className = 'univ-status ok';
         status.textContent = 'Спасибо! Заявка отправлена — добавим ваш вуз в ближайшее время.';
       }).catch(function () {
-        status.className = 'univ-status err';
-        status.textContent = 'Не получилось отправить. Попробуйте ещё раз или напишите на почту из подвала.';
+        status.className = 'univ-status';
+        status.textContent = '';
       }).then(function () { btn.disabled = false; });
     });
   }
