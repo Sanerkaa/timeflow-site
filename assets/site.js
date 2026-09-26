@@ -359,9 +359,9 @@
     showAll();
   }
 
-  // Подвал «восходит» заранее: наблюдатель блоков срабатывает, когда
-  // блок уже заехал на экран, и подвал с его долгой анимацией запаздывал.
-  // Здесь старт — как только край подвала подошёл к низу окна.
+  // Подвал «восходит» от своей нижней кромки, поэтому старт — когда на
+  // экране уже треть подвала: раньше анимация проходила за краем окна,
+  // позже — казалось, что подвал запаздывает.
   var foot = document.querySelector('.foot');
   if (foot) {
     if (!reduced && 'IntersectionObserver' in window) {
@@ -369,7 +369,7 @@
         if (!entries[0].isIntersecting) return;
         foot.classList.add('is-in');
         footSeen.disconnect();
-      }, { rootMargin: '0px 0px 15% 0px', threshold: 0 });
+      }, { threshold: 0.33 });
       footSeen.observe(foot);
     } else {
       foot.classList.add('is-in');
