@@ -1258,13 +1258,34 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
 .foot.is-in .foot-arc {
   animation:
     stripShift 18s ease-in-out infinite,
-    arcRise 1.5s cubic-bezier(.25, .6, .3, 1) both;
+    arcRise 1.8s linear both;
 }
+/* Ход сосчитан заранее: одна кривая замедления на всю анимацию, шаги
+   по 5% с равномерным ходом между ними. С тремя ключевыми кадрами и общей
+   функцией плавности купол разгонялся и тормозил на каждом отрезке —
+   выглядело как несколько волн подряд. */
 @keyframes arcRise {
-  0%   { --arc-rx: 18%;  --arc-ry: 0%;   --arc-solid: 0%; }
-  30%  { --arc-rx: 38%;  --arc-ry: 115%; --arc-solid: 28%; }
-  65%  { --arc-rx: 85%;  --arc-ry: 200%; --arc-solid: 52%; }
-  100% { --arc-rx: 160%; --arc-ry: 420%; --arc-solid: 72%; }
+    0% { --arc-rx: 18.0%; --arc-ry: 0.0%; --arc-solid: 0.0%; }
+    5% { --arc-rx: 22.7%; --arc-ry: 42.1%; --arc-solid: 9.9%; }
+   10% { --arc-rx: 28.9%; --arc-ry: 78.2%; --arc-solid: 18.6%; }
+   15% { --arc-rx: 36.0%; --arc-ry: 108.1%; --arc-solid: 26.2%; }
+   20% { --arc-rx: 43.9%; --arc-ry: 131.0%; --arc-solid: 32.6%; }
+   25% { --arc-rx: 53.1%; --arc-ry: 147.7%; --arc-solid: 38.2%; }
+   30% { --arc-rx: 63.1%; --arc-ry: 162.5%; --arc-solid: 43.1%; }
+   35% { --arc-rx: 73.3%; --arc-ry: 178.2%; --arc-solid: 47.4%; }
+   40% { --arc-rx: 83.4%; --arc-ry: 196.6%; --arc-solid: 51.4%; }
+   45% { --arc-rx: 93.2%; --arc-ry: 218.9%; --arc-solid: 54.9%; }
+   50% { --arc-rx: 103.1%; --arc-ry: 244.7%; --arc-solid: 58.1%; }
+   55% { --arc-rx: 112.7%; --arc-ry: 272.0%; --arc-solid: 60.9%; }
+   60% { --arc-rx: 121.9%; --arc-ry: 299.3%; --arc-solid: 63.3%; }
+   65% { --arc-rx: 130.3%; --arc-ry: 325.3%; --arc-solid: 65.4%; }
+   70% { --arc-rx: 137.9%; --arc-ry: 349.1%; --arc-solid: 67.2%; }
+   75% { --arc-rx: 144.5%; --arc-ry: 370.0%; --arc-solid: 68.7%; }
+   80% { --arc-rx: 150.0%; --arc-ry: 387.7%; --arc-solid: 69.9%; }
+   85% { --arc-rx: 154.3%; --arc-ry: 401.7%; --arc-solid: 70.8%; }
+   90% { --arc-rx: 157.5%; --arc-ry: 411.8%; --arc-solid: 71.5%; }
+   95% { --arc-rx: 159.4%; --arc-ry: 417.9%; --arc-solid: 71.9%; }
+  100% { --arc-rx: 160.0%; --arc-ry: 420.0%; --arc-solid: 72.0%; }
 }
 
 .foot-arc .wrap > * {
