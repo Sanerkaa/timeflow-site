@@ -1164,11 +1164,14 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
 .foot {
   margin-top: 40px;
   font-size: .92rem;
-  color: var(--muted);
+  color: var(--ink); /* серый --muted на сиреневом читался плохо */
   text-align: center;
 }
 .foot-arc {
-  background: var(--lilac-soft);
+  /* Тот же переливающийся сиреневый, что у полосы «Попробуйте бесплатно» */
+  background: linear-gradient(135deg, var(--lilac-soft), var(--lilac), var(--lilac-soft));
+  background-size: 220% 220%;
+  animation: stripShift 18s ease-in-out infinite;
   border-radius: 50% 50% 0 0 / 90px 90px 0 0;
   padding: 78px 0 36px;
 }
@@ -1247,7 +1250,11 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
   mask-image: radial-gradient(var(--arc-rx) var(--arc-ry) at 50% 100%, #000 var(--arc-solid), transparent 100%);
 }
 .js .foot:not(.is-in) .foot-arc { --arc-rx: 18%; --arc-ry: 30%; --arc-solid: 0%; }
-.foot.is-in .foot-arc { animation: arcRise 1.5s cubic-bezier(.25, .6, .3, 1) both; }
+.foot.is-in .foot-arc {
+  animation:
+    arcRise 1.5s cubic-bezier(.25, .6, .3, 1) both,
+    stripShift 18s ease-in-out infinite;
+}
 @keyframes arcRise {
   0%   { --arc-rx: 18%;  --arc-ry: 30%;  --arc-solid: 0%; }
   30%  { --arc-rx: 38%;  --arc-ry: 115%; --arc-solid: 28%; }
