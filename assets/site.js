@@ -330,8 +330,7 @@
 
   /* ── Блоки всплывают при прокрутке ─────────────────────────────────── */
 
-  // Подвал сюда же: его полукруг «восходит», когда до него долистали
-  var items = [].slice.call(document.querySelectorAll('.reveal, .foot'));
+  var items = [].slice.call(document.querySelectorAll('.reveal'));
   var showAll = function () {
     items.forEach(function (el) { el.classList.add('is-in'); });
   };
@@ -358,6 +357,23 @@
     });
   } else {
     showAll();
+  }
+
+  // Подвал «восходит» заранее: наблюдатель блоков срабатывает, когда
+  // блок уже заехал на экран, и подвал с его долгой анимацией запаздывал.
+  // Здесь старт — как только край подвала подошёл к низу окна.
+  var foot = document.querySelector('.foot');
+  if (foot) {
+    if (!reduced && 'IntersectionObserver' in window) {
+      var footSeen = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        foot.classList.add('is-in');
+        footSeen.disconnect();
+      }, { rootMargin: '0px 0px 15% 0px', threshold: 0 });
+      footSeen.observe(foot);
+    } else {
+      foot.classList.add('is-in');
+    }
   }
 
   if (reduced) return;

@@ -1246,26 +1246,26 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
   -webkit-mask-image: radial-gradient(var(--arc-rx) var(--arc-ry) at 50% 100%, #000 var(--arc-solid), transparent 100%);
   mask-image: radial-gradient(var(--arc-rx) var(--arc-ry) at 50% 100%, #000 var(--arc-solid), transparent 100%);
 }
-.js .foot:not(.is-in) .foot-arc { --arc-rx: 8%; --arc-ry: 6%; --arc-solid: 0%; }
-.foot.is-in .foot-arc { animation: arcRise 2.2s cubic-bezier(.35, .1, .25, 1) both; }
+.js .foot:not(.is-in) .foot-arc { --arc-rx: 18%; --arc-ry: 30%; --arc-solid: 0%; }
+.foot.is-in .foot-arc { animation: arcRise 1.5s cubic-bezier(.25, .6, .3, 1) both; }
 @keyframes arcRise {
-  0%   { --arc-rx: 8%;   --arc-ry: 6%;   --arc-solid: 0%; }
-  35%  { --arc-rx: 30%;  --arc-ry: 105%; --arc-solid: 25%; }
-  70%  { --arc-rx: 80%;  --arc-ry: 190%; --arc-solid: 50%; }
+  0%   { --arc-rx: 18%;  --arc-ry: 30%;  --arc-solid: 0%; }
+  30%  { --arc-rx: 38%;  --arc-ry: 115%; --arc-solid: 28%; }
+  65%  { --arc-rx: 85%;  --arc-ry: 200%; --arc-solid: 52%; }
   100% { --arc-rx: 160%; --arc-ry: 420%; --arc-solid: 72%; }
 }
 
 .foot-arc .wrap > * {
   transition:
-    opacity .8s ease var(--foot-delay, 0ms),
-    transform .9s cubic-bezier(.2, .7, .3, 1) var(--foot-delay, 0ms);
+    opacity .6s ease var(--foot-delay, 0ms),
+    transform .7s cubic-bezier(.2, .7, .3, 1) var(--foot-delay, 0ms);
 }
 .js .foot:not(.is-in) .foot-arc .wrap > * { opacity: 0; transform: translateY(18px); }
-.foot-arc .wrap > :nth-child(1) { --foot-delay: 650ms; }
-.foot-arc .wrap > :nth-child(2) { --foot-delay: 780ms; }
-.foot-arc .wrap > :nth-child(3) { --foot-delay: 900ms; }
-.foot-arc .wrap > :nth-child(4) { --foot-delay: 1000ms; }
-.foot-arc .wrap > :nth-child(5) { --foot-delay: 1080ms; }
+.foot-arc .wrap > :nth-child(1) { --foot-delay: 220ms; }
+.foot-arc .wrap > :nth-child(2) { --foot-delay: 300ms; }
+.foot-arc .wrap > :nth-child(3) { --foot-delay: 380ms; }
+.foot-arc .wrap > :nth-child(4) { --foot-delay: 450ms; }
+.foot-arc .wrap > :nth-child(5) { --foot-delay: 510ms; }
 
 /* Иконки связи ещё и «выпрыгивают» с лёгким перелётом. Анимация, а не
    transition: иначе задержка появления мешала бы наведению. backwards —
@@ -1277,8 +1277,8 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
 .foot.is-in .foot-icon {
   animation: footPop .55s cubic-bezier(.3, 1.6, .5, 1) backwards;
 }
-.foot.is-in .foot-icon:nth-of-type(1) { animation-delay: 900ms; }
-.foot.is-in .foot-icon:nth-of-type(2) { animation-delay: 990ms; }
+.foot.is-in .foot-icon:nth-of-type(1) { animation-delay: 380ms; }
+.foot.is-in .foot-icon:nth-of-type(2) { animation-delay: 450ms; }
 
 @media (max-width: 560px) {
   .foot-arc { border-radius: 50% 50% 0 0 / 44px 44px 0 0; padding-top: 56px; }
