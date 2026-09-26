@@ -206,6 +206,93 @@
     }
   }
 
+  /* ── Город с подсказками ──────────────────────────────────────────── */
+
+  // Сначала города, которые начинаются с набранного, потом те, где оно
+  // встречается внутри. Стрелки ходят по списку, Enter выбирает, Esc и
+  // клик мимо закрывают. Вписать свой город можно — это обычное поле.
+  var city = document.getElementById('univCity');
+  if (city) {
+    var cityList = document.getElementById('univCityList');
+    var options = city.getAttribute('data-options').split('|');
+    var shown = [], active = -1;
+    var norm = function (t) { return t.toLowerCase().replace(/ё/g, 'е'); };
+    var close = function () {
+      cityList.hidden = true;
+      city.setAttribute('aria-expanded', 'false');
+      city.removeAttribute('aria-activedescendant');
+      active = -1;
+    };
+    var mark = function (active) {
+      [].forEach.call(cityList.children, function (li, i) {
+        li.setAttribute('aria-selected', i === active ? 'true' : 'false');
+        if (i === active) {
+          city.setAttribute('aria-activedescendant', li.id);
+          li.scrollIntoView({ block: 'nearest' });
+        }
+      });
+    };
+    var render = function () {
+      var q = norm(city.value.trim());
+      var starts = [], inside = [];
+      options.forEach(function (c) {
+        var n = norm(c), at = q ? n.indexOf(q) : 0;
+        if (at === 0) starts.push(c); else if (at > 0) inside.push(c);
+      });
+      shown = starts.concat(inside).slice(0, 8);
+      if (!shown.length || (shown.length === 1 && norm(shown[0]) === q)) { close(); return; }
+      cityList.textContent = '';
+      shown.forEach(function (c, i) {
+        var li = document.createElement('li');
+        li.id = 'univCity-' + i;
+        li.setAttribute('role', 'option');
+        var at = q ? norm(c).indexOf(q) : -1;
+        if (at >= 0) {
+          li.appendChild(document.createTextNode(c.slice(0, at)));
+          var m = document.createElement('mark');
+          m.textContent = c.slice(at, at + q.length);
+          li.appendChild(m);
+          li.appendChild(document.createTextNode(c.slice(at + q.length)));
+        } else {
+          li.textContent = c;
+        }
+        // mousedown, а не click: иначе поле успело бы потерять фокус
+        // и закрыть список раньше, чем выбор дошёл бы до него
+        li.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          city.value = c;
+          close();
+        });
+        cityList.appendChild(li);
+      });
+      active = -1;
+      mark(active);
+      cityList.hidden = false;
+      city.setAttribute('aria-expanded', 'true');
+    };
+    city.addEventListener('input', render);
+    city.addEventListener('focus', function () { if (city.value.trim()) render(); });
+    city.addEventListener('blur', close);
+    city.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (cityList.hidden) render();
+        if (!shown.length) return;
+        e.preventDefault();
+        active = e.key === 'ArrowDown'
+          ? (active + 1) % shown.length
+          : (active - 1 + shown.length) % shown.length;
+        mark(active);
+      } else if (e.key === 'Enter' && !cityList.hidden && active >= 0) {
+        e.preventDefault();
+        city.value = shown[active];
+        close();
+      } else if (e.key === 'Escape' && !cityList.hidden) {
+        e.preventDefault();
+        close();
+      }
+    });
+  }
+
   /* ── Заявка на новый вуз ──────────────────────────────────────────── */
 
   // Шлём заявку фоном и остаёмся на странице. Не вышло (нет сети,

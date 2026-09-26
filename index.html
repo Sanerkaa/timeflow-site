@@ -410,9 +410,16 @@
         <div class="field-row">
           <label class="field">
             <span>Город</span>
-            <!-- Список городов: браузер сам сужает его по мере ввода
-                 и открывает стрелкой; свой город вписать тоже можно -->
-            <input name="Город" maxlength="100" list="univCities" autocomplete="off">
+            <!-- Свой выпадающий список вместо datalist: тот рисует браузер,
+                 и под сайт его не оформить. Города — в data-options,
+                 список строит site.js; без скрипта это обычное поле. -->
+            <span class="combo">
+              <input name="Город" maxlength="100" autocomplete="off" id="univCity"
+                     role="combobox" aria-autocomplete="list" aria-expanded="false"
+                     aria-controls="univCityList"
+                     data-options="Москва|Санкт-Петербург|Новосибирск|Екатеринбург|Казань|Нижний Новгород|Красноярск|Челябинск|Самара|Уфа|Ростов-на-Дону|Краснодар|Омск|Воронеж|Пермь|Волгоград|Саратов|Тюмень|Тольятти|Барнаул|Ижевск|Махачкала|Хабаровск|Ульяновск|Иркутск|Владивосток|Ярославль|Севастополь|Томск|Ставрополь|Кемерово|Набережные Челны|Оренбург|Новокузнецк|Балашиха|Рязань|Чебоксары|Калининград|Пенза|Липецк|Киров|Астрахань|Тула|Улан-Удэ|Сочи|Курск|Сургут|Тверь|Магнитогорск|Брянск|Якутск|Иваново|Владимир|Симферополь|Чита|Белгород|Калуга|Смоленск|Волжский|Курган|Орёл|Череповец|Вологда|Владикавказ|Саранск|Мурманск|Грозный|Тамбов|Архангельск|Стерлитамак|Кострома|Петрозаводск|Нижневартовск|Йошкар-Ола|Новороссийск|Сыктывкар|Нальчик|Благовещенск|Великий Новгород|Псков|Абакан|Южно-Сахалинск|Петропавловск-Камчатский|Горно-Алтайск|Бийск|Норильск|Ханты-Мансийск|Новый Уренгой|Салехард|Магадан|Кызыл|Элиста|Майкоп|Черкесск|Биробиджан|Анадырь">
+              <ul class="combo-list" id="univCityList" role="listbox" hidden></ul>
+            </span>
           </label>
           <label class="field">
             <span>Группа</span>
@@ -423,104 +430,6 @@
           <span>Почта или Telegram для ответа</span>
           <input name="Контакт" maxlength="120" placeholder="name@mail.ru или @username">
         </label>
-        <datalist id="univCities">
-          <option value="Москва">
-          <option value="Санкт-Петербург">
-          <option value="Новосибирск">
-          <option value="Екатеринбург">
-          <option value="Казань">
-          <option value="Нижний Новгород">
-          <option value="Красноярск">
-          <option value="Челябинск">
-          <option value="Самара">
-          <option value="Уфа">
-          <option value="Ростов-на-Дону">
-          <option value="Краснодар">
-          <option value="Омск">
-          <option value="Воронеж">
-          <option value="Пермь">
-          <option value="Волгоград">
-          <option value="Саратов">
-          <option value="Тюмень">
-          <option value="Тольятти">
-          <option value="Барнаул">
-          <option value="Ижевск">
-          <option value="Махачкала">
-          <option value="Хабаровск">
-          <option value="Ульяновск">
-          <option value="Иркутск">
-          <option value="Владивосток">
-          <option value="Ярославль">
-          <option value="Севастополь">
-          <option value="Томск">
-          <option value="Ставрополь">
-          <option value="Кемерово">
-          <option value="Набережные Челны">
-          <option value="Оренбург">
-          <option value="Новокузнецк">
-          <option value="Балашиха">
-          <option value="Рязань">
-          <option value="Чебоксары">
-          <option value="Калининград">
-          <option value="Пенза">
-          <option value="Липецк">
-          <option value="Киров">
-          <option value="Астрахань">
-          <option value="Тула">
-          <option value="Улан-Удэ">
-          <option value="Сочи">
-          <option value="Курск">
-          <option value="Сургут">
-          <option value="Тверь">
-          <option value="Магнитогорск">
-          <option value="Брянск">
-          <option value="Якутск">
-          <option value="Иваново">
-          <option value="Владимир">
-          <option value="Симферополь">
-          <option value="Чита">
-          <option value="Белгород">
-          <option value="Калуга">
-          <option value="Смоленск">
-          <option value="Волжский">
-          <option value="Курган">
-          <option value="Орёл">
-          <option value="Череповец">
-          <option value="Вологда">
-          <option value="Владикавказ">
-          <option value="Саранск">
-          <option value="Мурманск">
-          <option value="Грозный">
-          <option value="Тамбов">
-          <option value="Архангельск">
-          <option value="Стерлитамак">
-          <option value="Кострома">
-          <option value="Петрозаводск">
-          <option value="Нижневартовск">
-          <option value="Йошкар-Ола">
-          <option value="Новороссийск">
-          <option value="Сыктывкар">
-          <option value="Нальчик">
-          <option value="Благовещенск">
-          <option value="Великий Новгород">
-          <option value="Псков">
-          <option value="Абакан">
-          <option value="Южно-Сахалинск">
-          <option value="Петропавловск-Камчатский">
-          <option value="Горно-Алтайск">
-          <option value="Бийск">
-          <option value="Норильск">
-          <option value="Ханты-Мансийск">
-          <option value="Новый Уренгой">
-          <option value="Салехард">
-          <option value="Магадан">
-          <option value="Кызыл">
-          <option value="Элиста">
-          <option value="Майкоп">
-          <option value="Черкесск">
-          <option value="Биробиджан">
-          <option value="Анадырь">
-        </datalist>
         <label class="check">
           <input type="checkbox" name="Согласие" value="да" required>
           <span>Согласен(на) на обработку этих данных, чтобы ответить на заявку.
