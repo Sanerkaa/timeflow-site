@@ -103,7 +103,7 @@
     <a class="brand" href="/"><img src="assets/mark.png" alt="">TimeFlow</a>
     <nav>
       <a href="#features" class="hide-sm">Возможности</a>
-      <a href="#plans">Тарифы</a>
+      <a href="/tariffs">Тарифы</a>
       <button class="theme-switch" id="themeSwitch" type="button"
               aria-label="Включить тёмную тему" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -134,7 +134,7 @@
       <h1>Учёба перестаёт<br>теряться в голове</h1>
       <div class="hero-actions">
         <a class="btn btn-main" href="https://github.com/Sanerkaa/timeflow-site/releases/latest/download/TimeFlow.apk">Скачать приложение</a>
-        <a class="btn btn-ghost" href="#plans">Посмотреть тарифы</a>
+        <a class="btn btn-ghost" href="/tariffs">Посмотреть тарифы</a>
       </div>
     </div>
     <div class="hero-art">
@@ -380,55 +380,155 @@
   </div>
 </section>
 
-<section id="plans">
+<section id="univ">
   <div class="wrap">
-    <div class="section-head reveal">
-      <h2>Тарифы</h2>
-    </div>
+    <div class="univ">
+      <div class="univ-text reveal">
+        <h2>Нет вашего вуза?</h2>
+        <p>
+          Оставьте заявку, и мы добавим расписание вашего вуза
+          в ближайшее время.
+        </p>
+      </div>
 
-    <div class="plans">
-      <article class="plan reveal">
-        <h3>Бесплатный</h3>
-        <div class="price">0 ₽</div>
-        <ul>
-          <li class="yes">Задачи, планировщик, расписание</li>
-          <li class="yes">Виджет и совместные комнаты</li>
-          <li>Ассистент: 5 запросов в день</li>
-          <li>Разбор задач: 2 в день</li>
-          <li>Задачи голосом: 2 в день</li>
-          <li>Силлабус: 2 в неделю</li>
-          <li>Файлы к задачам до 20 МБ</li>
-        </ul>
-        <a class="btn btn-ghost" href="https://github.com/Sanerkaa/timeflow-site/releases/latest/download/TimeFlow.apk">Скачать</a>
-      </article>
+      <!-- Заявка уходит письмом на почту через FormSubmit: у сайта нет
+           своего сервера. Со скриптом форма шлёт fetch и остаётся на месте,
+           без скрипта — обычная отправка с возвратом сюда же. -->
+      <form class="univ-form card reveal" id="univForm"
+            action="https://formsubmit.co/chuprinapolina212@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="TimeFlow: заявка на новый вуз">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_next" value="https://timeflow-app.ru/#univ">
+        <!-- Ловушка для ботов: человек это поле не видит и не заполнит -->
+        <input type="text" name="_honey" class="univ-honey" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-      <article class="plan pick reveal">
-        <h3>Студенческий</h3>
-        <div class="price">299 ₽ <span>в месяц</span></div>
-        <ul>
-          <li class="yes">Ассистент: 10 запросов в день</li>
-          <li class="yes">Разбор задач: 10 в день</li>
-          <li class="yes">Задачи голосом: 5 в день</li>
-          <li class="yes">Силлабус: 5 в день</li>
-          <li>Файлы к задачам до 20 МБ</li>
-          <li>Всё из бесплатного тарифа</li>
-        </ul>
-        <a class="btn btn-main" href="/tariffs">Подробнее</a>
-      </article>
-
-      <article class="plan reveal">
-        <h3>Pro</h3>
-        <div class="price">750 ₽ <span>в месяц</span></div>
-        <ul>
-          <li class="yes">Ассистент без ограничений</li>
-          <li class="yes">Разбор задач без ограничений</li>
-          <li class="yes">Задачи голосом: 10 в день</li>
-          <li class="yes">Силлабус: 10 в день</li>
-          <li class="yes">Файлы к задачам до 100 МБ</li>
-          <li>Всё из «Студенческого»</li>
-        </ul>
-        <a class="btn btn-ghost" href="/tariffs">Подробнее</a>
-      </article>
+        <label class="field">
+          <span>Вуз <b aria-hidden="true">*</b></span>
+          <input name="Вуз" required maxlength="200" autocomplete="organization">
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Город</span>
+            <!-- Список городов: браузер сам сужает его по мере ввода
+                 и открывает стрелкой; свой город вписать тоже можно -->
+            <input name="Город" maxlength="100" list="univCities" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>Группа</span>
+            <input name="Группа" maxlength="60">
+          </label>
+        </div>
+        <label class="field">
+          <span>Почта или Telegram для ответа</span>
+          <input name="Контакт" maxlength="120" placeholder="name@mail.ru или @username">
+        </label>
+        <datalist id="univCities">
+          <option value="Москва">
+          <option value="Санкт-Петербург">
+          <option value="Новосибирск">
+          <option value="Екатеринбург">
+          <option value="Казань">
+          <option value="Нижний Новгород">
+          <option value="Красноярск">
+          <option value="Челябинск">
+          <option value="Самара">
+          <option value="Уфа">
+          <option value="Ростов-на-Дону">
+          <option value="Краснодар">
+          <option value="Омск">
+          <option value="Воронеж">
+          <option value="Пермь">
+          <option value="Волгоград">
+          <option value="Саратов">
+          <option value="Тюмень">
+          <option value="Тольятти">
+          <option value="Барнаул">
+          <option value="Ижевск">
+          <option value="Махачкала">
+          <option value="Хабаровск">
+          <option value="Ульяновск">
+          <option value="Иркутск">
+          <option value="Владивосток">
+          <option value="Ярославль">
+          <option value="Севастополь">
+          <option value="Томск">
+          <option value="Ставрополь">
+          <option value="Кемерово">
+          <option value="Набережные Челны">
+          <option value="Оренбург">
+          <option value="Новокузнецк">
+          <option value="Балашиха">
+          <option value="Рязань">
+          <option value="Чебоксары">
+          <option value="Калининград">
+          <option value="Пенза">
+          <option value="Липецк">
+          <option value="Киров">
+          <option value="Астрахань">
+          <option value="Тула">
+          <option value="Улан-Удэ">
+          <option value="Сочи">
+          <option value="Курск">
+          <option value="Сургут">
+          <option value="Тверь">
+          <option value="Магнитогорск">
+          <option value="Брянск">
+          <option value="Якутск">
+          <option value="Иваново">
+          <option value="Владимир">
+          <option value="Симферополь">
+          <option value="Чита">
+          <option value="Белгород">
+          <option value="Калуга">
+          <option value="Смоленск">
+          <option value="Волжский">
+          <option value="Курган">
+          <option value="Орёл">
+          <option value="Череповец">
+          <option value="Вологда">
+          <option value="Владикавказ">
+          <option value="Саранск">
+          <option value="Мурманск">
+          <option value="Грозный">
+          <option value="Тамбов">
+          <option value="Архангельск">
+          <option value="Стерлитамак">
+          <option value="Кострома">
+          <option value="Петрозаводск">
+          <option value="Нижневартовск">
+          <option value="Йошкар-Ола">
+          <option value="Новороссийск">
+          <option value="Сыктывкар">
+          <option value="Нальчик">
+          <option value="Благовещенск">
+          <option value="Великий Новгород">
+          <option value="Псков">
+          <option value="Абакан">
+          <option value="Южно-Сахалинск">
+          <option value="Петропавловск-Камчатский">
+          <option value="Горно-Алтайск">
+          <option value="Бийск">
+          <option value="Норильск">
+          <option value="Ханты-Мансийск">
+          <option value="Новый Уренгой">
+          <option value="Салехард">
+          <option value="Магадан">
+          <option value="Кызыл">
+          <option value="Элиста">
+          <option value="Майкоп">
+          <option value="Черкесск">
+          <option value="Биробиджан">
+          <option value="Анадырь">
+        </datalist>
+        <label class="check">
+          <input type="checkbox" name="Согласие" value="да" required>
+          <span>Согласен(на) на обработку этих данных, чтобы ответить на заявку.
+            <a href="/policy">Политика конфиденциальности</a></span>
+        </label>
+        <button class="btn btn-main" type="submit">Отправить заявку</button>
+        <p class="univ-status" role="status" aria-live="polite"></p>
+      </form>
     </div>
   </div>
 </section>
@@ -437,6 +537,13 @@
   <div class="wrap">
     <div class="strip reveal">
       <h2>Попробуйте бесплатно</h2>
+      <!-- Счётчик скачиваний APK: сумма по всем релизам на GitHub. Число в
+           разметке — запасное на случай, если GitHub не ответит; site.js
+           подтягивает живое и прокручивает к нему. -->
+      <div class="downloads" id="downloads" data-count="88">
+        <span class="downloads-num">88</span>
+        <span class="downloads-label">скачиваний приложения</span>
+      </div>
       <div style="margin-top:22px">
         <a class="btn btn-main" href="https://github.com/Sanerkaa/timeflow-site/releases/latest/download/TimeFlow.apk">Скачать для Android</a>
       </div>

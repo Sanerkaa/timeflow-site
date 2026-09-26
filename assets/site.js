@@ -152,6 +152,95 @@
     }
   }
 
+  /* ── Счётчик скачиваний ─────────────────────────────────────────────── */
+
+  // Сумма скачиваний всех APK во всех релизах. Запрос без токена: у
+  // GitHub на это 60 обращений в час с одного адреса, посетителю хватит.
+  // Не ответил — остаётся число из разметки.
+  var dl = document.getElementById('downloads');
+  if (dl) {
+    var dlNum = dl.querySelector('.downloads-num');
+    var dlLabel = dl.querySelector('.downloads-label');
+    var word = function (n) {
+      var a = n % 10, b = n % 100;
+      if (a === 1 && b !== 11) return 'скачивание';
+      if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return 'скачивания';
+      return 'скачиваний';
+    };
+    var show = function (n) {
+      dlNum.textContent = n.toLocaleString('ru-RU');
+      dlLabel.textContent = word(n) + ' приложения';
+    };
+    var target = +dl.getAttribute('data-count') || 0;
+    var roll = function () {
+      if (reduced) { show(target); return; }
+      var t0 = performance.now(), dur = 1400;
+      (function step(now) {
+        var k = Math.min(1, (now - t0) / dur);
+        show(Math.round(target * (1 - Math.pow(1 - k, 3))));
+        if (k < 1) requestAnimationFrame(step);
+      })(t0);
+    };
+    var started = false;
+    var start = function () { if (!started) { started = true; roll(); } };
+
+    if (window.fetch) {
+      fetch('https://api.github.com/repos/Sanerkaa/timeflow-site/releases?per_page=100')
+        .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+        .then(function (list) {
+          var sum = 0;
+          list.forEach(function (rel) {
+            (rel.assets || []).forEach(function (a) { sum += a.download_count || 0; });
+          });
+          if (sum >= target) { target = sum; if (started) show(sum); }
+        })
+        .catch(function () {});
+    }
+    if (!reduced && 'IntersectionObserver' in window) {
+      var dlSeen = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { start(); dlSeen.disconnect(); }
+      }, { threshold: 0.6 });
+      dlSeen.observe(dl);
+    } else {
+      start();
+    }
+  }
+
+  /* ── Заявка на новый вуз ──────────────────────────────────────────── */
+
+  // Шлём заявку фоном и остаёмся на странице. Не вышло (нет сети,
+  // сервис недоступен) — говорим об этом и оставляем введённое.
+  var univ = document.getElementById('univForm');
+  if (univ && window.fetch && window.FormData) {
+    univ.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var btn = univ.querySelector('button[type=submit]');
+      var status = univ.querySelector('.univ-status');
+      var data = {};
+      new FormData(univ).forEach(function (v, k) { data[k] = v; });
+      if (data._honey) return;
+      btn.disabled = true;
+      status.className = 'univ-status';
+      status.textContent = 'Отправляем…';
+      fetch(univ.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(data)
+      }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      }).then(function (res) {
+        if (res && (res.success === false || res.success === 'false')) throw new Error(res.message);
+        univ.reset();
+        status.className = 'univ-status ok';
+        status.textContent = 'Спасибо! Заявка отправлена — добавим ваш вуз в ближайшее время.';
+      }).catch(function () {
+        status.className = 'univ-status err';
+        status.textContent = 'Не получилось отправить. Попробуйте ещё раз или напишите на почту из подвала.';
+      }).then(function () { btn.disabled = false; });
+    });
+  }
+
   /* ── Блоки всплывают при прокрутке ─────────────────────────────────── */
 
   // Подвал сюда же: его полукруг «восходит», когда до него долистали
