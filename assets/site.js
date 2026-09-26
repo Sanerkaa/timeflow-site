@@ -154,7 +154,8 @@
 
   /* ── Блоки всплывают при прокрутке ─────────────────────────────────── */
 
-  var items = [].slice.call(document.querySelectorAll('.reveal'));
+  // Подвал сюда же: его полукруг «восходит», когда до него долистали
+  var items = [].slice.call(document.querySelectorAll('.reveal, .foot'));
   var showAll = function () {
     items.forEach(function (el) { el.classList.add('is-in'); });
   };

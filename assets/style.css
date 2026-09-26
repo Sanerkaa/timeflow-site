@@ -1140,6 +1140,41 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
   color: var(--plum);
 }
 
+/* Появление подвала: полукруг поднимается из нижней кромки, как солнце
+   из-за горизонта, и раскрывается во всю ширину, а следом по очереди
+   всплывают знак, связь, ссылки и копирайт. Прячем только при живом
+   скрипте — класс is-in ставит site.js, как и у .reveal. */
+.foot-arc {
+  clip-path: ellipse(100% 300% at 50% 100%);
+  transition: clip-path 1.2s cubic-bezier(.2, .7, .2, 1);
+}
+.js .foot:not(.is-in) .foot-arc { clip-path: ellipse(22% 0% at 50% 100%); }
+
+.foot-arc .wrap > * {
+  transition:
+    opacity .6s ease var(--foot-delay, 0ms),
+    transform .7s cubic-bezier(.2, .7, .3, 1) var(--foot-delay, 0ms);
+}
+.js .foot:not(.is-in) .foot-arc .wrap > * { opacity: 0; transform: translateY(18px); }
+.foot-arc .wrap > :nth-child(1) { --foot-delay: 420ms; }
+.foot-arc .wrap > :nth-child(2) { --foot-delay: 520ms; }
+.foot-arc .wrap > :nth-child(3) { --foot-delay: 620ms; }
+.foot-arc .wrap > :nth-child(4) { --foot-delay: 700ms; }
+.foot-arc .wrap > :nth-child(5) { --foot-delay: 760ms; }
+
+/* Иконки связи ещё и «выпрыгивают» с лёгким перелётом. Анимация, а не
+   transition: иначе задержка появления мешала бы наведению. backwards —
+   после прыжка она отпускает transform, и подъём при наведении работает. */
+@keyframes footPop {
+  from { opacity: 0; transform: scale(.4); }
+  to { opacity: 1; transform: none; }
+}
+.foot.is-in .foot-icon {
+  animation: footPop .55s cubic-bezier(.3, 1.6, .5, 1) backwards;
+}
+.foot.is-in .foot-icon:nth-of-type(1) { animation-delay: 640ms; }
+.foot.is-in .foot-icon:nth-of-type(2) { animation-delay: 720ms; }
+
 @media (max-width: 560px) {
   .foot-arc { border-radius: 50% 50% 0 0 / 44px 44px 0 0; padding-top: 56px; }
   .foot-links { flex-direction: column; gap: 10px; }
@@ -1520,6 +1555,8 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
   .loader-track span { width: 100%; }
 
   .js .reveal:not(.is-in) { opacity: 1; transform: none; }
+  .js .foot:not(.is-in) .foot-arc { clip-path: none; }
+  .js .foot:not(.is-in) .foot-arc .wrap > * { opacity: 1; transform: none; }
 }
 
 /* ── Снимки разъезжаются по прокрутке ──────────────────────────────────── */
