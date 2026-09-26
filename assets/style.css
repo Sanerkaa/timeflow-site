@@ -1249,14 +1249,19 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
   -webkit-mask-image: radial-gradient(var(--arc-rx) var(--arc-ry) at 50% 100%, #000 var(--arc-solid), transparent 100%);
   mask-image: radial-gradient(var(--arc-rx) var(--arc-ry) at 50% 100%, #000 var(--arc-solid), transparent 100%);
 }
-.js .foot:not(.is-in) .foot-arc { --arc-rx: 18%; --arc-ry: 30%; --arc-solid: 0%; }
+/* До старта плашки не видно совсем: видимое пятно в ожидании давало
+   «первую волну», а запуск — вторую */
+.js .foot:not(.is-in) .foot-arc { --arc-rx: 18%; --arc-ry: 0%; --arc-solid: 0%; }
+/* Переливание — первым, как в базовом правиле: при смене списка
+   анимация на том же месте с тем же именем не перезапускается, и цвет
+   не дёргается в момент старта */
 .foot.is-in .foot-arc {
   animation:
-    arcRise 1.5s cubic-bezier(.25, .6, .3, 1) both,
-    stripShift 18s ease-in-out infinite;
+    stripShift 18s ease-in-out infinite,
+    arcRise 1.5s cubic-bezier(.25, .6, .3, 1) both;
 }
 @keyframes arcRise {
-  0%   { --arc-rx: 18%;  --arc-ry: 30%;  --arc-solid: 0%; }
+  0%   { --arc-rx: 18%;  --arc-ry: 0%;   --arc-solid: 0%; }
   30%  { --arc-rx: 38%;  --arc-ry: 115%; --arc-solid: 28%; }
   65%  { --arc-rx: 85%;  --arc-ry: 200%; --arc-solid: 52%; }
   100% { --arc-rx: 160%; --arc-ry: 420%; --arc-solid: 72%; }
