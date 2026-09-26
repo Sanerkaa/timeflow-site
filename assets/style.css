@@ -1067,34 +1067,85 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
 
 /* ── Подвал ────────────────────────────────────────────────────────────── */
 
-footer {
-  border-top: 1px solid var(--line);
-  padding: 54px 0 40px;
+/* Центрованный подвал на светлой плашке с выпуклым верхним краем:
+   знак, связь (Telegram и почта), документы, реквизиты. Один на все
+   страницы. */
+.foot {
+  margin-top: 40px;
   font-size: .92rem;
   color: var(--muted);
+  text-align: center;
+}
+.foot-arc {
+  background: var(--lilac-soft);
+  border-radius: 50% 50% 0 0 / 90px 90px 0 0;
+  padding: 78px 0 36px;
+}
+.foot-brand {
+  display: inline-flex;
+  font-size: 1.35rem;
 }
 
-.foot-grid {
+.foot-follow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 22px 0 26px;
+  color: var(--ink);
+}
+.foot-follow span { margin-right: 4px; }
+.foot-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  transition: transform .25s cubic-bezier(.2, .7, .3, 1), background .2s ease, color .2s ease;
+}
+.foot-icon svg { width: 20px; height: 20px; }
+.foot-icon:hover {
+  transform: translateY(-3px);
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+}
+
+.foot-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px 78px;
-  margin-bottom: 34px;
+  justify-content: center;
+  gap: 8px 26px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  max-width: 640px;
+  margin: 0 auto;
+}
+.foot-links a { color: var(--ink); }
+
+.foot-legal {
+  margin: 22px auto 0;
+  max-width: 640px;
+  font-size: .82rem;
+  line-height: 1.7;
+}
+.foot-copy {
+  margin: 8px 0 0;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--plum);
 }
 
-.foot-grid h4 {
-  font-size: .82rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--plum);
-  margin: 0 0 14px;
+@media (max-width: 560px) {
+  .foot-arc { border-radius: 50% 50% 0 0 / 44px 44px 0 0; padding-top: 56px; }
+  .foot-links { flex-direction: column; gap: 10px; }
 }
-.foot-grid ul { list-style: none; margin: 0; padding: 0; }
-.foot-grid li { margin-bottom: 9px; }
-.foot-grid a { color: var(--ink); }
 
 .requisites { line-height: 1.9; }
-/* В подвале главной реквизиты чуть отодвинуты от колонок со ссылками */
-.foot-grid + .requisites { margin-top: 58px; }
 .fill { background: var(--fill-bg); padding: 0 6px; border-radius: 4px; color: var(--fill-ink); }
 
 /* ── Юридические страницы ──────────────────────────────────────────────── */
@@ -1389,7 +1440,7 @@ footer {
 .btn-main:hover { box-shadow: var(--btn-shadow-hover); }
 
 /* Ссылки в тексте подчёркиваются растущей линией вместо резкого underline */
-p a:not(.btn), .foot-grid a:not(.brand), .requisites a {
+p a:not(.btn), .foot-links a, .requisites a {
   text-decoration: none;
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 0 1px;
@@ -1397,7 +1448,7 @@ p a:not(.btn), .foot-grid a:not(.brand), .requisites a {
   background-repeat: no-repeat;
   transition: background-size .3s cubic-bezier(.2, .7, .3, 1), color .2s ease;
 }
-p a:not(.btn):hover, .foot-grid a:not(.brand):hover, .requisites a:hover {
+p a:not(.btn):hover, .foot-links a:hover, .requisites a:hover {
   text-decoration: none;
   background-size: 100% 1px;
   color: var(--accent);
