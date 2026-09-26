@@ -13,14 +13,18 @@ export function radiusAt(y) {
   return shoulder - 0.055 * cap * cap;
 }
 
-// Like real hourglasses, the neck is thick glass around a narrow bore: the
-// outer outline keeps the logo's shape, the sand runs through the bore.
-export const BORE = 0.010;
+// Like real hourglasses, the neck is thick glass around a bore as thin as
+// the falling thread: the sand funnels straight into it, with nothing left
+// to narrow below. The outer outline keeps the logo's shape.
+export const BORE = 0.006;
 export const COLLAR = 0.2; // Half-height of the thickened neck.
+const GAP = 0.008; // Sand reaches the rails' inner edge, outside radiusAt().
 
-export function channelAt(y) {
+// Radius the sand fills to: the glass bore at the neck, the rails elsewhere.
+export function boreAt(y) {
   const t = Math.min(1, Math.abs(y) / COLLAR);
-  return radiusAt(y) - (NECK - BORE) * (1 - t * t * (3 - 2 * t));
+  const k = 1 - t * t * (3 - 2 * t);
+  return radiusAt(y) - (NECK - BORE) * k + GAP * (1 - k);
 }
 
 function radicalInverse(n, base) {

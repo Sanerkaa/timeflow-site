@@ -1,4 +1,4 @@
-import { HEIGHT, RADIUS, DEPTH, REPOSE, radiusAt, channelAt, COLLAR, createBulbSamples,
+import { HEIGHT, RADIUS, DEPTH, REPOSE, radiusAt, boreAt, COLLAR, createBulbSamples,
   solveLevel, surfacePotential, flowRate } from './hourglass-physics.js';
 
 // The glass is continuous, not a stack of cells. Sand is a closed implicit
@@ -114,6 +114,11 @@ function build(T) {
       float glint2 = smoothstep(0.72, 0.9, rim);
       vec3 clear = mix(mix(uColor, uColor * vec3(0.5, 0.42, 0.6), band2), vec3(1.0), glint2);
       float clearA = min(0.9, thick * (0.1 + 0.45*band2 + 0.7*glint2));
+      // A frosted knot of glass right at the narrowest point, as blown
+      // hourglasses have: it veils the bore, so sand there is only hinted.
+      float knot = 1.0 - smoothstep(0.02, 0.085, abs(vY));
+      clear = mix(clear, mix(uColor, vec3(1.0), 0.3 + 0.45*rim), knot * 0.8);
+      clearA = max(clearA, knot * (0.62 + 0.3*rim));
       gl_FragColor = vec4(mix(tinted, clear, uClear), mix(tintedA, clearA, uClear));
       #include <colorspace_fragment>
     }` });
@@ -125,7 +130,7 @@ function build(T) {
   for (let i = 60; i >= 0; i--) {
     const y = -COLLAR + 2 * COLLAR * i / 60;
     // Just outside the sand's bore wall: a shared surface z-fought in stripes.
-    collarProfile.push(new T.Vector2(Math.min(channelAt(y) + 0.011, radiusAt(y) + 0.012), y));
+    collarProfile.push(new T.Vector2(Math.min(boreAt(y) + 0.003, radiusAt(y) + 0.012), y));
   }
   collarProfile.push(collarProfile[0].clone());
   const collar = new T.Mesh(new T.LatheGeometry(collarProfile, coarse ? 48 : 72), collarMat);
@@ -196,32 +201,29 @@ function build(T) {
       float cap = max(0.0, (abs(y) - 0.86) / 0.08);
       return 0.045 + 0.475 * t*t*(3.0-2.0*t) - 0.055*cap*cap;
     }
-    // Narrow bore through the thick glass of the neck (channelAt in physics).
-    float channel(float y) {
+    // Radius the sand fills to (boreAt in physics): a bore as thin as the
+    // thread through the thick glass of the neck, the rails elsewhere.
+    float bore(float y) {
       float t = clamp(abs(y) / 0.2, 0.0, 1.0);
-      return radius(y) - 0.035 * (1.0 - t*t*(3.0-2.0*t));
+      float k = 1.0 - t*t*(3.0-2.0*t);
+      return radius(y) - 0.039 * k + 0.008 * (1.0 - k);
     }
-    // Thread radius: the full bore at the neck, never wider below it.
-    float thin(float s) {
-      return mix(0.018, 0.0055, smoothstep(0.0, 0.16, s));
-    }
+    const float THREAD = 0.0055; // Just inside the bore: one even thread.
     // Two capsules joined at the bore exit, so the bend adds no thickness.
     float thread(vec3 p, float side, float flow) {
       const float BORE_LEN = 0.04;
       vec3 c1 = vec3(0.0, -side * clamp(-side * p.y, 0.0, BORE_LEN), 0.0);
-      float d1 = length(p - c1) - thin(abs(c1.y)) * flow;
+      float d1 = length(p - c1) - THREAD * flow;
       vec3 exit = vec3(0.0, -side * BORE_LEN, 0.0);
       float t = max(0.0, dot(p - exit, -uUp));
-      float d2 = length(p - exit + uUp * t) - thin(BORE_LEN + t) * flow;
+      float d2 = length(p - exit + uUp * t) - THREAD * flow;
       return (min(d1, d2) + 0.0008) * 0.9;
     }
     float field(vec3 p) {
       float h = dot(p, uUp);
       float radial = sqrt(max(0.0, dot(p,p)-h*h) + 0.0009);
       float r = length(p.xz);
-      // Sand touches the glass (the bore in the neck, the rails elsewhere);
-      // without the offset a gap showed between sand and frame.
-      float wall = (r - channel(p.y) - 0.008) * 0.45;
+      float wall = (r - bore(p.y)) * 0.45;
       float envelope = max(wall, abs(p.y)-0.94);
       // Union of two continuous chamber fields. Switching the distance at
       // y=0 could step OVER the sand in the other bulb at oblique angles.
@@ -229,8 +231,11 @@ function build(T) {
       float lower = max( p.y, (h + uSlope.y*radial - uLevel.y) / 1.2);
       // While sand runs, it leaves the neck as one thin solid thread, as in a
       // real hourglass: along the bore first, then straight down with gravity.
-      float threadU = thread(p, 1.0, uFlow.x);
-      float threadL = thread(p, -1.0, uFlow.y);
+      // No thread once the bore is too flat for sand to run, even while the
+      // smoothed flow is still fading: it would poke sideways into the glass.
+      float steep = smoothstep(0.2, 0.45, abs(uUp.y));
+      float threadU = thread(p, 1.0, uFlow.x * steep);
+      float threadL = thread(p, -1.0, uFlow.y * steep);
       upper = min(upper, threadU);
       lower = min(lower, threadL);
       return max(envelope, min(upper, lower));
@@ -322,11 +327,11 @@ function build(T) {
     for (let ch = 0; ch < 2; ch++) {
       while (pending[ch] >= grainVolume && grains < MAX_GRAINS) {
         const i = grains * 3;
-        positions[i] = (Math.random()-0.5) * 0.014;
+        positions[i] = (Math.random()-0.5) * 0.008;
         // Spawn inside the opening so the stream overlaps the bulk, rather
         // than adding an independent solid tip aligned to world gravity.
         positions[i+1] = (ch === 0 ? 1 : -1) * 0.004 - realUp.y * Math.random() * 0.008;
-        positions[i+2] = (Math.random()-0.5) * 0.010;
+        positions[i+2] = (Math.random()-0.5) * 0.006;
         const speed = 0.18 + Math.random()*0.16;
         // Grains leave along the bore, as the thread does; gravity bends them.
         velocities[i] = (Math.random()-0.5)*0.02;
@@ -352,7 +357,7 @@ function build(T) {
       const y = positions[i+1];
       const ch = y >= 0 ? 0 : 1;
       const radial = Math.hypot(positions[i],positions[i+2]/DEPTH);
-      const wall = channelAt(Math.min(HEIGHT,Math.abs(y))) - 0.004;
+      const wall = boreAt(Math.min(HEIGHT,Math.abs(y))) - 0.002;
       if (radial > wall) {
         positions[i] *= wall/radial; positions[i+2] *= wall/radial;
         velocities[i] *= 0.2; velocities[i+2] *= 0.2;
