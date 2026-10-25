@@ -174,207 +174,359 @@
   </div>
 </section>
 
-<section id="features">
+<!-- Значки внутри телефона: один раз здесь, дальше по ссылке <use>.
+     Так их можно ставить и в разметку, и в то, что строит features.js. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></symbol>
+    <symbol id="i-sync" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+    <symbol id="i-columns" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></symbol>
+    <symbol id="i-exit" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-chev-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+    <symbol id="i-smile-plus" viewBox="0 0 24 24"><path d="M22 11v1a10 10 0 1 1-9-10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/><path d="M16 5h6"/><path d="M19 2v6"/></symbol>
+    <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></symbol>
+    <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  </defs>
+</svg>
+
+<section id="features" class="fx">
   <div class="wrap">
     <div class="section-head reveal">
       <h2>Что умеет приложение</h2>
     </div>
 
-    <!-- Сетка «бенто»: ассистент — главное отличие от обычного списка дел,
-         поэтому он крупный, остальное вокруг. В каждой карточке маленькая
-         сценка из приложения, свёрстанная html, а не картинкой: так она
-         красится темой и остаётся чёткой. Со сценками можно играть —
-         писать ассистенту, открывать пары, отмечать задачи, красить
-         виджет; оживляет их features.js. Без скрипта они просто стоят. -->
-    <div class="bento">
-      <article class="card feat reveal" data-f="ai">
-        <div class="feat-text">
-          <div class="card-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
-          </div>
+    <!-- Возможности одна за другой, а рядом прилипший к экрану телефон.
+         Пока листают, он поворачивается и показывает экран той
+         возможности, что сейчас посередине. Экраны свёрстаны html по
+         снимкам приложения, и с ними можно играть: у всех экранов общие
+         задачи, поэтому созданное у ассистента или в Телеграме видно и в
+         списке, и в планировщике, и в виджете. Оживляет всё features.js;
+         без него остаются тексты и неподвижный снимок в телефоне. -->
+    <div class="fx-grid">
+      <ol class="fx-steps">
+        <li class="fx-step is-active" data-s="ai">
+          <div class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-bot"/></svg></div>
           <h3>Ассистент</h3>
           <p>
             Скажите или напишите, что нужно сделать, и задача создастся сама,
             со сроком и категорией. Сфотографируйте силлабус, приложение
             вытащит из него дедлайны на весь семестр.
           </p>
-        </div>
-        <div class="demo demo-ai">
-          <div class="ai-log" aria-live="polite">
-            <div class="bubble bubble-me" data-ai="said">Сдать реферат по истории к пятнице</div>
-            <div class="made" data-ai="made">
-              <span class="made-check" aria-hidden="true"></span>
-              <div>
-                <b data-ai="title">Реферат по истории</b>
-                <span class="chips" data-ai="chips"><i>Пт, 23:59</i><i>Учёба</i><i class="hot">Важно</i></span>
-              </div>
-            </div>
-          </div>
-          <form class="ai-form" data-ai="form">
-            <input class="ai-input" type="text" maxlength="70" autocomplete="off"
-                   placeholder="Напишите задачу своими словами"
-                   aria-label="Задача для ассистента">
-            <button class="ai-send" type="submit" aria-label="Отправить ассистенту">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
-            </button>
-          </form>
-          <div class="ai-ideas">
-            <button type="button" class="idea">Зачёт по праву в среду в 10</button>
-            <button type="button" class="idea">Позвонить старосте завтра</button>
-            <button type="button" class="idea">Курсовая до 15 декабря</button>
-          </div>
-          <button type="button" class="syllabus" data-ai="syllabus"
-                  aria-label="Разобрать силлабус: показать, сколько дедлайнов в нём найдено">
-            <span class="syl-page" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-            <span class="syl-arrow" aria-hidden="true"></span>
-            <span class="syl-out"><b data-ai="count">14</b> дедлайнов на семестр</span>
-            <span class="syl-go">Разобрать силлабус</span>
-          </button>
-        </div>
-      </article>
-
-      <article class="card feat reveal" data-f="schedule">
-        <div class="feat-text">
-          <div class="card-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>
-          </div>
-          <h3>Расписание вуза</h3>
-          <p>
-            Работает без интернета, идущая сейчас пара подсвечивается,
-            к любой можно поставить напоминание и оставить заметку.
-          </p>
-        </div>
-        <div class="demo demo-pairs">
-          <div class="pair-item">
-            <button type="button" class="pair" aria-expanded="false"><time>9:00</time><span>Матанализ</span></button>
-            <div class="pair-more"><span>ауд. 3-214 · Лекция</span><button type="button" class="bell" aria-pressed="false" data-at="8:50">Напомнить</button></div>
-          </div>
-          <div class="pair-item is-now is-open">
-            <button type="button" class="pair now" aria-expanded="true"><time>10:40</time><span>История</span><em>сейчас</em></button>
-            <div class="pair-more"><span>ауд. 5-610 · Семинар</span><button type="button" class="bell" aria-pressed="false" data-at="10:30">Напомнить</button></div>
-          </div>
-          <div class="pair-item">
-            <button type="button" class="pair" aria-expanded="false"><time>12:40</time><span>Английский</span></button>
-            <div class="pair-more"><span>ауд. 2-105 · Практика</span><button type="button" class="bell" aria-pressed="false" data-at="12:30">Напомнить</button></div>
-          </div>
-        </div>
-      </article>
-
-      <article class="card feat reveal" data-f="tasks">
-        <div class="feat-text">
-          <div class="card-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9.5 8h5"/><path d="M9.5 12H16"/><path d="M9.5 16H14"/></svg>
-          </div>
+        </li>
+        <li class="fx-step" data-s="tasks">
+          <div class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9.5 8h5"/><path d="M9.5 12H16"/><path d="M9.5 16H14"/></svg></div>
           <h3>Задачи</h3>
           <p>
             Сроки, приоритеты, категории и повторы. К задаче можно приложить
             фото или голосовую заметку.
           </p>
-        </div>
-        <div class="demo demo-todo">
-          <div class="todo is-done"><button type="button" class="box" aria-pressed="true" aria-label="Лабораторная №3 — выполнено"></button><span>Лабораторная №3</span></div>
-          <div class="todo"><button type="button" class="box" aria-pressed="false" aria-label="Эссе по философии — выполнено"></button><span>Эссе по философии</span>
-            <button type="button" class="wave" aria-pressed="false" aria-label="Прослушать голосовую заметку"><b></b><b></b><b></b><b></b><b></b><span class="wave-time">0:04</span></button>
+        </li>
+        <li class="fx-step" data-s="schedule">
+          <div class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-cap"/></svg></div>
+          <h3>Расписание вуза</h3>
+          <p>
+            Работает без интернета, идущая сейчас пара подсвечивается,
+            к любой можно поставить напоминание и оставить заметку.
+          </p>
+        </li>
+        <li class="fx-step" data-s="planner">
+          <div class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-cal"/></svg></div>
+          <h3>Планировщик</h3>
+          <p>
+            Вся неделя на одной полосе: точкой отмечены дни, где есть дела,
+            а перенести задачу на сегодня или на завтра можно одним нажатием.
+          </p>
+        </li>
+        <li class="fx-step" data-s="rooms">
+          <div class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-users"/></svg></div>
+          <h3>Совместные задачи</h3>
+          <p>
+            Комната по коду для группы или проекта: общий список, исполнители,
+            комментарии и файлы.
+          </p>
+        </li>
+        <li class="fx-step" data-s="widget">
+          <div class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></div>
+          <h3>Виджет на экране</h3>
+          <p>
+            Ближайшая пара прямо на рабочем столе. Подстраивается под обои:
+            фон, карточки пар, текст и номер пары красятся по отдельности.
+          </p>
+        </li>
+        <li class="fx-step" data-s="tg">
+          <div class="card-mark"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-send"/></svg></div>
+          <h3>Телеграм</h3>
+          <p>
+            Задачи можно ставить прямо из переписки: бот привязывается по коду,
+            и всё созданное сразу появляется в приложении.
+          </p>
+        </li>
+      </ol>
+
+      <div class="fx-stage">
+        <div class="ph" role="group" aria-label="Приложение TimeFlow: экраны можно нажимать">
+          <div class="ph-shadow" aria-hidden="true"></div>
+          <div class="ph-body">
+            <!-- Толщина корпуса — стопка одинаковых скруглённых пластин, а
+                 не грани: у плоской грани углы не скруглить, и при
+                 повороте в углах зияли бы щели -->
+            <i class="ph-edge" style="--z:1"></i><i class="ph-edge" style="--z:2"></i>
+            <i class="ph-edge" style="--z:3"></i><i class="ph-edge" style="--z:4"></i>
+            <i class="ph-edge" style="--z:5"></i><i class="ph-edge" style="--z:6"></i>
+            <i class="ph-edge" style="--z:7"></i><i class="ph-edge" style="--z:8"></i>
+            <div class="ph-face">
+              <div class="ph-screen" data-dir="1">
+                <img class="ph-fallback" src="assets/tasks.webp" width="620" height="1384"
+                     alt="Экран «Мои задачи»: просроченные задачи и задачи на потом">
+
+                <!-- ── Ассистент ── -->
+                <div class="scr scr-ai is-on" data-scr="ai">
+                  <div class="a-status"><time>10:52</time><span class="a-sys" aria-hidden="true"><b></b><b></b><b></b><i></i></span></div>
+                  <header class="ai-head">
+                    <span class="ai-ava"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg></span>
+                    <div><b>TimeFlow AI</b><small><i></i>Готов помочь</small></div>
+                    <button type="button" class="a-icon" data-ai="clear" aria-label="Очистить чат"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg></button>
+                  </header>
+                  <div class="ai-log" data-ai="log" aria-live="polite"></div>
+                  <div class="ai-ideas">
+                    <button type="button" class="a-chip" data-say>Зачёт по праву в среду в 10</button>
+                    <button type="button" class="a-chip" data-say>Курсовая до 15 декабря</button>
+                    <button type="button" class="a-chip" data-ai="syllabus"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg>Силлабус</button>
+                  </div>
+                  <form class="a-input" data-ai="form">
+                    <button type="button" class="a-mic" data-ai="mic" aria-label="Сказать голосом"><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg></button>
+                    <input type="text" maxlength="80" autocomplete="off" placeholder="Сообщение..." aria-label="Сообщение ассистенту">
+                    <button type="submit" class="a-send" aria-label="Отправить"><svg class="ic" aria-hidden="true"><use href="#i-up"/></svg></button>
+                  </form>
+                  <nav class="a-nav" aria-label="Разделы приложения">
+                    <button type="button" class="a-tab" data-go="tasks"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Главная</button>
+                    <button type="button" class="a-tab" data-go="schedule"><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg>Пары</button>
+                    <button type="button" class="a-tab" data-go="planner"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>План</button>
+                    <button type="button" class="a-tab is-on" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>AI</button>
+                  </nav>
+                </div>
+
+                <!-- ── Мои задачи ── -->
+                <div class="scr scr-tasks" data-scr="tasks">
+                  <div class="a-status"><time>10:52</time><span class="a-sys" aria-hidden="true"><b></b><b></b><b></b><i></i></span></div>
+                  <header class="t-head">
+                    <div><b class="a-title">Мои задачи</b><small data-date="long">Понедельник, 26 октября</small></div>
+                    <span class="t-tools">
+                      <span class="t-tool is-violet"><svg class="ic" aria-hidden="true"><use href="#i-trend"/></svg></span>
+                      <button type="button" class="t-tool is-teal" data-go="rooms" aria-label="Совместные задачи"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg></button>
+                      <span class="t-tool is-green"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg></span>
+                    </span>
+                  </header>
+                  <div class="t-sum">
+                    <span class="t-ring" data-t="ring"><b data-t="ringText">1/2</b></span>
+                    <div class="t-sum-text">
+                      <b data-t="sumTitle">Осталась 1 задача</b>
+                      <span class="t-late" data-t="late"><svg class="ic" aria-hidden="true"><use href="#i-alert"/></svg><span>Просрочено: 1</span></span>
+                    </div>
+                    <span class="t-spark"><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg></span>
+                    <span class="t-next"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg><span data-t="next">Английский · в 12:40</span></span>
+                  </div>
+                  <div class="t-filters" role="group" aria-label="Какие задачи показать">
+                    <span class="t-search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></span>
+                    <button type="button" class="a-chip is-on" data-f="all" aria-pressed="true">Все</button>
+                    <button type="button" class="a-chip" data-f="done" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>Выполненные</button>
+                    <button type="button" class="a-chip" data-f="open" aria-pressed="false">Запланированные</button>
+                  </div>
+                  <div class="t-list" data-t="list"></div>
+                  <button type="button" class="t-fab" data-t="add" aria-label="Новая задача"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                  <form class="a-sheet" data-t="sheet" hidden>
+                    <b>Новая задача</b>
+                    <input type="text" maxlength="60" autocomplete="off" placeholder="Что нужно сделать?" aria-label="Название задачи">
+                    <span class="a-sheet-row">
+                      <button type="button" class="a-chip is-on" data-day="0" aria-pressed="true">Сегодня</button>
+                      <button type="button" class="a-chip" data-day="1" aria-pressed="false">Завтра</button>
+                      <button type="submit" class="a-btn">Сохранить</button>
+                    </span>
+                  </form>
+                  <nav class="a-nav" aria-label="Разделы приложения">
+                    <button type="button" class="a-tab is-on" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Главная</button>
+                    <button type="button" class="a-tab" data-go="schedule"><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg>Пары</button>
+                    <button type="button" class="a-tab" data-go="planner"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>План</button>
+                    <button type="button" class="a-tab" data-go="ai"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>AI</button>
+                  </nav>
+                </div>
+
+                <!-- ── Расписание ── -->
+                <div class="scr scr-schedule" data-scr="schedule">
+                  <div class="a-status"><time>10:52</time><span class="a-sys" aria-hidden="true"><b></b><b></b><b></b><i></i></span></div>
+                  <div class="s-groups" role="group" aria-label="Группа">
+                    <button type="button" class="s-group is-on" data-g="0" aria-pressed="true"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg>ПИ402.2</button>
+                    <button type="button" class="s-group" data-g="1" aria-pressed="false">ПИ402.1 <small>НГУЭУ</small></button>
+                    <span class="s-add"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></span>
+                  </div>
+                  <div class="s-search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><span data-s="group">ПИ402.2</span><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg></div>
+                  <button type="button" class="s-sync" data-s="sync">Обновлено: <span data-s="synced">сегодня 08:00</span><svg class="ic" aria-hidden="true"><use href="#i-sync"/></svg></button>
+                  <div class="s-week"><b data-s="week">Текущая неделя</b><button type="button" class="s-today" data-s="today">Сегодня</button></div>
+                  <div class="s-days" data-s="days" role="group" aria-label="День недели"></div>
+                  <b class="s-day" data-s="dayName">Понедельник</b>
+                  <div class="s-list" data-s="list"></div>
+                  <nav class="a-nav" aria-label="Разделы приложения">
+                    <button type="button" class="a-tab" data-go="tasks"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Главная</button>
+                    <button type="button" class="a-tab is-on" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg>Пары</button>
+                    <button type="button" class="a-tab" data-go="planner"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>План</button>
+                    <button type="button" class="a-tab" data-go="ai"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>AI</button>
+                  </nav>
+                </div>
+
+                <!-- ── Планировщик ── -->
+                <div class="scr scr-planner" data-scr="planner">
+                  <div class="a-status"><time>10:52</time><span class="a-sys" aria-hidden="true"><b></b><b></b><b></b><i></i></span></div>
+                  <header class="p-head">
+                    <div><b class="a-title">Планировщик</b><small data-p="month">Октябрь 2026</small></div>
+                    <button type="button" class="p-today" data-p="today">Сегодня</button>
+                    <span class="p-icon"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg></span>
+                  </header>
+                  <div class="p-week">
+                    <button type="button" class="p-arrow" data-p="prev" aria-label="Прошлая неделя"><svg class="ic" aria-hidden="true"><use href="#i-back"/></svg></button>
+                    <div class="p-days" data-p="days" role="group" aria-label="День"></div>
+                    <button type="button" class="p-arrow" data-p="next" aria-label="Следующая неделя"><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg></button>
+                  </div>
+                  <div class="p-bar"><b data-p="dayName">Понедельник, 26 октября</b><span data-p="count">1 задача</span></div>
+                  <div class="p-list" data-p="list"></div>
+                  <nav class="a-nav" aria-label="Разделы приложения">
+                    <button type="button" class="a-tab" data-go="tasks"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Главная</button>
+                    <button type="button" class="a-tab" data-go="schedule"><svg class="ic" aria-hidden="true"><use href="#i-cap"/></svg>Пары</button>
+                    <button type="button" class="a-tab is-on" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>План</button>
+                    <button type="button" class="a-tab" data-go="ai"><svg class="ic" aria-hidden="true"><use href="#i-bot"/></svg>AI</button>
+                  </nav>
+                </div>
+
+                <!-- ── Комната ── -->
+                <div class="scr scr-rooms" data-scr="rooms">
+                  <div class="a-status"><time>10:52</time><span class="a-sys" aria-hidden="true"><b></b><b></b><b></b><i></i></span></div>
+                  <header class="r-head">
+                    <button type="button" class="a-icon" data-go="tasks" aria-label="Назад к задачам"><svg class="ic" aria-hidden="true"><use href="#i-back"/></svg></button>
+                    <button type="button" class="r-code" data-r="code" aria-label="Скопировать код комнаты TF4R2M"><b>TF4R2M</b><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg></button>
+                    <span class="r-faces" aria-hidden="true"><i>А</i><i class="is-online">М</i><i>В</i></span>
+                    <span class="r-icon"><svg class="ic" aria-hidden="true"><use href="#i-columns"/></svg></span>
+                    <span class="r-icon is-exit"><svg class="ic" aria-hidden="true"><use href="#i-exit"/></svg></span>
+                  </header>
+                  <div class="r-progress"><i data-r="bar"></i></div>
+                  <small class="r-stat" data-r="stat">В сети: 1 из 3 · готово 1 из 5</small>
+                  <div class="r-list" data-r="list"></div>
+                  <button type="button" class="t-fab" data-r="add" aria-label="Новая общая задача"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                  <form class="a-sheet" data-r="sheet" hidden>
+                    <b>Общая задача</b>
+                    <input type="text" maxlength="60" autocomplete="off" placeholder="Что нужно сделать группе?" aria-label="Новая общая задача">
+                    <span class="a-sheet-row"><button type="submit" class="a-btn">Добавить</button></span>
+                  </form>
+                </div>
+
+                <!-- ── Рабочий стол с виджетом расписания ── -->
+                <div class="scr scr-home" data-scr="widget" data-wall="0">
+                  <div class="a-status"><time>10:52</time><span class="a-sys" aria-hidden="true"><b></b><b></b><b></b><i></i></span></div>
+                  <div class="h-widgets">
+                    <div class="h-clock" aria-hidden="true"><b>10:52</b><span data-date="short">пн, 26 октября</span></div>
+                    <button type="button" class="w" data-w="box" aria-label="Виджет расписания: показать следующую пару">
+                      <b class="w-title" data-w="title">ПИ402.2, 26 октября, понедельник</b>
+                      <span class="w-time"><i class="w-num" data-w="num">2</i><span data-w="time">10:40 - 12:10</span></span>
+                      <span class="w-card"><b data-w="name">История</b><span data-w="type">Семинар</span><em data-w="room">ауд. 5-610</em></span>
+                      <span class="w-empty" data-w="empty" hidden>Сегодня пар нет</span>
+                    </button>
+                  </div>
+                  <div class="h-apps" aria-hidden="true">
+                    <i><svg class="ic"><use href="#i-mail"/></svg></i>
+                    <i><svg class="ic"><use href="#i-send"/></svg></i>
+                    <i><svg class="ic"><use href="#i-image"/></svg></i>
+                    <i><svg class="ic"><use href="#i-clock"/></svg></i>
+                    <i><svg class="ic"><use href="#i-cal"/></svg></i>
+                    <i><svg class="ic"><use href="#i-mic"/></svg></i>
+                    <i><svg class="ic"><use href="#i-note"/></svg></i>
+                    <i><img src="assets/icon-180.png" alt=""></i>
+                  </div>
+                  <div class="h-panel">
+                    <div class="h-parts" role="group" aria-label="Что перекрасить">
+                      <button type="button" class="is-on" data-part="bg" aria-pressed="true">Фон</button>
+                      <button type="button" data-part="card" aria-pressed="false" aria-label="Карточки пар">Карточки</button>
+                      <button type="button" data-part="text" aria-pressed="false">Текст</button>
+                      <button type="button" data-part="num" aria-pressed="false" aria-label="Номер пары">Номер</button>
+                    </div>
+                    <div class="h-swatches" role="group" aria-label="Цвет">
+                      <button type="button" class="h-auto" data-c="" aria-label="Под обои">Авто</button>
+                      <button type="button" data-c="#704090" style="--c:#704090" aria-label="Сливовый"></button>
+                      <button type="button" data-c="#d98fb0" style="--c:#d98fb0" aria-label="Розовый"></button>
+                      <button type="button" data-c="#6fa8a0" style="--c:#6fa8a0" aria-label="Мятный"></button>
+                      <button type="button" data-c="#e7b75b" style="--c:#e7b75b" aria-label="Песочный"></button>
+                      <button type="button" data-c="#f4f1f8" style="--c:#f4f1f8" aria-label="Белый"></button>
+                      <button type="button" data-c="#1b1622" style="--c:#1b1622" aria-label="Чёрный"></button>
+                    </div>
+                    <button type="button" class="h-wall" data-w="wall"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg>Сменить обои</button>
+                  </div>
+                  <div class="h-apps h-dock" aria-hidden="true">
+                    <i><svg class="ic"><use href="#i-chat"/></svg></i>
+                    <i><svg class="ic"><use href="#i-search"/></svg></i>
+                    <i><svg class="ic"><use href="#i-users"/></svg></i>
+                    <i><svg class="ic"><use href="#i-home"/></svg></i>
+                  </div>
+                </div>
+
+                <!-- ── Телеграм ── -->
+                <div class="scr scr-tg" data-scr="tg">
+                  <div class="a-status"><time>10:52</time><span class="a-sys" aria-hidden="true"><b></b><b></b><b></b><i></i></span></div>
+                  <header class="g-head">
+                    <img src="assets/icon-180.png" alt="">
+                    <div><b>TimeFlow</b><small>бот</small></div>
+                  </header>
+                  <div class="g-log" data-g="log" aria-live="polite"></div>
+                  <form class="g-form" data-g="form">
+                    <input type="text" maxlength="60" autocomplete="off" placeholder="Сообщение" aria-label="Сообщение боту">
+                    <button type="submit" class="g-send" aria-label="Отправить боту"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg></button>
+                  </form>
+                </div>
+
+                <div class="ph-toast" data-toast role="status" aria-live="polite"></div>
+              </div>
+              <i class="ph-glare" aria-hidden="true"></i>
+            </div>
           </div>
-          <div class="todo"><button type="button" class="box" aria-pressed="false" aria-label="Купить тетради — выполнено"></button><span>Купить тетради</span></div>
         </div>
-      </article>
 
-      <article class="card feat reveal" data-f="rooms">
-        <div class="card-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></svg>
+        <div class="fx-dots" role="group" aria-label="Экраны приложения">
+          <button type="button" class="is-on" data-go="ai" aria-label="Ассистент"></button>
+          <button type="button" data-go="tasks" aria-label="Задачи"></button>
+          <button type="button" data-go="schedule" aria-label="Расписание вуза"></button>
+          <button type="button" data-go="planner" aria-label="Планировщик"></button>
+          <button type="button" data-go="rooms" aria-label="Совместные задачи"></button>
+          <button type="button" data-go="widget" aria-label="Виджет"></button>
+          <button type="button" data-go="tg" aria-label="Телеграм"></button>
         </div>
-        <h3>Совместные задачи</h3>
-        <p>
-          Комната по коду для группы или проекта: общий список, исполнители,
-          комментарии и файлы.
-        </p>
-        <div class="demo demo-room">
-          <div class="room-row">
-            <span class="faces" aria-label="В комнате 8 человек"><i>А</i><i>М</i><i>К</i><i class="me">Вы</i><i class="more">+5</i></span>
-            <button type="button" class="room-code" aria-label="Скопировать код комнаты K7F-29"><code>K7F-29</code><span class="room-copied" aria-live="polite"></span></button>
-          </div>
-          <button type="button" class="room-join" aria-pressed="false">Войти в комнату</button>
-        </div>
-      </article>
-
-      <article class="card feat reveal" data-f="widget">
-        <div class="card-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-        </div>
-        <h3>Виджет на экране</h3>
-        <p>
-          Подстраивается под обои: фон, карточки, текст и знак красятся
-          по отдельности.
-        </p>
-        <div class="demo demo-widget">
-          <span class="mini" aria-hidden="true"><b>Сегодня</b><i></i><i></i></span>
-          <span class="swatches" role="group" aria-label="Цвет виджета">
-            <button type="button" class="swatch" style="--c:#704090" aria-pressed="false" aria-label="Сливовый"></button>
-            <button type="button" class="swatch" style="--c:#d98fb0" aria-pressed="false" aria-label="Розовый"></button>
-            <button type="button" class="swatch" style="--c:#6fa8a0" aria-pressed="false" aria-label="Мятный"></button>
-            <button type="button" class="swatch" style="--c:#e7b75b" aria-pressed="false" aria-label="Песочный"></button>
-            <button type="button" class="swatch" style="--c:#3d6fd8" aria-pressed="false" aria-label="Синий"></button>
-          </span>
-        </div>
-      </article>
-
-      <article class="card feat reveal" data-f="tg">
-        <div class="card-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
-        </div>
-        <h3>Телеграм</h3>
-        <p>
-          Задачи можно ставить прямо из переписки: бот привязывается по коду,
-          и всё созданное сразу появляется в приложении.
-        </p>
-        <div class="demo demo-tg">
-          <div class="tg-log" aria-live="polite">
-            <span class="bubble bubble-me">купить ватман к среде</span>
-            <span class="bubble bubble-bot">Готово, задача в TimeFlow</span>
-          </div>
-          <form class="tg-form">
-            <input class="tg-input" type="text" maxlength="60" autocomplete="off"
-                   placeholder="Напишите боту" aria-label="Сообщение боту">
-            <button class="tg-send" type="submit" aria-label="Отправить боту">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
-            </button>
-          </form>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section style="padding-top:0">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <h2>Как это выглядит</h2>
-    </div>
-    <div class="shots">
-      <div class="shot-slot">
-        <figure class="shot">
-          <img src="assets/tasks.webp" alt="Экран «Мои задачи»: просроченные задачи и задачи на потом" loading="lazy" width="620" height="1384">
-          <figcaption>Мои задачи</figcaption>
-        </figure>
-      </div>
-      <div class="shot-slot">
-        <figure class="shot">
-          <img src="assets/schedule.webp" alt="Расписание пар группы на субботу" loading="lazy" width="620" height="1384">
-          <figcaption>Расписание вуза</figcaption>
-        </figure>
-      </div>
-      <div class="shot-slot">
-        <figure class="shot">
-          <img src="assets/planner.webp" alt="Планировщик: неделя и задачи на выбранный день" loading="lazy" width="620" height="1384">
-          <figcaption>Планировщик</figcaption>
-        </figure>
-      </div>
-      <div class="shot-slot">
-        <figure class="shot">
-          <img src="assets/assistant.webp" alt="Чат с ассистентом: задача создаётся по одной фразе и сразу видна карточкой" loading="lazy" width="620" height="1384">
-          <figcaption>Ассистент</figcaption>
-        </figure>
       </div>
     </div>
   </div>
