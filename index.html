@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#f8f5fb">
 <title>TimeFlow — планировщик для студентов</title>
 <meta name="description" content="Задачи, расписание вуза и ассистент, который сам разбирает учебный план. Приложение для Android, есть бесплатный тариф.">
-<link rel="icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/icon-180.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TimeFlow — планировщик для студентов">
@@ -51,50 +51,18 @@
 
 <div class="glow" id="glow" aria-hidden="true"></div>
 
-<!-- Заставка на время загрузки: песочные часы с фирменного знака.
-     Колбы, рамка и «блик» повторяют логотип, песок пересыпается сверху
-     вниз, потом часы переворачиваются. Поле рисунка квадратное и больше
-     самих часов: при повороте их диагональ длиннее высоты, и в поле
-     впритык углы срезались бы. Блик вынесен из вращающейся группы и на
-     время переворота гаснет — иначе он висел бы в воздухе. -->
+<!-- Заставка на время загрузки: знак TimeFlow стоит на месте, вокруг
+     бежит кольцо — как кольцо прогресса в карточке дня в приложении. -->
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-in">
-    <svg class="loader-glass" viewBox="-52 -14 224 224" width="208" height="208" aria-hidden="true" focusable="false">
-      <defs>
-        <clipPath id="tfTop"><path d="M25 15H95A7 7 0 0 1 102 22V58C102 82 63 80 63 98H57C57 80 18 82 18 58V22A7 7 0 0 1 25 15Z"/></clipPath>
-        <clipPath id="tfBot"><path d="M57 98H63C63 116 102 114 102 138V174A7 7 0 0 1 95 181H25A7 7 0 0 1 18 174V138C18 114 57 116 57 98Z"/></clipPath>
-        <linearGradient id="tfBody" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#f2ecf8"/>
-          <stop offset="1" stop-color="#e2d7ee"/>
-        </linearGradient>
-      </defs>
-
-      <g class="tf-glass">
-        <path class="tf-frame" d="M20 4H100A16 16 0 0 1 116 20V56C116 84 82 80 82 98C82 116 116 112 116 140V176A16 16 0 0 1 100 192H20A16 16 0 0 1 4 176V140C4 112 38 116 38 98C38 80 4 84 4 56V20A16 16 0 0 1 20 4Z"/>
-        <path class="tf-body" d="M25 15H95A7 7 0 0 1 102 22V58C102 82 63 80 63 98H57C57 80 18 82 18 58V22A7 7 0 0 1 25 15Z"/>
-        <path class="tf-body" d="M57 98H63C63 116 102 114 102 138V174A7 7 0 0 1 95 181H25A7 7 0 0 1 18 174V138C18 114 57 116 57 98Z"/>
-
-        <g clip-path="url(#tfTop)">
-          <path class="tf-sand-top" d="M-10 -6C24 -6 48 0 60 12 72 0 96 -6 130 -6V210H-10Z"/>
-        </g>
-        <g clip-path="url(#tfBot)">
-          <path class="tf-sand-bottom" d="M-10 102C24 102 48 96 60 84 72 96 96 102 130 102V210H-10Z"/>
-        </g>
-
-        <!-- Падающие песчинки: три штуки со сдвигом по времени, чтобы
-             струйка не выглядела мигающей точкой -->
-        <g class="tf-fall">
-          <ellipse class="tf-grain" cx="60" cy="98" rx="2.4" ry="3.2"/>
-          <ellipse class="tf-grain tf-grain-2" cx="60" cy="98" rx="1.9" ry="2.6"/>
-          <ellipse class="tf-grain tf-grain-3" cx="60" cy="98" rx="2.2" ry="2.9"/>
-        </g>
-      </g>
-
-      <rect class="tf-glare" x="28" y="23" width="32" height="11" rx="5.5"/>
-    </svg>
-
+    <div class="loader-mark">
+      <svg class="loader-ring" viewBox="0 0 120 120" width="148" height="148" aria-hidden="true" focusable="false">
+        <circle class="loader-ring-track" cx="60" cy="60" r="55"/>
+        <circle class="loader-ring-arc" cx="60" cy="60" r="55" pathLength="100"/>
+      </svg>
+      <img src="assets/mark.png" alt="" width="52" height="86">
+    </div>
     <span class="loader-word">TimeFlow</span>
-    <span class="loader-track"><span></span></span>
   </div>
 </div>
 

@@ -43,13 +43,6 @@
   --loader-drop: 0 16px 28px rgba(87, 48, 113, .18);
   --fill-bg: #fdf3c7;
   --fill-ink: #6b5800;
-  /* Знак в заставке: рамка, колбы, песок, блик */
-  --mark-frame: #7a4fa0;
-  --mark-glass-1: #f2ecf8;
-  --mark-glass-2: #e2d7ee;
-  --mark-sand: #b9a0d4;
-  --mark-glare: #6b3f92;
-  --mark-glare-a: .5;
   color-scheme: light;
 }
 
@@ -98,12 +91,6 @@
   --loader-drop: 0 16px 28px rgba(0, 0, 0, .45);
   --fill-bg: #3a3319;
   --fill-ink: #f0dd93;
-  --mark-frame: #8e64b8;
-  --mark-glass-1: #2c2340;
-  --mark-glass-2: #221a31;
-  --mark-sand: #a583c8;
-  --mark-glare: #e2cdf7;
-  --mark-glare-a: .28;
   color-scheme: dark;
 }
 
@@ -740,17 +727,10 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
 
 /* ── Заставка загрузки ─────────────────────────────────────────────────── */
 
-/* Песочные часы с фирменного знака: та же рамка со скруглёнными углами, те
-   же колбы с узкой перемычкой. Песок пересыпается сверху вниз, потом часы
-   переворачиваются и всё повторяется.
-
-   Стык цикла не виден потому, что песка ровно на одну колбу: в начале
-   верхняя полна до крышки, в конце нижняя полна до перемычки. Переворот
-   на 180° ставит полную колбу наверх — ровно ту картинку, с которой цикл
-   начинается. Сверху песок уходит воронкой, снизу растёт горкой: их
-   поверхности нарисованы с запасом за краями колб, поэтому в начале и в
-   конце не видны. Блик на стекле нарисован вне вращающейся группы и на
-   время переворота гаснет.
+/* Знак TimeFlow в центре, вокруг бежит кольцо: дуга вращается и при этом
+   то растягивается, то сжимается, так что кольцо не выглядит застывшим.
+   Долю загруженного оно не показывает — её никто не знает, — только то,
+   что работа идёт.
 
    Заставка обязана исчезнуть даже без JavaScript, иначе сайт превратится в
    один сиреневый экран. Поэтому у неё два независимых выключателя: скрипт
@@ -789,105 +769,62 @@ details p { margin: 14px 0 0; color: var(--muted); font-size: .96rem; }
 
 .loader-in { text-align: center; }
 
+/* Размеры заданы и в разметке: место под знак занято до того, как доедет
+   css, и заставка не дёргается */
+.loader-mark {
+  position: relative;
+  width: 148px;
+  height: 148px;
+  margin: 0 auto;
+}
+.loader-mark img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52px;
+  height: 86px;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(var(--loader-drop));
+}
+
+.loader-ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: loaderSpin 1.6s linear infinite;
+}
+.loader-ring circle {
+  fill: none;
+  stroke-width: 4;
+}
+.loader-ring-track { stroke: var(--lilac); }
+.loader-ring-arc {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-dasharray: 22 78;
+  transform-box: view-box;
+  transform-origin: 60px 60px;
+  animation: loaderArc 1.6s ease-in-out infinite;
+}
+
+@keyframes loaderSpin {
+  to { transform: rotate(360deg); }
+}
+/* Дуга растёт, потом её хвост догоняет голову: длина и сдвиг меняются
+   вместе, поэтому голова идёт ровно, а хвост то отстаёт, то подтягивается */
+@keyframes loaderArc {
+  0%   { stroke-dasharray: 8 92;  stroke-dashoffset: 0; }
+  50%  { stroke-dasharray: 60 40; stroke-dashoffset: -14; }
+  100% { stroke-dasharray: 8 92;  stroke-dashoffset: -100; }
+}
+
 .loader-word {
   display: block;
-  margin-top: 22px;
+  margin-top: 20px;
   font-family: var(--display);
   font-size: 1.45rem;
   color: var(--plum);
   letter-spacing: .06em;
-}
-
-/* Полоска не показывает долю загруженного — её никто не знает. Она просто
-   говорит, что работа идёт */
-.loader-track {
-  display: block;
-  width: 132px;
-  height: 3px;
-  margin: 18px auto 0;
-  border-radius: 3px;
-  background: var(--lilac);
-  overflow: hidden;
-}
-.loader-track span {
-  display: block;
-  width: 45%;
-  height: 100%;
-  border-radius: 3px;
-  background: var(--accent);
-  animation: loaderSweep 1.4s cubic-bezier(.65, 0, .35, 1) infinite;
-}
-@keyframes loaderSweep {
-  0% { transform: translateX(-105%); }
-  100% { transform: translateX(325%); }
-}
-
-/* Размер задан стилем, а не только атрибутами: в разметке они нужны, чтобы
-   место под знак было занято до того, как доедет css, и заставка не дёрнулась */
-.loader-glass {
-  display: block;
-  margin: -12px auto;
-  width: 208px;
-  height: 208px;
-  filter: drop-shadow(var(--loader-drop));
-}
-
-.tf-frame { fill: var(--mark-frame); }
-.tf-body { fill: url(#tfBody); }
-.tf-sand-top, .tf-sand-bottom, .tf-grain { fill: var(--mark-sand); }
-.tf-glare {
-  fill: var(--mark-glare);
-  opacity: var(--mark-glare-a);
-  animation: tfGlare 3.6s linear infinite;
-}
-
-/* transform-box: view-box — иначе сдвиг считался бы от рамки самой фигуры,
-   а не от системы координат svg, и песок уехал бы мимо колбы */
-.tf-glass, .tf-sand-top, .tf-sand-bottom, .tf-grain { transform-box: view-box; }
-
-.tf-glass {
-  transform-origin: 60px 98px;
-  animation: tfFlip 3.6s cubic-bezier(.66, 0, .3, 1) infinite;
-}
-.tf-sand-top { animation: tfDrain 3.6s ease-in-out infinite; }
-.tf-sand-bottom { animation: tfFill 3.6s ease-in-out infinite; }
-
-/* Песчинки падают по одной дорожке, но с разным разбегом — получается
-   непрерывная струйка, а не мигающая точка */
-.tf-grain {
-  transform-origin: 60px 98px;
-  animation: tfGrain 1.05s cubic-bezier(.4, 0, .8, .4) infinite;
-}
-.tf-grain-2 { animation-delay: .35s; }
-.tf-grain-3 { animation-delay: .7s; }
-.tf-fall { animation: tfStream 3.6s linear infinite; }
-
-@keyframes tfDrain {
-  0%, 4% { transform: translateY(0); }
-  72%, 100% { transform: translateY(112px); }
-}
-@keyframes tfFill {
-  0%, 8% { transform: translateY(100px); }
-  76%, 100% { transform: translateY(0); }
-}
-@keyframes tfGlare {
-  0%, 76% { opacity: var(--mark-glare-a); }
-  80%, 96% { opacity: 0; }
-  100% { opacity: var(--mark-glare-a); }
-}
-@keyframes tfFlip {
-  0%, 80% { transform: rotate(0deg); }
-  100% { transform: rotate(180deg); }
-}
-@keyframes tfGrain {
-  0% { transform: translateY(-4px) scaleY(.7); opacity: 0; }
-  15%, 85% { opacity: 1; }
-  100% { transform: translateY(44px) scaleY(1.15); opacity: 0; }
-}
-@keyframes tfStream {
-  0%, 5% { opacity: 0; }
-  10%, 70% { opacity: 1; }
-  75%, 100% { opacity: 0; }
 }
 
 /* ── Движение на странице ──────────────────────────────────────────────── */
@@ -1041,10 +978,7 @@ a:focus-visible, summary:focus-visible, .btn:focus-visible {
   }
 
   .loader { animation-delay: 1.2s; }
-  .tf-sand-top { transform: translateY(56px); }
-  .tf-sand-bottom { transform: translateY(50px); }
-  .tf-fall { opacity: 0; }
-  .loader-track span { width: 100%; }
+  .loader-ring-arc { stroke-dasharray: 30 70; }
 
   .js .reveal:not(.is-in) { opacity: 1; transform: none; }
   .js .foot:not(.is-in) .foot-arc { -webkit-mask-image: none; mask-image: none; }
@@ -1296,11 +1230,6 @@ details[open]::details-content { block-size: auto; }
 @media (prefers-reduced-motion: reduce) {
   .glow { display: none; }
 }
-
-/* Колбы в заставке залиты градиентом из разметки, а его остановки — тоже
-   свойства css, поэтому тема достаёт и их */
-#tfBody stop:first-child { stop-color: var(--mark-glass-1); }
-#tfBody stop:last-child { stop-color: var(--mark-glass-2); }
 
 /* ── Песочные часы ─────────────────────────────────────────────────────
 
