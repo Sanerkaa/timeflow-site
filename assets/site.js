@@ -446,6 +446,27 @@
     glassMove();
     addEventListener('scroll', onGlass, { passive: true });
     addEventListener('resize', onGlass);
+
+    /* Ссылка на раздел по ту сторону часов («Возможности» в шапке) не
+       листает плавно сквозь них: раздел в два с половиной экрана, и
+       часы прокручивались бы за полсекунды, судорожно. Через часы —
+       сразу прыжок, раздел дальше проявляется сам, как при прокрутке. */
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!link || link.getAttribute('href').length < 2) return;
+      var target = document.getElementById(link.getAttribute('href').slice(1));
+      if (!target) return;
+      var from = scrollY;
+      /* Минус шапка: она прилипает сверху и иначе закрыла бы заголовок */
+      var bar = document.querySelector('.top');
+      var to = target.getBoundingClientRect().top + scrollY - (bar ? bar.offsetHeight : 0);
+      var top = glassScroll.offsetTop;
+      var bottom = top + glassScroll.offsetHeight;
+      if (Math.max(from, to) < top || Math.min(from, to) > bottom - innerHeight) return;
+      e.preventDefault();
+      scrollTo({ top: to, behavior: 'instant' });
+      history.pushState(null, '', link.getAttribute('href'));
+    });
   }
 
   /* ── Наклон карточек за курсором ───────────────────────────────────── */
