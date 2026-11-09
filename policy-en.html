@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Цвет полосы браузера на телефоне; скрипт ниже правит его под тему -->
+<meta name="theme-color" content="#f8f5fb">
+<title>Privacy Policy · TimeFlow</title>
+<meta name="description" content="TimeFlow Privacy Policy under Russian Federal Law No. 152-FZ: what data is collected, why, who receives it and how to delete it.">
+<link rel="alternate" hreflang="ru" href="https://timeflow-app.ru/policy">
+<link rel="alternate" hreflang="en" href="https://timeflow-app.ru/policy-en">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<!-- Класс js и тему ставим до первой отрисовки.
+
+     Класс js: блоки, которые всплывают при прокрутке, прячутся только
+     при живом скрипте. Без него класса нет, прятать некому — и
+     страница видна целиком.
+
+     Тема: сначала та, что человек выбрал сам, иначе системная. Код
+     стоит здесь, а не в site.js, именно из-за порядка: site.js
+     отложенный, и страница успела бы мигнуть светлым. -->
+<script>
+(function () {
+  var root = document.documentElement;
+  root.className = "js";
+  var pick = null;
+  try { pick = localStorage.getItem("tf-theme"); } catch (e) { pick = null; }
+  if (pick !== "light" && pick !== "dark") {
+    pick = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  root.dataset.theme = pick;
+  var bar = document.querySelector('meta[name="theme-color"]');
+  if (bar) bar.setAttribute("content", pick === "dark" ? "#131019" : "#f8f5fb");
+})();
+</script>
+<script src="assets/site.js" defer></script>
+</head>
+<body>
+
+<div class="glow" id="glow" aria-hidden="true"></div>
+
+<!-- Заставка на время загрузки: знак TimeFlow стоит на месте, вокруг
+     бежит кольцо — как кольцо прогресса в карточке дня в приложении. -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-in">
+    <div class="loader-mark">
+      <svg class="loader-ring" viewBox="0 0 120 120" width="148" height="148" aria-hidden="true" focusable="false">
+        <circle class="loader-ring-track" cx="60" cy="60" r="55"/>
+        <circle class="loader-ring-arc" cx="60" cy="60" r="55" pathLength="100"/>
+      </svg>
+      <img src="assets/mark.png" alt="" width="52" height="86">
+    </div>
+    <span class="loader-word">TimeFlow</span>
+  </div>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="assets/mark.png" alt="">TimeFlow</a>
+    <nav>
+      <a href="/tariffs">Pricing</a>
+      <a href="/oferta" class="hide-sm">Terms</a>
+      <button class="theme-switch" id="themeSwitch" type="button"
+              aria-label="Switch to dark theme" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <!-- Вырез месяца — дырка в маске, а не плашка цвета фона:
+               шапка полупрозрачная, плашку было бы видно -->
+          <mask id="tfBite">
+            <rect x="0" y="0" width="24" height="24" fill="#fff"/>
+            <circle class="bite" cx="12" cy="12" r="5.4" fill="#000"/>
+          </mask>
+          <g class="rays" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none">
+            <path d="M12 2.2v2"/><path d="M12 19.8v2"/>
+            <path d="M2.2 12h2"/><path d="M19.8 12h2"/>
+            <path d="M5.5 5.5l1.4 1.4"/><path d="M17.1 17.1l1.4 1.4"/>
+            <path d="M18.5 5.5l-1.4 1.4"/><path d="M6.9 17.1l-1.4 1.4"/>
+          </g>
+          <circle class="disc" cx="12" cy="12" r="5.4" mask="url(#tfBite)"/>
+        </svg>
+      </button>
+      <a href="https://github.com/Sanerkaa/timeflow-site/releases/latest/download/TimeFlow.apk" class="btn btn-main btn-sm">Download</a>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <a href="/policy" lang="ru" hreflang="ru">RU</a>
+        <a href="/policy-en" lang="en" hreflang="en" aria-current="page">EN</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="doc">
+  <div class="narrow">
+    <a class="back" href="/">← Home</a>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Personal Data Processing Policy. Version of November 9, 2026</p>
+
+    <p class="callout">
+      This English version is provided for convenience. In case of any
+      discrepancy, the <a href="/policy" hreflang="ru">Russian version</a>
+      prevails.
+    </p>
+
+    <nav class="toc" aria-label="Contents">
+      <ol>
+        <li><a href="#general">General provisions</a></li>
+        <li><a href="#terms">Definitions</a></li>
+        <li><a href="#data">Data we process</a></li>
+        <li><a href="#purposes">Purposes and legal grounds</a></li>
+        <li><a href="#conditions">Processing procedure and conditions</a></li>
+        <li><a href="#processors">Disclosure to third parties</a></li>
+        <li><a href="#crossborder">Cross-border transfer</a></li>
+        <li><a href="#rooms">Shared rooms</a></li>
+        <li><a href="#storage">Cookies and on-device storage</a></li>
+        <li><a href="#retention">Retention and deletion</a></li>
+        <li><a href="#rights">Your rights</a></li>
+        <li><a href="#security">Data security</a></li>
+        <li><a href="#children">Children</a></li>
+        <li><a href="#changes">Changes to this Policy</a></li>
+        <li><a href="#contacts">Contact us</a></li>
+      </ol>
+    </nav>
+
+    <h2 id="general">1. General provisions</h2>
+    <p>
+      1.1. This Personal Data Processing Policy (the “Policy”) has been
+      prepared in accordance with Federal Law of the Russian Federation
+      No. 152-FZ “On Personal Data” of July 27, 2006 (“Law No. 152-FZ”) and
+      sets out how personal data is processed and protected.
+    </p>
+    <p>
+      1.2. The Policy applies to all personal data the Operator receives from
+      users of the TimeFlow mobile application (the “App”), the Telegram bot
+      <a href="https://t.me/TimeFlowUpdater_bot">@TimeFlowUpdater_bot</a>
+      (the “Bot”) and the website
+      <a href="https://timeflow-app.ru">timeflow-app.ru</a>
+      (the “Website”), together the “Service”.
+    </p>
+    <p>
+      1.3. The personal data operator is Polina Vladimirovna Chuprina, a
+      self-employed individual (professional income tax payer), Taxpayer ID
+      (INN) 540231194105, email
+      <a href="mailto:chuprinapolina212@gmail.com">chuprinapolina212@gmail.com</a>
+      (the “Operator”).
+    </p>
+    <p>
+      1.4. The Policy is publicly available at
+      <a href="https://timeflow-app.ru/policy">timeflow-app.ru/policy</a>
+      as required by Part 2 of Article 18.1 of Law No. 152-FZ.
+    </p>
+    <p>
+      1.5. The Policy does not apply to third-party services linked from the
+      Service (for example, Google, Telegram or the payment service). They
+      process data under their own rules.
+    </p>
+
+    <h2 id="terms">2. Definitions</h2>
+    <ul>
+      <li>
+        <strong>Personal data</strong>: any information relating directly or
+        indirectly to an identified or identifiable individual (the data
+        subject).
+      </li>
+      <li>
+        <strong>Processing</strong>: any action or set of actions performed
+        on personal data, including collection, recording, organisation,
+        accumulation, storage, adaptation, retrieval, use, transfer,
+        blocking, erasure and destruction.
+      </li>
+      <li><strong>User</strong>: an individual who uses the Service.</li>
+      <li>
+        <strong>Account</strong>: the user’s record in the Service, created
+        when signing up with an email address or a Google account.
+      </li>
+      <li>
+        <strong>Shared room</strong>: a common task list that can be joined
+        by users who know the room code.
+      </li>
+    </ul>
+
+    <h2 id="data">3. Data we process</h2>
+
+    <h3>3.1. Data you provide</h3>
+    <ul>
+      <li>
+        <strong>Sign-up and sign-in:</strong> email address and password. The
+        password is stored by the authentication service only as a hash and
+        is not available to the Operator. When signing in with Google: name,
+        email address and profile photo from the Google account.
+      </li>
+      <li>
+        <strong>Profile:</strong> the name and photo you set or change in the
+        App.
+      </li>
+      <li>
+        <strong>Content:</strong> tasks, descriptions, categories, due dates,
+        reminders, attached photos and audio recordings.
+      </li>
+      <li>
+        <strong>Study data:</strong> the university and study group you
+        select, and a photo or file of your syllabus uploaded for
+        recognition.
+      </li>
+      <li>
+        <strong>Shared rooms:</strong> tasks, comments, reactions, attached
+        files and task assignments.
+      </li>
+      <li>
+        <strong>Telegram link:</strong> your Telegram user ID and time zone,
+        and the messages and files you send to the Bot.
+      </li>
+      <li>
+        <strong>Payments:</strong> the email address for the receipt and the
+        chosen plan. Bank card details are entered on the payment service’s
+        page; the Operator neither receives nor stores them.
+      </li>
+      <li>
+        <strong>Website request form:</strong> university name, city, study
+        group and a contact for the reply (email address or Telegram
+        username).
+      </li>
+      <li>
+        <strong>Inquiries:</strong> the content of emails you send to the
+        Operator.
+      </li>
+    </ul>
+
+    <h3>3.2. Data collected automatically</h3>
+    <ul>
+      <li>account identifier;</li>
+      <li>device identifier for push notifications;</li>
+      <li>“online” status and last activity time in a shared room;</li>
+      <li>subscription details: plan, expiry date, payment ID;</li>
+      <li>
+        the number of requests to artificial intelligence features per
+        billing period and, for requests made without signing in (for
+        example, from the demo assistant on the Website), the IP address;
+      </li>
+      <li>
+        server logs: IP address, date and time, request type, error details.
+      </li>
+    </ul>
+
+    <h3>3.3. What we do not collect</h3>
+    <p>
+      The Service does not collect location, contacts, call logs, SMS
+      messages, data from other apps or the advertising ID, and does not use
+      web analytics or advertising trackers. Special categories of personal
+      data (Article 10 of Law No. 152-FZ) and biometric personal data
+      (Article 11 of Law No. 152-FZ) are not processed.
+    </p>
+
+    <h3>3.4. Microphone and camera</h3>
+    <p>
+      The microphone and camera are used only when you act: recording audio,
+      dictating a task or taking a photo. Voice input is handled by the
+      device’s system speech recognition service under its developer’s
+      rules; the App receives only the recognised text.
+    </p>
+
+    <h2 id="purposes">4. Purposes and legal grounds</h2>
+    <p>
+      4.1. The Operator processes personal data only for the purposes and on
+      the grounds listed below (Article 6 of Law No. 152-FZ).
+    </p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Purpose</th><th>Data</th><th>Legal ground</th></tr>
+        <tr>
+          <td>Sign-up, sign-in and account access</td>
+          <td>email, password, name, photo, account ID</td>
+          <td>performance of the contract with the user (<a href="/oferta">public offer</a>), Art. 6(1)(5)</td>
+        </tr>
+        <tr>
+          <td>Storing and syncing data across devices</td>
+          <td>content, study data</td>
+          <td>performance of the contract, Art. 6(1)(5)</td>
+        </tr>
+        <tr>
+          <td>Reminders and notifications</td>
+          <td>tasks, device ID, time zone</td>
+          <td>performance of the contract, Art. 6(1)(5)</td>
+        </tr>
+        <tr>
+          <td>Operating the Bot</td>
+          <td>Telegram ID, time zone, messages and files</td>
+          <td>user consent given by linking the Bot, Art. 6(1)(1)</td>
+        </tr>
+        <tr>
+          <td>Collaboration in shared rooms</td>
+          <td>name, photo, online status, room content</td>
+          <td>performance of the contract, Art. 6(1)(5)</td>
+        </tr>
+        <tr>
+          <td>Artificial intelligence features</td>
+          <td>request text, recognised voice input, syllabus, request count</td>
+          <td>performance of the contract, Art. 6(1)(5)</td>
+        </tr>
+        <tr>
+          <td>Subscription payment and receipts</td>
+          <td>email, plan, amount, payment ID</td>
+          <td>performance of the contract and of obligations under the professional income tax legislation, Art. 6(1)(2) and (5)</td>
+        </tr>
+        <tr>
+          <td>Replying to requests and inquiries</td>
+          <td>request data, contact, correspondence</td>
+          <td>user consent, Art. 6(1)(1)</td>
+        </tr>
+        <tr>
+          <td>Service security, abuse prevention, plan limits</td>
+          <td>IP address, server logs, request count</td>
+          <td>legitimate interests of the Operator, provided the user’s rights are respected, Art. 6(1)(7)</td>
+        </tr>
+      </table>
+    </div>
+    <p>
+      4.2. Personal data is not sold, not used for advertising and not used
+      for decisions producing legal effects for the user based solely on
+      automated processing (Article 16 of Law No. 152-FZ).
+    </p>
+    <p>
+      4.3. Requests to artificial intelligence features include only what is
+      needed for the answer: the task or request text and the syllabus
+      image. Your name and email address are not included. The request text
+      is not stored after the answer is received.
+    </p>
+
+    <h2 id="conditions">5. Processing procedure and conditions</h2>
+    <p>
+      5.1. Processing is automated, with data transferred over the Internet.
+      The Operator performs the actions listed in Section 2 to the extent
+      needed for the purposes in Section 4.
+    </p>
+    <p>
+      5.2. Processing follows the principles of Article 5 of Law No. 152-FZ:
+      lawfulness and fairness, purpose limitation, data minimisation,
+      accuracy, and storage limitation.
+    </p>
+    <p>
+      5.3. The user is responsible for the accuracy of the data provided. By
+      adding information about other people to the Service (for example,
+      names in tasks or photos), the user confirms having the right to share
+      it.
+    </p>
+    <p>
+      5.4. Where consent is required, it is given freely, of the user’s own
+      will and in the user’s interest, and is specific, informed, conscious
+      and unambiguous. It may be withdrawn as described in Section 11.
+    </p>
+
+    <h2 id="processors">6. Disclosure to third parties</h2>
+    <p>
+      6.1. To run the Service, the Operator entrusts processing of personal
+      data to the following parties (Part 3 of Article 6 of Law No. 152-FZ).
+      They process data only for the stated purposes and must keep it
+      confidential and secure.
+    </p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Recipient</th><th>Data</th><th>Purpose</th><th>Location</th></tr>
+        <tr>
+          <td>Google LLC (Firebase Authentication, Cloud Firestore, Firebase Cloud Messaging, Sign in with Google)</td>
+          <td>account ID and details, profile, content, shared rooms, device ID</td>
+          <td>authentication, storage and sync, push notifications</td>
+          <td>USA and other countries</td>
+        </tr>
+        <tr>
+          <td>Yandex.Cloud LLC (Yandex Cloud)</td>
+          <td>attachments, subscriptions, Telegram link, AI request counts and requests, server logs</td>
+          <td>file storage, server functions and artificial intelligence features</td>
+          <td>Russia</td>
+        </tr>
+        <tr>
+          <td>YooMoney NBCO LLC (YooKassa)</td>
+          <td>email, amount, plan</td>
+          <td>accepting payments and issuing receipts</td>
+          <td>Russia</td>
+        </tr>
+        <tr>
+          <td>Telegram</td>
+          <td>Telegram ID, Bot messages and files</td>
+          <td>operating the Bot</td>
+          <td>outside Russia</td>
+        </tr>
+        <tr>
+          <td>Vercel Inc., GitHub Inc., Google Fonts</td>
+          <td>IP address and browser technical data</td>
+          <td>hosting the Website, loading fonts, serving the App installation file</td>
+          <td>USA</td>
+        </tr>
+        <tr>
+          <td>FormSubmit</td>
+          <td>Website request form data</td>
+          <td>delivering the request to the Operator’s email</td>
+          <td>outside Russia</td>
+        </tr>
+      </table>
+    </div>
+    <p>
+      6.2. Artificial intelligence features run on models hosted in Yandex
+      Cloud. Requests are processed on Yandex Cloud infrastructure and are
+      not shared with the model developers.
+    </p>
+    <p>
+      6.3. The Operator may disclose personal data upon a lawful request of
+      government authorities in cases provided for by the laws of the
+      Russian Federation.
+    </p>
+
+    <h2 id="crossborder">7. Cross-border transfer</h2>
+    <p>
+      7.1. Some data is processed by providers whose servers are located
+      outside the Russian Federation (Section 6). Such transfer is carried
+      out in accordance with Article 12 of Law No. 152-FZ and only to the
+      extent needed to run the Service.
+    </p>
+    <p>
+      7.2. By using features that require such transfer (sign-up, sync, push
+      notifications, the Bot), the user acknowledges that the recipient
+      country may not provide protection of data subjects’ rights equal to
+      that in Russia.
+    </p>
+
+    <h2 id="rooms">8. Shared rooms</h2>
+    <p>
+      8.1. All members of a shared room can see the room’s tasks, comments,
+      reactions and files, as well as other members’ names, profile photos
+      and online status. Anyone who knows the room code can join; the code is
+      shared by users themselves.
+    </p>
+    <p>
+      8.2. Room administrators can remove members and files from the room.
+      A user can leave a room at any time.
+    </p>
+    <p>
+      8.3. Attached files open via a direct link. The link is not published,
+      but anyone it is shared with can open the file.
+    </p>
+
+    <h2 id="storage">9. Cookies and on-device storage</h2>
+    <p>
+      9.1. The Website does not use cookies for analytics or advertising.
+      Browser local storage keeps only your chosen colour theme; you can
+      remove it by clearing the site data in your browser.
+    </p>
+    <p>
+      9.2. The App keeps a copy of your data on the device to work offline
+      and caches downloaded photos. When you sign out, local data is removed
+      from the device.
+    </p>
+
+    <h2 id="retention">10. Retention and deletion</h2>
+    <ul>
+      <li>
+        Account and content: for as long as the account exists. After a
+        deletion request or withdrawal of consent, data is destroyed within
+        30 days (Part 5 of Article 21 of Law No. 152-FZ) unless the law
+        requires otherwise.
+      </li>
+      <li>
+        Payment details: for the periods required by Russian tax legislation.
+      </li>
+      <li>Requests and inquiries: until answered, then deleted.</li>
+      <li>
+        Artificial intelligence request counts: for the plan’s billing
+        period.
+      </li>
+      <li>
+        Server logs: no longer than needed for security, usually a few days.
+      </li>
+    </ul>
+    <p>
+      Once the purposes of processing are achieved, personal data is
+      destroyed or anonymised.
+    </p>
+
+    <h2 id="rights">11. Your rights</h2>
+    <p>11.1. Under Articles 14–17 and 21 of Law No. 152-FZ, you have the right to:</p>
+    <ul>
+      <li>
+        obtain information about the processing of your personal data: the
+        fact and purposes of processing, the data processed, retention
+        periods and recipients;
+      </li>
+      <li>
+        request correction, blocking or destruction of data that is
+        incomplete, outdated, inaccurate, unlawfully obtained or no longer
+        needed for the stated purposes;
+      </li>
+      <li>withdraw your consent to processing;</li>
+      <li>
+        appeal against the Operator’s actions to Roskomnadzor, the Russian
+        data protection authority (<a href="https://rkn.gov.ru">rkn.gov.ru</a>),
+        or in court.
+      </li>
+    </ul>
+    <p>
+      11.2. You can change or delete some data yourself in the App: your
+      profile, tasks and attachments, shared room membership and the
+      Telegram link.
+    </p>
+    <p>
+      11.3. Send requests and consent withdrawals to
+      <a href="mailto:chuprinapolina212@gmail.com">chuprinapolina212@gmail.com</a>
+      from the email address of your account, or state that address, so the
+      Operator can identify you. The Operator replies within 10 business days
+      of receiving the request. This period may be extended by no more than
+      5 business days, with notice of the reasons.
+    </p>
+    <p>
+      11.4. After consent is withdrawn, the Operator stops processing and
+      destroys the data within 30 days unless there is another legal ground
+      for processing. The Service cannot be used without processing some
+      data (for example, the email address and content).
+    </p>
+
+    <h2 id="security">12. Data security</h2>
+    <p>
+      12.1. The Operator takes legal, organisational and technical measures
+      to protect personal data against unauthorised access, alteration,
+      disclosure and destruction (Articles 18.1 and 19 of Law No. 152-FZ):
+    </p>
+    <ul>
+      <li>data is transmitted only over encrypted channels (HTTPS, TLS);</li>
+      <li>
+        cloud database access rules let users see only their own data and the
+        data of rooms they belong to;
+      </li>
+      <li>server functions accept requests only with a valid authorisation token;</li>
+      <li>passwords are stored only as hashes;</li>
+      <li>
+        service access keys are kept in a secure secrets store and are not
+        included in the App;
+      </li>
+      <li>only the minimum necessary data is shared with third-party services.</li>
+    </ul>
+    <p>
+      12.2. If an unlawful transfer of personal data that violates users’
+      rights is detected, the Operator notifies Roskomnadzor within the
+      periods set by Part 3.1 of Article 21 of Law No. 152-FZ.
+    </p>
+
+    <h2 id="children">13. Children</h2>
+    <p>
+      The Service is intended for persons over 14. Children under 14 may use
+      the Service only with the consent of a parent or legal guardian. If the
+      Operator learns that it has received data of a child under 14 without
+      such consent, it will delete it.
+    </p>
+
+    <h2 id="changes">14. Changes to this Policy</h2>
+    <p>
+      The Operator may amend this Policy. The new version is published at the
+      same address and takes effect on the date stated at the top of the
+      document, unless the new version provides otherwise.
+    </p>
+
+    <h2 id="contacts">15. Contact us</h2>
+    <p>
+      Operator: Polina Vladimirovna Chuprina, INN 540231194105.<br>
+      Questions about personal data processing:
+      <a href="mailto:chuprinapolina212@gmail.com">chuprinapolina212@gmail.com</a>
+    </p>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="foot-arc">
+    <div class="wrap">
+      <a class="brand foot-brand" href="/"><img src="assets/mark.png" alt="">TimeFlow</a>
+
+      <div class="foot-follow">
+        <span>Get in touch</span>
+        <a class="foot-icon" href="https://t.me/TimeFlowUpdater_bot" aria-label="TimeFlow on Telegram">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.64 6.8-1.57 7.4c-.12.53-.43.66-.87.41l-2.4-1.77-1.16 1.12c-.13.13-.24.24-.49.24l.17-2.45 4.46-4.03c.19-.17-.04-.27-.3-.1l-5.51 3.47-2.37-.74c-.52-.16-.53-.52.11-.77l9.27-3.57c.43-.16.81.1.66.79Z"/></svg>
+        </a>
+        <a class="foot-icon" href="mailto:chuprinapolina212@gmail.com" aria-label="Send an email">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        </a>
+      </div>
+
+      <nav class="foot-links" aria-label="Documents">
+        <a href="/oferta">Terms of use</a>
+        <a href="/policy-en">Privacy policy</a>
+        <a href="/tariffs">Pricing and payment</a>
+      </nav>
+
+      <p class="foot-legal">
+        Seller: Polina Vladimirovna Chuprina, self-employed · INN 540231194105 ·
+        <a href="mailto:chuprinapolina212@gmail.com">chuprinapolina212@gmail.com</a>
+      </p>
+      <p class="foot-copy">© 2026 TimeFlow. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+
+</body>
+</html>

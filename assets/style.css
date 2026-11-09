@@ -2634,3 +2634,60 @@ html:not(.js) .scr { display: none; }
   .fx-step p { font-size: 1rem; }
   html:not(.js) .fx-stage { position: static; }
 }
+
+/* ── Язык юридических страниц ───────────────────────────────────────────
+
+   Пилюля RU / EN в шапке справа. Ссылки внутри nav, а на телефоне общее
+   правило прячет все ссылки шапки, поэтому здесь они возвращаются. */
+
+.lang-switch {
+  display: inline-flex;
+  flex: none;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+}
+.top nav .lang-switch a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+.top nav .lang-switch a[aria-current="page"],
+.top nav .lang-switch a[aria-current="page"]:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* На телефоне в шапке четыре элемента: поджимаем промежутки и кнопку,
+   а на самых узких экранах от знака остаётся только картинка */
+@media (max-width: 560px) {
+  .top nav:has(.lang-switch) { gap: 8px; }
+  .top nav:has(.lang-switch) .btn-sm { padding: 9px 12px; }
+  .top nav .lang-switch a { min-width: 26px; height: 26px; padding: 0 5px; font-size: .74rem; }
+}
+@media (max-width: 389px) {
+  .top:has(.lang-switch) .brand { font-size: 0; gap: 0; }
+}
+
+/* Оглавление и широкие таблицы политики */
+.doc .toc {
+  background: var(--lilac-soft);
+  border-radius: 16px;
+  padding: 18px 24px 10px;
+  margin: 0 0 10px;
+}
+.doc .toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 32px; }
+.doc .toc li { margin-bottom: 6px; break-inside: avoid; }
+@media (max-width: 560px) { .doc .toc ol { columns: 1; } }
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 20px 0; }
+.table-scroll table { margin: 0; min-width: 560px; }

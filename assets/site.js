@@ -32,7 +32,9 @@
       themeSwitch.setAttribute('aria-pressed', name === 'dark' ? 'true' : 'false');
       themeSwitch.setAttribute(
         'aria-label',
-        name === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему'
+        root.lang === 'en'
+          ? (name === 'dark' ? 'Switch to light theme' : 'Switch to dark theme')
+          : (name === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему')
       );
     }
     // Часам на первом экране тема тоже нужна: у них свои цвета стекла,
